@@ -1,0 +1,3 @@
+'use client'; import Link from 'next/link';import {usePathname} from 'next/navigation';
+const links=[['/','Dashboard'],['/analyze','Phân tích'],['/map','Bản đồ'],['/history','Lịch sử'],['/models','AI Models'],['/datasets','Datasets'],['/system','Hệ thống']];
+export function Navigation(){const path=usePathname();return <><aside className="side"><div className="brand">DrainGuard AI</div><div className="subtitle">AI-powered Urban Drain Monitoring</div>{links.map(([href,label])=><Link key={href} href={href} className={'nav '+(path===href?'active':'')}>{label}</Link>)}</aside><nav className="bottom">{links.slice(0,4).map(([href,label])=><Link key={href} href={href} className={path===href?'active':''}>{label}</Link>)}</nav></>}

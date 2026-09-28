@@ -1,0 +1,12 @@
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30
+pydantic-settings>=2.5
+sqlalchemy>=2.0
+psycopg[binary]>=3.2
+alembic>=1.13
+python-multipart>=0.0.9
+ultralytics>=8.3
+torch>=2.4
+opencv-python-headless>=4.10
+numpy>=1.26
+Pillow>=10.4

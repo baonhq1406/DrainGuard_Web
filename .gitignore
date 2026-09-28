@@ -1,0 +1,17 @@
+.venv/
+node_modules/
+.next/
+.env
+.env.local
+__pycache__/
+*.py[cod]
+*.db
+*.pt
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/outputs/*
+!backend/outputs/.gitkeep
+backend/model_storage/*
+!backend/model_storage/.gitkeep
+backend/dataset_storage/*
+!backend/dataset_storage/.gitkeep
