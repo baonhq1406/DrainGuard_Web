@@ -8,79 +8,17 @@ import { AnalysisMap } from '@/components/analysis-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const statuses: Array<'ALL' | Status> = ['ALL', 'LOW', 'MODERATE', 'HIGH', 'CRITICAL', 'MODEL_LIMITED', 'NO_DRAIN'];
+const labels: Record<string, string> = { LOW: 'Thông thoáng', MODERATE: 'Có nguy cơ tắc', HIGH: 'Tắc nhiều', CRITICAL: 'Tắc nghiêm trọng', MODEL_LIMITED: 'Chưa đủ dữ liệu AI', NO_DRAIN: 'Không nhận diện được drain' };
 
 export default function Map() {
   const [status, setStatus] = useState<'ALL' | Status>('ALL');
-  const { data = [], error, isFetching, refetch } = useQuery({
-    queryKey: ['map-records'],
-    queryFn: () => api<RecordItem[]>('/records?limit=100'),
-  });
-
-  const mapped = useMemo(
-    () => data.filter(x => x.latitude != null && x.longitude != null && (status === 'ALL' || x.status === status)),
-    [data, status]
-  );
-
-  const uniqueLocations = useMemo(
-    () => new Set(mapped.map(x => `${x.latitude!.toFixed(5)},${x.longitude!.toFixed(5)}`)).size,
-    [mapped]
-  );
-
-  return (
-    <main className="main">
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'end', flexWrap: 'wrap' }}>
-        <div>
-          <h1 className="title">Bản đồ giám sát</h1>
-          <p className="lead">Bản đồ thực với đường phố, địa danh và vị trí phân tích GPS của DrainGuard.</p>
-        </div>
-        <button className="button outline" onClick={() => refetch()} disabled={isFetching}>
-          {isFetching ? 'Đang tải...' : 'Làm mới'}
-        </button>
-      </div>
-
-      {error && <div className="notice">{error.message}</div>}
-
-      <section className="panel">
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 14 }}>
-          <span className="label">Lọc trạng thái</span>
-          {statuses.map(x => (
-            <button key={x} className={'button ' + (status === x ? '' : 'outline')} onClick={() => setStatus(x)}>
-              {x === 'ALL' ? 'Tất cả' : x}
-            </button>
-          ))}
-          <span className="label" style={{ marginLeft: 6 }}>{mapped.length} lượt · {uniqueLocations} vị trí</span>
-        </div>
-
-        {mapped.length ? (
-          <>
-            <AnalysisMap records={mapped} />
-            <div style={{ marginTop: 10 }} className="label">
-              Mỗi marker đại diện cho một vị trí GPS. Mở marker để xem các lần phân tích tại vị trí đó và tra cứu địa chỉ khi cần.
-            </div>
-            <div style={{ overflowX: 'auto', marginTop: 18 }}>
-              <table>
-                <thead><tr><th>Vị trí</th><th>Thời gian</th><th>Model</th><th>Drain</th><th>Blockage</th><th>Trạng thái</th></tr></thead>
-                <tbody>
-                  {mapped.map(x => (
-                    <tr key={x.id}>
-                      <td>{x.latitude?.toFixed(5)}, {x.longitude?.toFixed(5)}</td>
-                      <td>{new Date(x.created_at).toLocaleString('vi-VN')}</td>
-                      <td>{x.model.version}</td>
-                      <td>{x.drain_count}</td>
-                      <td>{x.blockage_percent == null ? '—' : x.blockage_percent + '%'}</td>
-                      <td><span className={'status ' + x.status}>{x.status}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        ) : (
-          <div className="notice">
-            {status === 'ALL' ? 'Chưa có record kèm GPS.' : 'Không có điểm GPS phù hợp với trạng thái đang lọc.'}
-          </div>
-        )}
-      </section>
-    </main>
-  );
+  const { data = [], error, isFetching, refetch } = useQuery({ queryKey: ['map-records'], queryFn: () => api<RecordItem[]>('/records?limit=100') });
+  const mapped = useMemo(() => data.filter(x => x.latitude != null && x.longitude != null && (status === 'ALL' || x.status === status)), [data, status]);
+  const uniqueLocations = useMemo(() => new Set(mapped.map(x => x.latitude!.toFixed(5) + ',' + x.longitude!.toFixed(5))).size, [mapped]);
+  return <main className="main user-page">
+    <div className="user-heading"><div className="eyebrow">BẢN ĐỒ</div><h1 className="title user-title">Khu vực đã kiểm tra</h1><p className="lead">Xem các vị trí đã ghi nhận bằng GPS và mở từng điểm để xem kết quả.</p></div>
+    <section className="map-toolbar"><div><b>{uniqueLocations}</b> vị trí · <b>{mapped.length}</b> lượt kiểm tra</div><div className="map-controls"><select value={status} onChange={e => setStatus(e.target.value as 'ALL' | Status)}><option value="ALL">Tất cả trạng thái</option>{statuses.slice(1).map(x => <option key={x} value={x}>{labels[x]}</option>)}</select><button className="button outline" onClick={() => refetch()} disabled={isFetching}>{isFetching ? 'Đang tải...' : 'Làm mới'}</button></div></section>
+    {error && <div className="notice">{error.message}</div>}
+    <section className="user-map-card">{mapped.length ? <><AnalysisMap records={mapped}/><div className="map-help"><span className="legend-dot low"/> Thông thoáng <span className="legend-dot high"/> Tắc nhiều <span className="legend-dot critical"/> Tắc nghiêm trọng</div></> : <div className="empty-map"><div className="upload-icon">📍</div><h2>Chưa có vị trí</h2><p>Phân tích ảnh và cho phép GPS để điểm kiểm tra xuất hiện tại đây.</p></div>}</section>
+  </main>;
 }
