@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import type { RecordItem } from '@/types';
+import type { RecordItem, EnvironmentItem } from '@/types';
 import { files } from '@/services/api';
 
 const STYLE_URL = process.env.NEXT_PUBLIC_MAP_STYLE_URL || 'https://tiles.openfreemap.org/styles/liberty';
@@ -16,10 +16,10 @@ function esc(value:string|number|null|undefined){
 function locationKey(record:RecordItem){ return record.latitude!.toFixed(5)+','+record.longitude!.toFixed(5); }
 function worstRecord(records:RecordItem[]){ return records.reduce((a,b)=>(statusRank[b.status]||0)>(statusRank[a.status]||0)?b:a,records[0]); }
 
-function circleFeature(lon:number,lat:number,radiusMeters:number,level:string){
+function riskCircleFeature(lon:number,lat:number,radiusMeters:number,level:string,score:number|null){
   const points:number[][]=[]; const latFactor=111320; const lonFactor=111320*Math.cos(lat*Math.PI/180);
   for(let i=0;i<=48;i++){ const angle=i/48*Math.PI*2; points.push([lon+Math.cos(angle)*radiusMeters/lonFactor,lat+Math.sin(angle)*radiusMeters/latFactor]); }
-  return {type:'Feature',properties:{level},geometry:{type:'Polygon',coordinates:[points]}};
+  return {type:'Feature',properties:{level,score},geometry:{type:'Polygon',coordinates:[points]}};
 }
 
 function drainMarkerElement(level:string){
@@ -29,7 +29,7 @@ function drainMarkerElement(level:string){
   return el;
 }
 
-function popupHtml(records:RecordItem[],address?:string){
+function popupHtml(records:RecordItem[],address?:string,environment?:EnvironmentItem){
   const latest=[...records].sort((a,b)=>new Date(b.created_at).getTime()-new Date(a.created_at).getTime())[0];
   const worst=worstRecord(records);
   const image=latest.annotated_image_url ? '<img class="dg-popup-image" src="'+files(latest.annotated_image_url)+'" alt="Ảnh AI"/>' : '<div class="dg-popup-image dg-popup-placeholder">Chưa có ảnh AI</div>';
@@ -37,6 +37,11 @@ function popupHtml(records:RecordItem[],address?:string){
     '<div class="dg-popup-head"><div><div class="dg-popup-kicker">DRAINGUARD AI</div><h3>Miệng thu nước</h3><div class="dg-popup-sub">'+records.length+' lượt kiểm tra tại vị trí này</div></div>'+
     '<span class="dg-popup-badge" style="--badge:'+statusColor[worst.status]+'">'+esc(statusLabel[worst.status]||worst.status)+'</span></div>'+
     image+
+    '<div class="dg-popup-environment">'+
+      '<div><span>Mưa</span><b>'+esc(environment?.precipitation_mm_h==null?'—':environment.precipitation_mm_h+' mm/h')+'</b></div>'+
+      '<div><span>Cao độ</span><b>'+esc(environment?.elevation_m==null?'—':environment.elevation_m+' m')+'</b></div>'+
+      '<div><span>Rủi ro ngập</span><b>'+esc(environment?.flood_risk_score==null?'—':environment.flood_risk_score+' / 100')+'</b></div>'+
+    '</div>'+
     '<div class="dg-popup-grid">'+
       '<div><span>Blockage</span><b>'+esc(latest.blockage_percent==null?'—':latest.blockage_percent+'%')+'</b></div>'+
       '<div><span>Confidence</span><b>'+esc(latest.confidence==null?'—':(latest.confidence*100).toFixed(1)+'%')+'</b></div>'+
@@ -50,9 +55,10 @@ function popupHtml(records:RecordItem[],address?:string){
   '</div>';
 }
 
-export function AnalysisMap({records}:{records:RecordItem[]}){
+export function AnalysisMap({records,environment=[]}:{records:RecordItem[];environment?:EnvironmentItem[]}){
   const host=useRef<HTMLDivElement>(null);
   const addressCache=useRef(new Map<string,string>());
+  const environmentCache=new Map(environment.map(x=>[x.latitude.toFixed(5)+','+x.longitude.toFixed(5),x]));
 
   useEffect(()=>{
     let map:any; let cancelled=false;
@@ -72,16 +78,17 @@ export function AnalysisMap({records}:{records:RecordItem[]}){
       map.on('load',()=>{
         if(!points.length)return;
         const bounds=new lib.LngLatBounds();
-        const zoneFeatures=groups.map(group=>{const worst=worstRecord(group);bounds.extend([group[0].longitude!,group[0].latitude!]);return circleFeature(group[0].longitude!,group[0].latitude!,zoneRadius[worst.status]||35,worst.status);});
+        const zoneFeatures=groups.map(group=>{const worst=worstRecord(group);bounds.extend([group[0].longitude!,group[0].latitude!]);return riskCircleFeature(group[0].longitude!,group[0].latitude!,Math.max(45,Math.min(240,45+(environmentCache.get(locationKey(group[0]))?.flood_risk_score||0)*1.8)),environmentCache.get(locationKey(group[0]))?.flood_risk_level||worst.status,environmentCache.get(locationKey(group[0]))?.flood_risk_score??null);});
         map.addSource('drainguard-zones',{type:'geojson',data:{type:'FeatureCollection',features:zoneFeatures}});
-        map.addLayer({id:'drainguard-zone-fill',type:'fill',source:'drainguard-zones',paint:{'fill-color':['match',['get','level'],'CRITICAL','#c9362d','HIGH','#dc6b18','MODERATE','#b7791f','LOW','#15803d','#64748b'],'fill-opacity':['match',['get','level'],'CRITICAL',0.12,'HIGH',0.10,'MODERATE',0.08,'LOW',0.05,0.04]}});
+        map.addLayer({id:'drainguard-zone-fill',type:'fill',source:'drainguard-zones',paint:{'fill-color':['match',['get','level'],'CRITICAL','#c9362d','HIGH','#dc6b18','MODERATE','#b7791f','LOW','#15803d','#64748b'],'fill-opacity':['interpolate',['linear'],['coalesce',['get','score'],0],0,0.04,35,0.07,60,0.10,80,0.14,100,0.18]}});
         map.addLayer({id:'drainguard-zone-line',type:'line',source:'drainguard-zones',paint:{'line-color':['match',['get','level'],'CRITICAL','#c9362d','HIGH','#dc6b18','MODERATE','#b7791f','LOW','#15803d','#64748b'],'line-width':1.2,'line-opacity':0.35,'line-dasharray':[2,2]}});
         if(points.length===1)map.flyTo({center:[points[0].longitude!,points[0].latitude!],zoom:17});
         else map.fitBounds(bounds,{padding:85,maxZoom:16,duration:650});
 
         for(const [key,group] of grouped){
           const worst=worstRecord(group);
-          const marker=new lib.Marker({element:drainMarkerElement(worst.status),anchor:'center'}).setLngLat([group[0].longitude!,group[0].latitude!]).setPopup(new lib.Popup({maxWidth:'390px',closeButton:true}).setHTML(popupHtml(group,addressCache.current.get(key)))).addTo(map);
+          const env=environmentCache.get(key);
+          const marker=new lib.Marker({element:drainMarkerElement(worst.status),anchor:'center'}).setLngLat([group[0].longitude!,group[0].latitude!]).setPopup(new lib.Popup({maxWidth:'390px',closeButton:true}).setHTML(popupHtml(group,addressCache.current.get(key),env))).addTo(map);
           marker.getElement().setAttribute('title','Miệng thu nước · '+(statusLabel[worst.status]||worst.status));
           marker.getPopup().on('open',()=>{
             const popupNode=marker.getPopup().getElement(); if(!popupNode)return;
