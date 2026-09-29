@@ -9,14 +9,8 @@ export default function Home(){
       <div style={{maxWidth:760}}>
         <div className="label" style={{textTransform:'uppercase',letterSpacing:1,fontWeight:700}}>DrainGuard AI</div>
         <h1 className="title" style={{fontSize:40,marginTop:8}}>Kiểm tra miệng thu nước bằng AI</h1>
-        <p className="lead" style={{fontSize:17,lineHeight:1.6,marginTop:12}}>
-          Gửi ảnh miệng thu nước để phát hiện drain, rác và ước tính mức độ tắc nghẽn.
-          Vị trí GPS có thể được ghi nhận để theo dõi trên bản đồ.
-        </p>
-        <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:20}}>
-          <Link href="/analyze" className="button" style={{textDecoration:'none'}}>Phân tích ảnh</Link>
-          <Link href="/map" className="button outline" style={{textDecoration:'none'}}>Xem bản đồ</Link>
-        </div>
+        <p className="lead" style={{fontSize:17,lineHeight:1.6,marginTop:12}}>Gửi ảnh miệng thu nước để phát hiện drain, rác và ước tính mức độ tắc nghẽn. Vị trí GPS có thể được ghi nhận để theo dõi trên bản đồ.</p>
+        <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:20}}><Link href="/analyze" className="button" style={{textDecoration:'none'}}>Phân tích ảnh</Link><Link href="/map" className="button outline" style={{textDecoration:'none'}}>Xem bản đồ</Link></div>
       </div>
     </section>
     <div className="grid">
