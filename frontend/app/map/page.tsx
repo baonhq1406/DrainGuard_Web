@@ -21,12 +21,17 @@ export default function Map() {
     [data, status]
   );
 
+  const uniqueLocations = useMemo(
+    () => new Set(mapped.map(x => `${x.latitude!.toFixed(5)},${x.longitude!.toFixed(5)}`)).size,
+    [mapped]
+  );
+
   return (
     <main className="main">
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'end', flexWrap: 'wrap' }}>
         <div>
           <h1 className="title">Bản đồ giám sát</h1>
-          <p className="lead">Các điểm phân tích có GPS và trạng thái tắc nghẽn.</p>
+          <p className="lead">Bản đồ thực với đường phố, địa danh và vị trí phân tích GPS của DrainGuard.</p>
         </div>
         <button className="button outline" onClick={() => refetch()} disabled={isFetching}>
           {isFetching ? 'Đang tải...' : 'Làm mới'}
@@ -43,17 +48,18 @@ export default function Map() {
               {x === 'ALL' ? 'Tất cả' : x}
             </button>
           ))}
-          <span className="label" style={{ marginLeft: 6 }}>{mapped.length} điểm có GPS</span>
+          <span className="label" style={{ marginLeft: 6 }}>{mapped.length} lượt · {uniqueLocations} vị trí</span>
         </div>
 
         {mapped.length ? (
           <>
             <AnalysisMap records={mapped} />
+            <div style={{ marginTop: 10 }} className="label">
+              Mỗi marker đại diện cho một vị trí GPS. Mở marker để xem các lần phân tích tại vị trí đó và tra cứu địa chỉ khi cần.
+            </div>
             <div style={{ overflowX: 'auto', marginTop: 18 }}>
               <table>
-                <thead>
-                  <tr><th>Vị trí</th><th>Thời gian</th><th>Model</th><th>Drain</th><th>Blockage</th><th>Trạng thái</th></tr>
-                </thead>
+                <thead><tr><th>Vị trí</th><th>Thời gian</th><th>Model</th><th>Drain</th><th>Blockage</th><th>Trạng thái</th></tr></thead>
                 <tbody>
                   {mapped.map(x => (
                     <tr key={x.id}>
