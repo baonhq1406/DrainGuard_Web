@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RefreshCw, MapPin, ShieldCheck, AlertTriangle, Siren } from 'lucide-react';
 import { api } from '@/services/api';
-import type { RecordItem, Status } from '@/types';
+import type { RecordItem, Status, EnvironmentItem } from '@/types';
 import { AnalysisMap } from '@/components/analysis-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -29,6 +29,22 @@ export default function Map() {
     ()=>data.filter(x=>x.latitude!=null&&x.longitude!=null&&(status==='ALL'||x.status===status)),
     [data,status]
   );
+
+  const environmentQuery=useQuery({
+    queryKey:['map-environment', mapped.map(x=>x.latitude!.toFixed(5)+','+x.longitude!.toFixed(5)).join('|')],
+    enabled:mapped.length>0,
+    queryFn:()=>{
+      const grouped=new Map<string,RecordItem>();
+      mapped.forEach(x=>grouped.set(x.latitude!.toFixed(5)+','+x.longitude!.toFixed(5),x));
+      const values=[...grouped.values()];
+      const params=new URLSearchParams({
+        latitudes:values.map(x=>String(x.latitude!)).join(','),
+        longitudes:values.map(x=>String(x.longitude!)).join(','),
+        blockages:values.map(x=>x.blockage_percent==null?'null':String(x.blockage_percent)).join(',')
+      });
+      return api<{items:EnvironmentItem[]}>('/map/environment?'+params.toString());
+    },
+  });
 
   const uniqueLocations=useMemo(
     ()=>new Set(mapped.map(x=>x.latitude!.toFixed(5)+','+x.longitude!.toFixed(5))).size,
@@ -82,7 +98,7 @@ export default function Map() {
 
         {mapped.length ? (
           <div className="map-stage">
-            <AnalysisMap records={mapped}/>
+            <AnalysisMap records={mapped} environment={environmentQuery.data?.items||[]}/>
 
             <div className="map-overlay map-overlay-left">
               <div className="map-overlay-title">Mức cảnh báo</div>
@@ -102,7 +118,12 @@ export default function Map() {
             </div>
 
             <div className="map-overlay map-overlay-bottom">
-              <span>Chọn biểu tượng drain để xem ảnh, blockage, GPS và lịch sử tại vị trí đó.</span>
+              <span>Rủi ro ngập = blockage + lượng mưa + cao độ · thời tiết từ Open-Meteo.</span>
+            </div>
+            <div className="map-environment-strip">
+              <div><span>Lượng mưa</span><b>{environmentQuery.data?.items?.[0]?.precipitation_mm_h==null?'—':environmentQuery.data.items[0].precipitation_mm_h.toFixed(1)+' mm/h'}</b></div>
+              <div><span>Cao độ</span><b>{environmentQuery.data?.items?.[0]?.elevation_m==null?'—':environmentQuery.data.items[0].elevation_m.toFixed(1)+' m'}</b></div>
+              <div><span>Điểm rủi ro</span><b>{(environmentQuery.data?.items||[]).filter(x=>x.flood_risk_score!=null).length}/{(environmentQuery.data?.items||[]).length}</b></div>
             </div>
           </div>
         ) : (
