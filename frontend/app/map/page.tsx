@@ -35,7 +35,13 @@ export default function Map() {
     enabled:mapped.length>0,
     queryFn:()=>{
       const grouped=new Map<string,RecordItem>();
-      mapped.forEach(x=>grouped.set(x.latitude!.toFixed(5)+','+x.longitude!.toFixed(5),x));
+      [...mapped]
+        .sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime())
+        .forEach(x=>{
+          const key=x.latitude!.toFixed(5)+','+x.longitude!.toFixed(5);
+          const current=grouped.get(key);
+          if(!current || current.blockage_percent==null || x.blockage_percent!=null) grouped.set(key,x);
+        });
       const values=[...grouped.values()];
       const params=new URLSearchParams({
         latitudes:values.map(x=>String(x.latitude!)).join(','),
@@ -121,10 +127,20 @@ export default function Map() {
               <span>Rủi ro ngập = blockage + lượng mưa + cao độ · thời tiết từ Open-Meteo.</span>
             </div>
             <div className="map-environment-strip">
-              <div><span>Lượng mưa</span><b>{environmentQuery.data?.items?.[0]?.precipitation_mm_h==null?'—':environmentQuery.data.items[0].precipitation_mm_h.toFixed(1)+' mm/h'}</b></div>
-              <div><span>Cao độ</span><b>{environmentQuery.data?.items?.[0]?.elevation_m==null?'—':environmentQuery.data.items[0].elevation_m.toFixed(1)+' m'}</b></div>
-              <div><span>Điểm rủi ro</span><b>{(environmentQuery.data?.items||[]).filter(x=>x.flood_risk_score!=null).length}/{(environmentQuery.data?.items||[]).length}</b></div>
+              <div><span>Mưa hiện tại · TB</span><b>{environmentQuery.isLoading?'...':(()=>{
+                const v=(environmentQuery.data?.items||[]).map(x=>x.precipitation_mm_h).filter((x):x is number=>x!=null);
+                return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1)+' mm/h':'—';
+              })()}</b></div>
+              <div><span>Cao độ · TB</span><b>{environmentQuery.isLoading?'...':(()=>{
+                const v=(environmentQuery.data?.items||[]).map(x=>x.elevation_m).filter((x):x is number=>x!=null);
+                return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1)+' m':'—';
+              })()}</b></div>
+              <div><span>Risk cao nhất</span><b>{environmentQuery.isLoading?'...':(()=>{
+                const v=(environmentQuery.data?.items||[]).map(x=>x.flood_risk_score).filter((x):x is number=>x!=null);
+                return v.length?Math.max(...v).toFixed(1)+' / 100':'Chưa đủ dữ liệu';
+              })()}</b></div>
             </div>
+            {environmentQuery.error&&<div className="map-environment-error">Không lấy được dữ liệu môi trường. Kiểm tra backend và kết nối Internet.</div>}
           </div>
         ) : (
           <div className="empty-map">
