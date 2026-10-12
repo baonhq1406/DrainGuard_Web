@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     output_dir: str = str(BASE_DIR / 'outputs')
     default_conf: float = 0.25
     default_imgsz: int = 1024
-    max_upload_mb: int = 20
+    max_upload_mb: int = 200
     cors_origins: str = 'http://localhost:3000'
 
 settings = Settings()

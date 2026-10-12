@@ -5,14 +5,15 @@ import { files } from '@/services/api';
 
 type AnalysisResponse = {
   annotated_image_url: string;
-  result: {
+    result: {
     drain_detected: boolean;
     drain_count: number;
     confidence: number | null;
     blockage_percent: number | null;
     status: string;
-    drains: Array<{ confidence: number; blockage_percent?: number }>;
   };
+
+  drains: Array<{ confidence: number; blockage_percent?: number }>;
 };
 
 const statusLabel: Record<string, string> = {
@@ -121,7 +122,7 @@ export default function Analyze() {
             <div className="user-metric"><span>Độ tin cậy</span><b>{confidence == null ? '—' : (confidence * 100).toFixed(1) + '%'}</b></div>
             <div className="user-metric"><span>Miệng thu nước</span><b>{result.result.drain_count}</b></div>
           </div>
-          {result.result.drains.length > 1 && <div className="drain-list"><h3>Chi tiết từng miệng thu nước</h3>{result.result.drains.map((drain, index) => <div className="drain-row" key={index}><span>Miệng thu #{index + 1}</span><span>{drain.blockage_percent == null ? '—' : drain.blockage_percent + '%'}</span></div>)}</div>}
+          {result.drains.length > 1 && <div className="drain-list"><h3>Chi tiết từng miệng thu nước</h3>{result.drains.map((drain, index) => <div className="drain-row" key={index}><span>Miệng thu #{index + 1}</span><span>{drain.blockage_percent == null ? '—' : drain.blockage_percent + '%'}</span></div>)}</div>}
           {blockage == null && <div className="notice">Model hiện tại chưa đủ thông tin để tính phần trăm tắc nghẽn cho ảnh này.</div>}
         </section>
       )}
