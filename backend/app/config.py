@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     default_conf: float = 0.25
     default_imgsz: int = 1024
     max_upload_mb: int = 200
-    cors_origins: str = 'http://localhost:3001222'
+    cors_origins: str = 'http://localhost:3000'
 
 settings = Settings()
 for directory in (settings.model_storage_dir, settings.upload_dir, settings.output_dir):
