@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { RefreshCw, MapPin, ShieldCheck, AlertTriangle, Siren } from 'lucide-react';
+import Link from 'next/link';
+import { RefreshCw, MapPin, ShieldCheck, AlertTriangle, Siren, Loader2 } from 'lucide-react';
 import { api } from '@/services/api';
 import type { RecordItem, Status, EnvironmentItem } from '@/types';
 import { AnalysisMap } from '@/components/analysis-map';
@@ -17,10 +18,10 @@ const labels: Record<string,string> = {
 
 const filterOptions: Array<'ALL'|Status> = ['ALL','LOW','MODERATE','HIGH','CRITICAL'];
 
-export default function Map() {
+export default function MapPage() {
   const [status,setStatus]=useState<'ALL'|Status>('ALL');
 
-  const {data=[],error,isFetching,refetch}=useQuery({
+  const {data=[],error,isFetching,isLoading,refetch}=useQuery({
     queryKey:['map-records'],
     queryFn:()=>api<RecordItem[]>('/records?limit=100'),
   });
@@ -65,7 +66,7 @@ export default function Map() {
   }),[data]);
 
   return (
-    <main className="main user-page map-page">
+    <main id="main" className="main user-page map-page">
       <div className="map-page-header">
         <div>
           <div className="eyebrow">DRAINGUARD AI · MONITORING MAP</div>
@@ -100,7 +101,7 @@ export default function Map() {
           </div>
         </div>
 
-        {error && <div className="notice map-error">{error.message}</div>}
+        {error && <div className="notice error map-error" role="alert">{error.message}</div>}
 
         {mapped.length ? (
           <div className="map-stage">
@@ -142,11 +143,24 @@ export default function Map() {
             </div>
             {environmentQuery.error&&<div className="map-environment-error">Không lấy được dữ liệu môi trường. Kiểm tra backend và kết nối Internet.</div>}
           </div>
+        ) : isLoading ? (
+          <div className="empty-map" role="status">
+            <div className="empty-map-icon"><Loader2 size={30} className="spin"/></div>
+            <h2>Đang tải dữ liệu bản đồ…</h2>
+          </div>
+        ) : data.some(x=>x.latitude!=null&&x.longitude!=null) ? (
+          <div className="empty-map">
+            <div className="empty-map-icon"><MapPin size={30}/></div>
+            <h2>Không có vị trí ở mức cảnh báo này</h2>
+            <p>Hãy chọn mức cảnh báo khác để xem các vị trí đã ghi nhận.</p>
+            <button className="button outline" style={{marginTop:16}} onClick={()=>setStatus('ALL')}>Hiển thị tất cả</button>
+          </div>
         ) : (
           <div className="empty-map">
             <div className="empty-map-icon"><MapPin size={30}/></div>
             <h2>Chưa có vị trí trên bản đồ</h2>
             <p>Phân tích ảnh và cho phép GPS để DrainGuard ghi nhận vị trí kiểm tra.</p>
+            <Link href="/analyze" className="button" style={{marginTop:16}}>Phân tích ảnh</Link>
           </div>
         )}
       </section>

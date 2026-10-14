@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { RefreshCw } from 'lucide-react';
 import { api } from '@/services/api';
 import type { Model } from '@/types';
 
@@ -16,6 +17,8 @@ type SystemInfo = {
   model_classes?: string[] | null;
 };
 
+type Tone = 'ok' | 'bad' | 'off' | '';
+
 export default function System() {
   const { data, error, isFetching, refetch } = useQuery({
     queryKey: ['system'],
@@ -29,37 +32,45 @@ export default function System() {
   });
   const active = models.find(m => m.is_active);
 
-  const rows = [
-    ['Backend API', data?.backend === 'ok' ? 'ONLINE' : '—'],
-    ['Database', data?.database === 'ok' ? 'ONLINE' : 'UNAVAILABLE'],
-    ['Device', data?.device || '—'],
-    ['CUDA', data?.cuda_available ? 'Available' : 'Unavailable'],
-    ['GPU', data?.gpu_name || '—'],
-    ['Model loaded', data?.model_loaded ? 'YES' : 'NO'],
-    ['Model task', data?.model_task || '—'],
-    ['Classes', data?.model_classes?.join(', ') || '—'],
+  // Giá trị hiển thị giữ nguyên như bản cũ; cột thứ 3 chỉ là màu chấm trạng thái (UI).
+  const rows: Array<[string, string, Tone]> = [
+    ['Backend API', data?.backend === 'ok' ? 'ONLINE' : '—', data?.backend === 'ok' ? 'ok' : error ? 'bad' : 'off'],
+    ['Database', data?.database === 'ok' ? 'ONLINE' : 'UNAVAILABLE', data?.database === 'ok' ? 'ok' : data ? 'bad' : 'off'],
+    ['Device', data?.device || '—', ''],
+    ['CUDA', data?.cuda_available ? 'Available' : 'Unavailable', data?.cuda_available ? 'ok' : 'off'],
+    ['GPU', data?.gpu_name || '—', ''],
+    ['Model loaded', data?.model_loaded ? 'YES' : 'NO', data?.model_loaded ? 'ok' : data ? 'bad' : 'off'],
+    ['Model task', data?.model_task || '—', ''],
+    ['Classes', data?.model_classes?.join(', ') || '—', ''],
   ];
 
+  const ready = data?.backend === 'ok' && data?.database === 'ok' && data?.model_loaded;
+
   return (
-    <main className="main">
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'end', flexWrap: 'wrap' }}>
+    <main id="main" className="main">
+      <div className="page-head">
         <div>
           <h1 className="title">Hệ thống</h1>
           <p className="lead">Theo dõi backend, database, GPU và model AI đang hoạt động.</p>
         </div>
-        <button className="button outline" onClick={() => refetch()} disabled={isFetching}>
-          {isFetching ? 'Đang kiểm tra...' : 'Kiểm tra lại'}
+        <button className="button outline" onClick={() => refetch()} disabled={isFetching} style={{ marginBottom: 24 }}>
+          <RefreshCw size={16} className={isFetching ? 'spin' : ''} />{isFetching ? 'Đang kiểm tra...' : 'Kiểm tra lại'}
         </button>
       </div>
 
-      {error && <div className="notice">{error.message}</div>}
+      {error && <div className="notice error" role="alert">{error.message}</div>}
+      {data && (ready
+        ? <div className="notice success" role="status">Hệ thống sẵn sàng: backend, database và model đều hoạt động.</div>
+        : <div className="notice warn" role="status">Hệ thống chưa sẵn sàng hoàn toàn. Kiểm tra các mục màu đỏ bên dưới.</div>)}
 
       <section className="panel">
         <div className="grid">
-          {rows.map(([label, value]) => (
+          {rows.map(([label, value, tone]) => (
             <div className="card" key={label}>
               <div className="label">{label}</div>
-              <div className="metric" style={{ fontSize: 18 }}>{value}</div>
+              <div className="metric break" style={{ fontSize: 18, display: 'flex', alignItems: 'center', gap: 10 }}>
+                {tone && <i className={'dot ' + tone} aria-hidden="true" />}{value}
+              </div>
             </div>
           ))}
         </div>
@@ -69,13 +80,13 @@ export default function System() {
         <h2>Model active</h2>
         {active ? (
           <div className="grid" style={{ marginTop: 12 }}>
-            <div className="card"><div className="label">Tên</div><div className="metric" style={{ fontSize: 18 }}>{active.name}</div></div>
-            <div className="card"><div className="label">Version</div><div className="metric" style={{ fontSize: 18 }}>{active.version}</div></div>
-            <div className="card"><div className="label">Task</div><div className="metric" style={{ fontSize: 18 }}>{active.task || '—'}</div></div>
-            <div className="card"><div className="label">imgsz</div><div className="metric" style={{ fontSize: 18 }}>{active.imgsz ?? '—'}</div></div>
+            <div className="card"><div className="label">Tên</div><div className="metric break" style={{ fontSize: 18 }}>{active.name}</div></div>
+            <div className="card"><div className="label">Version</div><div className="metric break" style={{ fontSize: 18 }}>{active.version}</div></div>
+            <div className="card"><div className="label">Task</div><div className="metric break" style={{ fontSize: 18 }}>{active.task || '—'}</div></div>
+            <div className="card"><div className="label">imgsz</div><div className="metric break" style={{ fontSize: 18 }}>{active.imgsz ?? '—'}</div></div>
           </div>
         ) : (
-          <div className="notice">Chưa có model ACTIVE.</div>
+          <div className="notice warn">Chưa có model ACTIVE. Vào AI Models để kích hoạt một model.</div>
         )}
       </section>
     </main>

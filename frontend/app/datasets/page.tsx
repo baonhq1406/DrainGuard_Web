@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Pencil, Trash2 } from 'lucide-react';
 import { api } from '@/services/api';
+import { EmptyState, TableSkeleton, noticeClass } from '@/components/ui';
 
 type Dataset = {
   id: number; name: string; version: string; task: string; classes_json: string[];
@@ -18,7 +20,7 @@ const emptyForm = {
 
 export default function Datasets() {
   const qc = useQueryClient();
-  const { data = [], error } = useQuery({ queryKey: ['datasets'], queryFn: () => api<Dataset[]>('/datasets') });
+  const { data = [], error, isLoading } = useQuery({ queryKey: ['datasets'], queryFn: () => api<Dataset[]>('/datasets') });
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState<Dataset>();
   const [message, setMessage] = useState('');
@@ -88,54 +90,57 @@ export default function Datasets() {
   }
 
   return (
-    <main className="main">
+    <main id="main" className="main">
       <h1 className="title">Datasets</h1>
       <p className="lead">Quản lý version dataset và nguồn training để truy xuất nguồn gốc model.</p>
 
       <section className="panel">
-        <h2>{editing ? 'Chỉnh sửa dataset' : 'Thêm dataset'}</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 10 }}>
-          <input placeholder="Tên dataset" value={form.name} onChange={e => set('name', e.target.value)} />
-          <input placeholder="Version" value={form.version} onChange={e => set('version', e.target.value)} />
-          <select value={form.task} onChange={e => set('task', e.target.value)}>
-            <option value="segment">segment</option><option value="detect">detect</option>
-          </select>
-          <input placeholder="Classes: drain, debris" value={form.classes} onChange={e => set('classes', e.target.value)} />
-          <input type="number" min="0" placeholder="Tổng ảnh" value={form.image_count} onChange={e => set('image_count', e.target.value)} />
-          <input type="number" min="0" placeholder="Train" value={form.train_count} onChange={e => set('train_count', e.target.value)} />
-          <input type="number" min="0" placeholder="Validation" value={form.val_count} onChange={e => set('val_count', e.target.value)} />
-          <input type="number" min="0" placeholder="Test" value={form.test_count} onChange={e => set('test_count', e.target.value)} />
-          <input placeholder="Nguồn / URL" value={form.source} onChange={e => set('source', e.target.value)} />
+        <div className="panel-head"><h2>{editing ? 'Chỉnh sửa dataset' : 'Thêm dataset'}</h2>{editing && <span className="status MODERATE">Đang sửa: {editing.name}</span>}</div>
+        <div className="form-grid">
+          <div className="field"><label htmlFor="ds-name">Tên dataset *</label><input id="ds-name" placeholder="Tên dataset" value={form.name} onChange={e => set('name', e.target.value)} /></div>
+          <div className="field"><label htmlFor="ds-version">Version *</label><input id="ds-version" placeholder="Version" value={form.version} onChange={e => set('version', e.target.value)} /></div>
+          <div className="field"><label htmlFor="ds-task">Loại tác vụ</label>
+            <select id="ds-task" value={form.task} onChange={e => set('task', e.target.value)}>
+              <option value="segment">segment</option><option value="detect">detect</option>
+            </select>
+          </div>
+          <div className="field"><label htmlFor="ds-classes">Classes (cách nhau bằng dấu phẩy)</label><input id="ds-classes" placeholder="Classes: drain, debris" value={form.classes} onChange={e => set('classes', e.target.value)} /></div>
+          <div className="field"><label htmlFor="ds-total">Tổng ảnh</label><input id="ds-total" type="number" min="0" placeholder="Tổng ảnh" value={form.image_count} onChange={e => set('image_count', e.target.value)} /></div>
+          <div className="field"><label htmlFor="ds-train">Train</label><input id="ds-train" type="number" min="0" placeholder="Train" value={form.train_count} onChange={e => set('train_count', e.target.value)} /></div>
+          <div className="field"><label htmlFor="ds-val">Validation</label><input id="ds-val" type="number" min="0" placeholder="Validation" value={form.val_count} onChange={e => set('val_count', e.target.value)} /></div>
+          <div className="field"><label htmlFor="ds-test">Test</label><input id="ds-test" type="number" min="0" placeholder="Test" value={form.test_count} onChange={e => set('test_count', e.target.value)} /></div>
+          <div className="field"><label htmlFor="ds-source">Nguồn / URL</label><input id="ds-source" placeholder="Nguồn / URL" value={form.source} onChange={e => set('source', e.target.value)} /></div>
+          <div className="field full"><label htmlFor="ds-desc">Mô tả</label><textarea id="ds-desc" placeholder="Mô tả dataset" value={form.description} onChange={e => set('description', e.target.value)} rows={3} /></div>
         </div>
-        <textarea placeholder="Mô tả dataset" value={form.description} onChange={e => set('description', e.target.value)} rows={3} style={{ width: '100%', marginTop: 10, padding: 10, borderRadius: 9, border: '1px solid #d9e6ef' }} />
-        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <div className="form-actions">
           <button className="button" onClick={save}>{editing ? 'Lưu thay đổi' : 'Thêm dataset'}</button>
           {editing && <button className="button outline" onClick={() => { setEditing(undefined); setForm(emptyForm); setMessage(''); }}>Hủy</button>}
         </div>
-        {message && <div className="notice">{message}</div>}
+        {message && <div className={noticeClass(message)} role="status">{message}</div>}
       </section>
 
-      {error && <div className="notice">{error.message}</div>}
+      {error && <div className="notice error" role="alert">{error.message}</div>}
 
       <section className="panel">
-        <div style={{ overflowX: 'auto' }}>
-          {data.length ? (
-            <table>
+        <div className="panel-head"><h2>Danh sách dataset</h2><span className="label">{isLoading ? 'Đang tải…' : data.length + ' dataset'}</span></div>
+        {isLoading ? <TableSkeleton /> : data.length ? (
+          <div className="table-wrap">
+            <table className="rtable">
               <thead><tr><th>Tên</th><th>Version</th><th>Task</th><th>Classes</th><th>Ảnh</th><th>Train</th><th>Val</th><th>Test</th><th>Nguồn</th><th></th></tr></thead>
               <tbody>
                 {data.map(x => (
-                  <tr key={x.id}>
-                    <td><b>{x.name}</b><div className="label">{x.description || ''}</div></td>
-                    <td>{x.version}</td><td>{x.task}</td><td>{x.classes_json.join(', ') || '—'}</td>
-                    <td>{x.image_count}</td><td>{x.train_count}</td><td>{x.val_count}</td><td>{x.test_count}</td>
-                    <td>{x.source || '—'}</td>
-                    <td><div style={{ display: 'flex', gap: 6 }}><button className="button outline" onClick={() => fromDataset(x)}>Sửa</button><button className="button outline" onClick={() => remove(x.id)}>Xóa</button></div></td>
+                  <tr key={x.id} className={editing?.id === x.id ? 'is-selected' : ''}>
+                    <td data-label="Tên"><b>{x.name}</b><div className="cell-sub">{x.description || ''}</div></td>
+                    <td data-label="Version">{x.version}</td><td data-label="Task">{x.task}</td><td data-label="Classes">{x.classes_json.join(', ') || '—'}</td>
+                    <td data-label="Ảnh">{x.image_count}</td><td data-label="Train">{x.train_count}</td><td data-label="Val">{x.val_count}</td><td data-label="Test">{x.test_count}</td>
+                    <td data-label="Nguồn" style={{ overflowWrap: 'anywhere' }}>{x.source || '—'}</td>
+                    <td data-label=""><div className="cell-actions"><button className="button outline sm" onClick={() => fromDataset(x)}><Pencil size={14} />Sửa</button><button className="button outline danger sm" onClick={() => remove(x.id)}><Trash2 size={14} />Xóa</button></div></td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          ) : <p className="lead">Chưa có dataset nào.</p>}
-        </div>
+          </div>
+        ) : <EmptyState title="Chưa có dataset nào">Dùng form phía trên để thêm dataset đầu tiên.</EmptyState>}
       </section>
     </main>
   );

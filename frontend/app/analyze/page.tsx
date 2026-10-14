@@ -1,18 +1,20 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, type DragEvent } from 'react';
+import { Camera, ImagePlus, Loader2, MapPin, ScanSearch } from 'lucide-react';
 import { files } from '@/services/api';
 
 type AnalysisResponse = {
   annotated_image_url: string;
-  result: {
+    result: {
     drain_detected: boolean;
     drain_count: number;
     confidence: number | null;
     blockage_percent: number | null;
     status: string;
-    drains: Array<{ confidence: number; blockage_percent?: number }>;
   };
+
+  drains: Array<{ confidence: number; blockage_percent?: number }>;
 };
 
 const statusLabel: Record<string, string> = {
@@ -33,13 +35,24 @@ export default function Analyze() {
   const [loading, setLoading] = useState(false);
   const [locationState, setLocationState] = useState<'idle'|'loading'|'ok'|'unavailable'>('idle');
   const [error, setError] = useState('');
+  const [dragOver, setDragOver] = useState(false);
 
   function chooseFile(next?: File) {
     if (!next) return;
+    if (preview) URL.revokeObjectURL(preview); // UI: giải phóng bộ nhớ ảnh xem trước cũ
     setFile(next);
     setPreview(URL.createObjectURL(next));
     setResult(undefined);
     setError('');
+  }
+
+  // UI: hỗ trợ kéo-thả ảnh (chỉ gọi lại chooseFile, không đổi luồng xử lý)
+  function onDrop(e: DragEvent) {
+    e.preventDefault(); setDragOver(false);
+    const dropped = e.dataTransfer.files?.[0];
+    if (!dropped) return;
+    if (!dropped.type.startsWith('image/')) { setError('Vui lòng chọn tệp ảnh (JPG, PNG hoặc WebP).'); return; }
+    chooseFile(dropped);
   }
 
   async function getLocation(form: FormData) {
@@ -70,58 +83,67 @@ export default function Analyze() {
   const confidence = result?.result.confidence;
 
   return (
-    <main className="main user-page">
+    <main id="main" className="main user-page">
       <div className="user-heading">
         <div className="eyebrow">DRAINGUARD AI</div>
         <h1 className="title user-title">Kiểm tra miệng thu nước</h1>
         <p className="lead">Chụp ảnh tại chỗ hoặc chọn ảnh có sẵn. Kết quả sẽ được lưu cùng vị trí GPS nếu bạn cho phép.</p>
       </div>
-      <section className="user-upload-card">
+      <section className="user-upload-card" aria-busy={loading}>
         <input ref={pickerRef} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={e => chooseFile(e.target.files?.[0])} />
         <input ref={cameraRef} hidden type="file" accept="image/*" capture="environment" onChange={e => chooseFile(e.target.files?.[0])} />
         {!file ? (
-          <div className="upload-empty">
-            <div className="upload-icon">📷</div>
+          <div
+            className={'upload-empty dropzone' + (dragOver ? ' is-over' : '')}
+            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={onDrop}
+          >
+            <div className="upload-icon"><Camera size={30} aria-hidden="true" /></div>
             <h2>Gửi ảnh miệng thu nước</h2>
             <p>Chọn một ảnh có sẵn hoặc chụp ảnh mới bằng camera.</p>
             <div className="upload-actions">
-              <button className="button" onClick={() => pickerRef.current?.click()}>Chọn ảnh</button>
-              <button className="button outline" onClick={() => cameraRef.current?.click()}>Chụp ảnh</button>
+              <button className="button" onClick={() => pickerRef.current?.click()}><ImagePlus size={18} />Chọn ảnh</button>
+              <button className="button outline" onClick={() => cameraRef.current?.click()}><Camera size={18} />Chụp ảnh</button>
             </div>
+            <div className="upload-hint">Có thể kéo thả ảnh vào đây · JPG, PNG hoặc WebP</div>
           </div>
         ) : (
           <div className="selected-image">
-            <div className="selected-preview"><img src={preview} alt="Ảnh đã chọn" /></div>
+            <div className="selected-preview preview-frame">
+              <img src={preview} alt="Ảnh đã chọn để phân tích" />
+              {loading && <div className="analyzing" role="status"><Loader2 size={28} className="spin" />{locationState === 'loading' ? 'Đang lấy vị trí GPS…' : 'AI đang phân tích ảnh…'}</div>}
+            </div>
             <div className="selected-info">
               <div className="label">Ảnh đã chọn</div>
-              <h2>{file.name}</h2>
+              <h2 style={{ overflowWrap: 'anywhere' }}>{file.name}</h2>
               <p className="label">{(file.size / 1024 / 1024).toFixed(1)} MB</p>
               <div className="upload-actions">
-                <button className="button" disabled={loading} onClick={run}>{loading ? 'Đang phân tích...' : 'Phân tích ảnh'}</button>
+                <button className="button" disabled={loading} onClick={run}>{loading ? <><Loader2 size={18} className="spin" />Đang phân tích...</> : <><ScanSearch size={18} />Phân tích ảnh</>}</button>
                 <button className="button outline" disabled={loading} onClick={() => pickerRef.current?.click()}>Đổi ảnh</button>
               </div>
             </div>
           </div>
         )}
-        <div className="location-hint">
-          <span>📍</span>
+        <div className={'location-hint' + (locationState === 'ok' ? ' ok' : locationState === 'unavailable' ? ' off' : '')}>
+          <MapPin size={20} aria-hidden="true" />
           <div><b>Vị trí thiết bị</b><div className="label">{locationState === 'ok' ? 'Đã ghi nhận GPS.' : locationState === 'loading' ? 'Đang lấy vị trí...' : locationState === 'unavailable' ? 'Không lấy được GPS; ảnh vẫn được phân tích.' : 'GPS sẽ được lấy khi bạn bấm Phân tích.'}</div></div>
         </div>
       </section>
-      {error && <div className="notice">{error}</div>}
+      {error && <div className="notice error" role="alert">{error}</div>}
       {result && (
-        <section className="result-card">
+        <section className={'result-card tone-' + status} aria-live="polite">
           <div className="result-head">
             <div><div className="eyebrow">KẾT QUẢ</div><h2>{statusLabel[status] || status}</h2><p className="label">{result.result.drain_count} miệng thu nước được nhận diện</p></div>
             <span className={'status ' + status}>{statusLabel[status] || status}</span>
           </div>
           <div className="result-image"><img src={files(result.annotated_image_url)} alt="Kết quả AI" /></div>
           <div className="result-metrics">
-            <div className="user-metric"><span>Độ tắc nghẽn</span><b>{blockage == null ? '—' : blockage + '%'}</b></div>
+            <div className="user-metric"><span>Độ tắc nghẽn</span><b>{blockage == null ? '—' : blockage + '%'}</b>{blockage != null && <div className="meter" role="img" aria-label={'Độ tắc nghẽn ' + blockage + '%'}><i style={{ width: Math.min(100, Math.max(0, blockage)) + '%' }} /></div>}</div>
             <div className="user-metric"><span>Độ tin cậy</span><b>{confidence == null ? '—' : (confidence * 100).toFixed(1) + '%'}</b></div>
             <div className="user-metric"><span>Miệng thu nước</span><b>{result.result.drain_count}</b></div>
           </div>
-          {result.result.drains.length > 1 && <div className="drain-list"><h3>Chi tiết từng miệng thu nước</h3>{result.result.drains.map((drain, index) => <div className="drain-row" key={index}><span>Miệng thu #{index + 1}</span><span>{drain.blockage_percent == null ? '—' : drain.blockage_percent + '%'}</span></div>)}</div>}
+          {result.drains.length > 1 && <div className="drain-list"><h3>Chi tiết từng miệng thu nước</h3>{result.drains.map((drain, index) => <div className="drain-row" key={index}><span>Miệng thu #{index + 1}</span><span>{drain.blockage_percent == null ? '—' : drain.blockage_percent + '%'}</span></div>)}</div>}
           {blockage == null && <div className="notice">Model hiện tại chưa đủ thông tin để tính phần trăm tắc nghẽn cho ảnh này.</div>}
         </section>
       )}
