@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import type { RecordItem, EnvironmentItem } from '@/types';
 
-export type MapStyleKey = 'esri-streets' | 'osm-standard' | 'esri-imagery' | 'carto-dark';
+export type MapStyleKey = 'modern-light' | 'modern-liberty' | 'satellite' | 'modern-dark';
 
 export interface MapStyleOption {
   key: MapStyleKey;
@@ -14,152 +14,87 @@ export interface MapStyleOption {
 
 export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
   {
-    key: 'esri-streets',
-    name: 'Giao thông GIS (ESRI)',
-    description: 'Chuẩn GIS quốc tế, tên đường rõ nét, 100% không quán ăn & rác thương mại',
-    icon: '🗺️',
+    key: 'modern-light',
+    name: 'Đô thị Hiện đại (Positron)',
+    description: 'Vector 4K siêu nét, phong cách Uber/Apple Maps, tinh gọn & chuẩn GIS',
+    icon: '💎',
   },
   {
-    key: 'osm-standard',
-    name: 'Bản đồ Chi tiết (OSM)',
-    description: 'Chi tiết từng ngõ hẻm & công trình hạ tầng đô thị, tên đường mới nhất',
-    icon: '🏛️',
+    key: 'modern-liberty',
+    name: 'Đô thị Sinh động (Liberty)',
+    description: 'Vector đa sắc màu, công viên & sông hồ sắc nét, 100% không quán ăn rác',
+    icon: '🏙️',
   },
   {
-    key: 'esri-imagery',
+    key: 'satellite',
     name: 'Vệ tinh Thực địa (ArcGIS)',
-    description: 'Ảnh vệ tinh thực tế độ nét cao kèm nhãn đường, không quảng cáo',
+    description: 'Ảnh vệ tinh độ phân giải cao kết hợp nhãn đường giao thông',
     icon: '🛰️',
   },
   {
-    key: 'carto-dark',
-    name: 'Chế độ Đêm Dark GIS',
-    description: 'Giao diện tối chuyên nghiệp cho trung tâm điều hành thông minh',
+    key: 'modern-dark',
+    name: 'Chế độ Đêm (Dark IOC)',
+    description: 'Giao diện tối công nghệ cao cho trung tâm giám sát & điều hành',
     icon: '🌙',
   },
 ];
 
-// Clean GIS Basemap Sources - Free of food/coffee/commercial clutter
-const MAP_SOURCES: Record<string, any> = {
-  'esri-streets': {
-    type: 'raster',
-    tiles: [
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-    ],
-    tileSize: 256,
-    minzoom: 0,
-    maxzoom: 19,
-    attribution: '© Esri, HERE, Garmin, USGS, NGA',
-  },
-  'osm-standard': {
-    type: 'raster',
-    tiles: [
-      'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    ],
-    tileSize: 256,
-    minzoom: 0,
-    maxzoom: 19,
-    attribution: '© OpenStreetMap contributors',
-  },
-  'esri-imagery': {
-    type: 'raster',
-    tiles: [
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    ],
-    tileSize: 256,
-    minzoom: 0,
-    maxzoom: 19,
-    attribution: '© Esri, Maxar, Earthstar Geographics',
-  },
-  'esri-labels': {
-    type: 'raster',
-    tiles: [
-      'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
-    ],
-    tileSize: 256,
-    minzoom: 0,
-    maxzoom: 19,
-  },
-  'carto-dark': {
-    type: 'raster',
-    tiles: [
-      'https://a.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
-      'https://b.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
-      'https://c.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
-      'https://d.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
-    ],
-    tileSize: 256,
-    minzoom: 0,
-    maxzoom: 19,
-    attribution: '© CARTO, © OpenStreetMap',
-  },
-};
-
-const BASE_STYLE = {
+// Clean Satellite Style Definition with transparent road labels
+const SATELLITE_STYLE = {
   version: 8 as const,
-  sources: MAP_SOURCES,
+  sources: {
+    'esri-imagery': {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      maxzoom: 19,
+      attribution: '© Esri, Maxar, Earthstar Geographics',
+    },
+    'esri-labels': {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      maxzoom: 19,
+    },
+  },
   layers: [
     {
-      id: 'map-fallback-background',
-      type: 'background' as const,
-      paint: {
-        'background-color': '#eef2f5',
-      },
-    },
-    {
-      id: 'layer-esri-streets',
-      type: 'raster' as const,
-      source: 'esri-streets',
-      layout: { visibility: 'visible' as const },
-      paint: {
-        'raster-fade-duration': 0,
-        'raster-resampling': 'linear' as const,
-      },
-    },
-    {
-      id: 'layer-osm-standard',
-      type: 'raster' as const,
-      source: 'osm-standard',
-      layout: { visibility: 'none' as const },
-      paint: {
-        'raster-fade-duration': 0,
-        'raster-resampling': 'linear' as const,
-      },
-    },
-    {
-      id: 'layer-esri-imagery',
+      id: 'satellite-base',
       type: 'raster' as const,
       source: 'esri-imagery',
-      layout: { visibility: 'none' as const },
       paint: {
         'raster-fade-duration': 0,
-        'raster-resampling': 'linear' as const,
       },
     },
     {
-      id: 'layer-esri-labels',
+      id: 'satellite-labels',
       type: 'raster' as const,
       source: 'esri-labels',
-      layout: { visibility: 'none' as const },
       paint: {
         'raster-fade-duration': 0,
-        'raster-resampling': 'linear' as const,
-      },
-    },
-    {
-      id: 'layer-carto-dark',
-      type: 'raster' as const,
-      source: 'carto-dark',
-      layout: { visibility: 'none' as const },
-      paint: {
-        'raster-fade-duration': 0,
-        'raster-resampling': 'linear' as const,
       },
     },
   ],
 };
+
+export function getStyleDefinition(key: MapStyleKey): any {
+  switch (key) {
+    case 'modern-light':
+      return 'https://tiles.openfreemap.org/styles/positron';
+    case 'modern-liberty':
+      return 'https://tiles.openfreemap.org/styles/liberty';
+    case 'modern-dark':
+      return 'https://tiles.openfreemap.org/styles/dark';
+    case 'satellite':
+      return SATELLITE_STYLE;
+    default:
+      return 'https://tiles.openfreemap.org/styles/positron';
+  }
+}
 
 const statusRank: Record<string, number> = {
   LOW: 1,
@@ -254,7 +189,7 @@ export function AnalysisMap({
   environment = [],
   selectedLocationKey = null,
   onSelectRecord,
-  mapStyle = 'esri-streets',
+  mapStyle = 'modern-light',
   showRiskZones = true,
   is3D = false,
   flyToLocation = null,
@@ -266,9 +201,22 @@ export function AnalysisMap({
   const host = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const mapLoaded = useRef(false);
+  const libRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const userMarkerRef = useRef<any>(null);
   const environmentCache = useRef<Map<string, EnvironmentItem>>(new Map());
+
+  // Refs for persistent event handler access
+  const recordsRef = useRef(records);
+  recordsRef.current = records;
+  const environmentRef = useRef(environment);
+  environmentRef.current = environment;
+  const selectedLocationKeyRef = useRef(selectedLocationKey);
+  selectedLocationKeyRef.current = selectedLocationKey;
+  const showRiskZonesRef = useRef(showRiskZones);
+  showRiskZonesRef.current = showRiskZones;
+  const onSelectRecordRef = useRef(onSelectRecord);
+  onSelectRecordRef.current = onSelectRecord;
 
   // Update environment map
   useEffect(() => {
@@ -276,30 +224,6 @@ export function AnalysisMap({
       environment.map(x => [x.latitude.toFixed(5) + ',' + x.longitude.toFixed(5), x])
     );
   }, [environment]);
-
-  // Update visible raster layer based on mapStyle
-  function applyMapStyle(map: any, styleKey: MapStyleKey) {
-    const isEsriStreets = styleKey === 'esri-streets';
-    const isOsm = styleKey === 'osm-standard';
-    const isEsriImagery = styleKey === 'esri-imagery';
-    const isCartoDark = styleKey === 'carto-dark';
-
-    if (map.getLayer('layer-esri-streets')) {
-      map.setLayoutProperty('layer-esri-streets', 'visibility', isEsriStreets ? 'visible' : 'none');
-    }
-    if (map.getLayer('layer-osm-standard')) {
-      map.setLayoutProperty('layer-osm-standard', 'visibility', isOsm ? 'visible' : 'none');
-    }
-    if (map.getLayer('layer-esri-imagery')) {
-      map.setLayoutProperty('layer-esri-imagery', 'visibility', isEsriImagery ? 'visible' : 'none');
-    }
-    if (map.getLayer('layer-esri-labels')) {
-      map.setLayoutProperty('layer-esri-labels', 'visibility', isEsriImagery ? 'visible' : 'none');
-    }
-    if (map.getLayer('layer-carto-dark')) {
-      map.setLayoutProperty('layer-carto-dark', 'visibility', isCartoDark ? 'visible' : 'none');
-    }
-  }
 
   // Render Risk Zones & Markers
   function renderLayersAndMarkers(lib: any, map: any) {
@@ -309,9 +233,13 @@ export function AnalysisMap({
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
 
+    const currentRecords = recordsRef.current;
+    const currentSelectedKey = selectedLocationKeyRef.current;
+    const currentShowRisk = showRiskZonesRef.current;
+
     // Group records by location
     const grouped = new Map<string, RecordItem[]>();
-    for (const record of records) {
+    for (const record of currentRecords) {
       if (record.latitude == null || record.longitude == null) continue;
       const key = locationKey(record);
       grouped.set(key, [...(grouped.get(key) || []), record]);
@@ -344,7 +272,7 @@ export function AnalysisMap({
           id: 'drainguard-zone-fill',
           type: 'fill',
           source: 'drainguard-zones',
-          layout: { visibility: showRiskZones ? 'visible' : 'none' },
+          layout: { visibility: currentShowRisk ? 'visible' : 'none' },
           paint: {
             'fill-color': [
               'match',
@@ -381,7 +309,7 @@ export function AnalysisMap({
           id: 'drainguard-zone-line',
           type: 'line',
           source: 'drainguard-zones',
-          layout: { visibility: showRiskZones ? 'visible' : 'none' },
+          layout: { visibility: currentShowRisk ? 'visible' : 'none' },
           paint: {
             'line-color': [
               'match',
@@ -412,7 +340,7 @@ export function AnalysisMap({
       const latest = [...group].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )[0];
-      const isSelected = selectedLocationKey === key;
+      const isSelected = currentSelectedKey === key;
       const env = environmentCache.current.get(key);
 
       const markerEl = drainMarkerElement(worst.status, isSelected);
@@ -420,8 +348,8 @@ export function AnalysisMap({
 
       markerEl.addEventListener('click', e => {
         e.stopPropagation();
-        if (onSelectRecord) {
-          onSelectRecord(latest, group, env);
+        if (onSelectRecordRef.current) {
+          onSelectRecordRef.current(latest, group, env);
         }
       });
 
@@ -433,7 +361,7 @@ export function AnalysisMap({
     }
   }
 
-  // Initialize Map with Google Maps Retina 2X base style
+  // Initialize Map with vector style
   useEffect(() => {
     let cancelled = false;
     let resizeObserver: ResizeObserver | null = null;
@@ -441,6 +369,7 @@ export function AnalysisMap({
     (async () => {
       const lib = await import('maplibre-gl');
       if (cancelled || !host.current) return;
+      libRef.current = lib;
 
       // Force pixelRatio to at least 2 for crisp Retina rendering on all screens
       const targetPixelRatio =
@@ -448,18 +377,19 @@ export function AnalysisMap({
           ? Math.max(window.devicePixelRatio || 1, 2)
           : 2;
 
+      const initialStyle = getStyleDefinition(mapStyle);
+
       const map = new lib.Map({
         container: host.current,
-        style: BASE_STYLE,
+        style: initialStyle,
         center: [108.2, 16.05],
         zoom: 13,
         minZoom: 3,
-        maxZoom: 19.5, // Giới hạn tối đa 5m theo chuẩn Google Maps, chống đen màn hình
+        maxZoom: 20, // Vector tiles allow smooth high-detail inspection
         pitch: is3D ? 50 : 0,
         bearing: 0,
         attributionControl: { compact: true },
         pixelRatio: targetPixelRatio,
-        fadeDuration: 0, // Eliminate fade blur during zoom transitions
       });
 
       map.addControl(new lib.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left');
@@ -467,6 +397,19 @@ export function AnalysisMap({
       map.on('rotate', () => {
         if (onBearingChange) onBearingChange(map.getBearing());
       });
+
+      const onStyleLoaded = () => {
+        if (cancelled) return;
+        // Suppress commercial food/restaurant POI layers if present in the style
+        ['poi_r20', 'poi_r7', 'poi_r1'].forEach(id => {
+          if (map.getLayer(id)) {
+            map.setLayoutProperty(id, 'visibility', 'none');
+          }
+        });
+        renderLayersAndMarkers(lib, map);
+      };
+
+      map.on('style.load', onStyleLoaded);
 
       map.on('load', () => {
         if (cancelled) return;
@@ -478,8 +421,7 @@ export function AnalysisMap({
         map.resize();
         setTimeout(() => map.resize(), 120);
 
-        applyMapStyle(map, mapStyle);
-        renderLayersAndMarkers(lib, map);
+        onStyleLoaded();
       });
 
       // Keep WebGL buffer size perfectly synchronized with container dimensions
@@ -505,10 +447,11 @@ export function AnalysisMap({
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle Map Style switching with zero-latency layer visibility
+  // Handle dynamic map style switching
   useEffect(() => {
     if (!mapInstance.current || !mapLoaded.current) return;
-    applyMapStyle(mapInstance.current, mapStyle);
+    const newStyle = getStyleDefinition(mapStyle);
+    mapInstance.current.setStyle(newStyle);
   }, [mapStyle]);
 
   // Re-render markers and risk zones when records change
