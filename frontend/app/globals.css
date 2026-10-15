@@ -1670,3 +1670,195 @@ body:has(.gis-viewport) .site-footer {
   color: #ffffff;
   margin-top: 4px;
 }
+
+/* ==========================================================================
+   HISTORY PAGE: URBAN TELEMETRY ACTIVITY & VISUAL AUDIT LOG
+   ========================================================================== */
+.history-page-wrap {
+  position: relative;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 40px 24px 90px;
+}
+
+.history-header {
+  text-align: center;
+  margin-bottom: 34px;
+}
+.history-title {
+  font-size: clamp(28px, 4.2vw, 46px);
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  margin: 10px 0;
+}
+.history-sub {
+  color: #94a3b8;
+  font-size: 15px;
+  max-width: 580px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* History Filter Bar */
+.history-filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  background: rgba(10, 16, 30, 0.75);
+  backdrop-filter: blur(16px);
+  padding: 12px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.history-search-input {
+  flex: 1;
+  min-width: 240px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0 14px 0 38px;
+  font-size: 13.5px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+}
+.history-search-input:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+}
+
+.history-view-toggle {
+  display: flex;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.9);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.history-toggle-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.history-toggle-btn.active {
+  background: rgba(2, 132, 199, 0.25);
+  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+/* Visual Card Grid */
+.history-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.history-card-item {
+  position: relative;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+.history-card-item:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(56, 189, 248, 0.2);
+}
+.history-card-thumb-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: #020617;
+  overflow: hidden;
+}
+.history-card-thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+.history-card-item:hover .history-card-thumb-wrap img {
+  transform: scale(1.05);
+}
+.history-card-badge-top {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.history-card-body {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* History Dark Table */
+.history-table-container {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.history-table th {
+  padding: 14px 16px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #38bdf8;
+  background: rgba(10, 16, 30, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.history-table td {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+.history-table tr.table-row-clickable {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.history-table tr.table-row-clickable:hover {
+  background: rgba(56, 189, 248, 0.08);
+}
+.history-table tr.table-row-clickable.is-selected {
+  background: rgba(2, 132, 199, 0.18);
+}
+
