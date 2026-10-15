@@ -1,234 +1,356 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
-  AlertTriangle,
+  Activity,
   ArrowRight,
   Camera,
   CheckCircle2,
-  Droplets,
-  History,
-  Info,
-  MapPin,
+  Cpu,
+  Layers,
   Map as MapIcon,
-  ScanSearch,
-  ShieldAlert,
+  Play,
+  Pause,
+  Scan,
+  ShieldCheck,
   Sparkles,
+  Zap,
 } from 'lucide-react';
-import { StatusBadge } from '@/components/ui';
 
 export default function Home() {
-  const steps = [
+  const [activeTab, setActiveTab] = useState<'annotated' | 'raw'>('annotated');
+  const [scannerActive, setScannerActive] = useState(true);
+  const [selectedDemoIndex, setSelectedDemoIndex] = useState(0);
+
+  const demoPairs = [
     {
-      title: 'Chụp ảnh tại chỗ',
-      desc: 'Mở camera điện thoại hoặc chọn ảnh miệng thu nước trên hè phố.',
-      icon: Camera,
+      raw: '/demo/drain-sample-2.jpg',
+      annotated: '/demo/drain-annotated-2.jpg',
+      title: 'Đường Hùng Vương - Bọc rác sinh hoạt lớn',
+      status: 'TẮC NGHIÊM TRỌNG',
+      blockage: '78%',
+      debrisCount: 5,
+      inferenceTime: '36ms',
     },
     {
-      title: 'AI nhận diện thông minh',
-      desc: 'Mô hình YOLO tự động phát hiện cấu trúc miệng thu và rác thải.',
-      icon: Sparkles,
-    },
-    {
-      title: 'Tính toán độ bít tắc',
-      desc: 'Ước tính phần trăm diện tích tắc nghẽn và phân cấp rủi ro.',
-      icon: AlertTriangle,
-    },
-    {
-      title: 'Định vị & Lưu trữ',
-      desc: 'Ghi nhận tọa độ GPS và lập bản đồ hỗ trợ cơ quan thoát nước.',
-      icon: MapPin,
+      raw: '/demo/drain-raw.jpg',
+      annotated: '/demo/drain-annotated.jpg',
+      title: 'Đường Lê Duẩn - Lá cây & rác che lấp lưới',
+      status: 'CÓ NGUY CƠ',
+      blockage: '41%',
+      debrisCount: 7,
+      inferenceTime: '38ms',
     },
   ];
 
-  const features = [
-    {
-      href: '/analyze',
-      title: 'Kiểm tra miệng thu',
-      desc: 'Chụp ảnh hoặc tải lên tệp ảnh để nhận kết quả phân tích AI tức thời.',
-      icon: ScanSearch,
-      label: 'Bắt đầu kiểm tra',
-      tone: 'blue',
-    },
-    {
-      href: '/map',
-      title: 'Bản đồ giám sát',
-      desc: 'Theo dõi trực quan vị trí các miệng thu nước và điểm nóng ngập lụt.',
-      icon: MapIcon,
-      label: 'Mở bản đồ',
-      tone: 'cyan',
-    },
-    {
-      href: '/history',
-      title: 'Lịch sử phản ánh',
-      desc: 'Tra cứu danh sách các điểm đã được kiểm tra kèm hình ảnh AI đã phân tích.',
-      icon: History,
-      label: 'Xem lịch sử',
-      tone: 'indigo',
-    },
-  ];
+  const currentDemo = demoPairs[selectedDemoIndex];
 
   return (
-    <main id="main" className="main home-page">
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <div className="hero-badge">
-            <span className="hero-badge-dot" />
-            <span>ỨNG DỤNG CỘNG ĐỒNG · CÔNG NGHỆ AI ĐÔ THỊ</span>
+    <main className="modern-home-wrapper">
+      {/* 1. Hero Section */}
+      <section className="modern-hero">
+        <div className="hero-glow-bg" />
+
+        {/* Live Pill Badge */}
+        <div className="modern-pill-badge">
+          <span className="pill-pulse-dot" />
+          <span>DRAINGUARD AI 2026 · HẠ TẦNG ĐÔ THỊ THÔNG MINH</span>
+        </div>
+
+        {/* Punchy Minimal Headline */}
+        <h1 className="modern-hero-title">
+          Phát hiện tắc nghẽn miệng cống <br />
+          <span className="hero-gradient-text">chỉ trong 38ms bằng AI Vision</span>
+        </h1>
+
+        <p className="modern-hero-subtitle">
+          Tự động định vị, phân loại rác thải và đo lường diện tích bít tắc theo thời gian thực
+          để cảnh báo sớm nguy cơ ngập úng đô thị.
+        </p>
+
+        {/* Hero Action Buttons */}
+        <div className="modern-hero-cta">
+          <Link href="/analyze" className="cta-btn-primary">
+            <Camera size={19} />
+            <span>Chụp ảnh kiểm tra ngay</span>
+          </Link>
+          <Link href="/map" className="cta-btn-secondary">
+            <MapIcon size={19} />
+            <span>Mở bản đồ giám sát 3D</span>
+          </Link>
+        </div>
+
+        {/* 2. Interactive Hero Visual Terminal (The Showcase) */}
+        <div className="hero-visual-terminal">
+          <div className="terminal-header">
+            <div className="terminal-dots">
+              <span className="terminal-dot dot-red" />
+              <span className="terminal-dot dot-yellow" />
+              <span className="terminal-dot dot-green" />
+            </div>
+
+            <div className="terminal-title-pill">
+              <Cpu size={14} className="text-sky-500" />
+              <span>YOLOv11x-Seg · Live Inference Simulator</span>
+            </div>
+
+            {/* Toggle Modes */}
+            <div className="terminal-toggle-group">
+              <button
+                type="button"
+                className={`terminal-tab-btn ${activeTab === 'annotated' ? 'is-active' : ''}`}
+                onClick={() => setActiveTab('annotated')}
+              >
+                ✨ AI Bounding Box
+              </button>
+              <button
+                type="button"
+                className={`terminal-tab-btn ${activeTab === 'raw' ? 'is-active' : ''}`}
+                onClick={() => setActiveTab('raw')}
+              >
+                📷 Ảnh thực địa
+              </button>
+              <button
+                type="button"
+                className="terminal-tab-btn"
+                onClick={() => setScannerActive(prev => !prev)}
+                title={scannerActive ? 'Tạm dừng laser' : 'Chạy laser quét'}
+              >
+                {scannerActive ? <Pause size={13} /> : <Play size={13} />}
+              </button>
+            </div>
           </div>
-          <h1 className="hero-heading">
-            Bảo vệ miệng thu nước, <br className="hero-br" />
-            <span className="hero-highlight">ngăn ngừa ngập úng đô thị</span>
-          </h1>
-          <p className="hero-description">
-            DrainGuard AI giúp người dân và đơn vị quản lý đô thị chụp ảnh kiểm tra tình trạng miệng cống,
-            tự động phát hiện rác thải che lấp và ước tính mức độ tắc nghẽn chỉ sau vài giây.
-          </p>
-          <div className="hero-cta-group">
-            <Link href="/analyze" className="button light hero-cta-primary">
-              <Camera size={19} />
-              <span>Chụp ảnh kiểm tra ngay</span>
-            </Link>
-            <Link href="/map" className="button outline-light hero-cta-secondary">
-              <MapIcon size={19} />
-              <span>Xem bản đồ giám sát</span>
-            </Link>
+
+          <div className="terminal-viewport">
+            {/* Main Image */}
+            <img
+              src={activeTab === 'annotated' ? currentDemo.annotated : currentDemo.raw}
+              alt={currentDemo.title}
+              className="terminal-image"
+            />
+
+            {/* Laser Scanner Beam */}
+            {scannerActive && (
+              <div className="scanner-laser-beam">
+                <div className="scanner-laser-glow" />
+              </div>
+            )}
+
+            {/* Floating Glass HUD Top-Left */}
+            <div className="floating-hud hud-top-left">
+              <div className="hud-badge-status">
+                <span className="hud-status-indicator" />
+                <span>{currentDemo.status}</span>
+              </div>
+              <div className="hud-detail-row">
+                <span>Bít tắc: <b>{currentDemo.blockage}</b></span>
+                <span>Vật cản: <b>{currentDemo.debrisCount} điểm rác</b></span>
+              </div>
+            </div>
+
+            {/* Floating Glass HUD Bottom-Right */}
+            <div className="floating-hud hud-bottom-right">
+              <div className="hud-detail-row" style={{ margin: 0 }}>
+                <span>Độ trễ AI: <b style={{ color: '#38bdf8' }}>{currentDemo.inferenceTime}</b></span>
+                <span>Tọa độ: <b>16.0678° N, 108.2208° E</b></span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Main Features Grid */}
-      <section className="home-section">
-        <div className="section-header">
-          <div className="eyebrow">TÍNH NĂNG CHÍNH</div>
-          <h2 className="section-title">Công cụ giám sát dành cho mọi người</h2>
-          <p className="section-subtitle">
-            Giao diện trực quan, dễ sử dụng ngay trên điện thoại di động mà không cần cài đặt phức tạp.
-          </p>
+      {/* 3. Modern Bento Grid Showcase */}
+      <section className="modern-bento-section">
+        <div className="bento-section-header">
+          <div className="bento-eyebrow">CÔNG NGHỆ THẾ HỆ MỚI</div>
+          <h2 className="bento-heading">Hệ thống thông minh cho đô thị tương lai</h2>
         </div>
 
-        <div className="features-grid">
-          {features.map(f => {
-            const Icon = f.icon;
-            return (
-              <Link href={f.href} key={f.href} className="feature-card">
-                <div className={'feature-icon-wrap ' + f.tone}>
-                  <Icon size={24} />
+        <div className="bento-grid">
+          {/* Card 1: GIS 3D Realtime Map (Span 8) */}
+          <Link href="/map" className="bento-card bento-col-8">
+            <span className="bento-card-badge">
+              <Layers size={13} /> BẢN ĐỒ VECTOR 4K
+            </span>
+            <h3 className="bento-card-title">Bản đồ Giám sát Ngập lụt Thời gian thực</h3>
+            <p className="bento-card-desc">
+              Tích hợp trực tiếp dữ liệu GIS đô thị, hiển thị các điểm nóng bít tắc và bán kính nguy cơ ngập úng với công nghệ Vector 60fps mượt mà.
+            </p>
+
+            <div className="sample-gallery-strip" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+              <div className="sample-thumb-item" style={{ aspectRatio: '16/9' }}>
+                <img src="/demo/drain-annotated-2.jpg" alt="Thực địa 1" />
+                <span className="sample-thumb-label">Điểm nóng #104 · Bít tắc 78%</span>
+              </div>
+              <div className="sample-thumb-item" style={{ aspectRatio: '16/9' }}>
+                <img src="/demo/drain-annotated.jpg" alt="Thực địa 2" />
+                <span className="sample-thumb-label">Điểm nóng #102 · Bít tắc 41%</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '18px', color: '#0284c7', fontWeight: 800, fontSize: '13px' }}>
+              <span>Xem trực tiếp bản đồ</span>
+              <ArrowRight size={15} />
+            </div>
+          </Link>
+
+          {/* Card 2: AI Speed & Precision (Span 4) */}
+          <div className="bento-card bento-col-4">
+            <span className="bento-card-badge">
+              <Zap size={13} /> TỐC ĐỘ XỬ LÝ
+            </span>
+            <h3 className="bento-card-title">Tức thời & Chính xác</h3>
+            <p className="bento-card-desc">
+              Mô hình YOLOv11x-Seg tối ưu hóa trực tiếp trên GPU, phân tách từng túi nilon, cành cây và bùn đất.
+            </p>
+            <div className="metric-mega-number">38ms</div>
+            <span style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', fontWeight: 600 }}>
+              Thời gian suy luận trung bình mỗi ảnh
+            </span>
+          </div>
+
+          {/* Card 3: Visual Risk Gauge (Span 4) */}
+          <div className="bento-card bento-col-4">
+            <span className="bento-card-badge">
+              <Activity size={13} /> PHÂN CẤP TẮC NGHẼN
+            </span>
+            <h3 className="bento-card-title">Thang đo Diện tích Chuẩn xác</h3>
+            <p className="bento-card-desc">
+              Tự động tính tỷ lệ phần trăm diện tích miệng cống bị che lấp để đề xuất mức độ ưu tiên xử lý.
+            </p>
+
+            <div className="visual-gauge-wrap">
+              <div className="gauge-bar-track">
+                <div className="gauge-bar-fill" />
+              </div>
+              <div className="gauge-legend-row">
+                <span style={{ color: '#16a34a' }}>0% Sạch</span>
+                <span style={{ color: '#ca8a04' }}>25% Nguy cơ</span>
+                <span style={{ color: '#ea580c' }}>50% Tắc</span>
+                <span style={{ color: '#dc2626' }}>&gt;75% Nguy hiểm</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4: Interactive Sample Picker (Span 8) */}
+          <div className="bento-card bento-col-8">
+            <span className="bento-card-badge">
+              <Scan size={13} /> THỬ NGHIỆM TRỰC QUAN
+            </span>
+            <h3 className="bento-card-title">Chọn ảnh mẫu để kiểm tra ngay lập tức</h3>
+            <p className="bento-card-desc">
+              Nhấp vào một trong các tình huống thực địa dưới đây để thay đổi trực tiếp màn hình mô phỏng phía trên.
+            </p>
+
+            <div className="sample-gallery-strip">
+              {demoPairs.map((pair, idx) => (
+                <div
+                  key={pair.title}
+                  className="sample-thumb-item"
+                  style={{
+                    borderColor: selectedDemoIndex === idx ? '#0284c7' : 'transparent',
+                    boxShadow: selectedDemoIndex === idx ? '0 0 0 3px rgba(2, 132, 199, 0.25)' : 'none',
+                  }}
+                  onClick={() => setSelectedDemoIndex(idx)}
+                >
+                  <img src={pair.annotated} alt={pair.title} />
+                  <span className="sample-thumb-label">{pair.status} ({pair.blockage})</span>
                 </div>
-                <h3 className="feature-title">{f.title}</h3>
-                <p className="feature-desc">{f.desc}</p>
-                <div className="feature-action">
-                  <span>{f.label}</span>
-                  <ArrowRight size={16} />
+              ))}
+              <Link
+                href="/analyze"
+                className="sample-thumb-item"
+                style={{
+                  display: 'grid',
+                  placeItems: 'center',
+                  background: '#f0f7fc',
+                  color: '#0284c7',
+                  border: '2px dashed #b9d8ee',
+                  textDecoration: 'none',
+                  padding: '12px',
+                  textAlign: 'center',
+                }}
+              >
+                <div>
+                  <Camera size={24} style={{ margin: '0 auto 6px' }} />
+                  <span style={{ fontSize: '11px', fontWeight: 800, display: 'block' }}>Tải ảnh của bạn</span>
                 </div>
               </Link>
-            );
-          })}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Steps Section */}
-      <section className="home-section process-section">
-        <div className="section-header">
-          <div className="eyebrow">QUY TRÌNH HOẠT ĐỘNG</div>
-          <h2 className="section-title">4 bước đơn giản để kiểm tra</h2>
-          <p className="section-subtitle">
-            Hệ thống trí tuệ nhân tạo xử lý tự động từ ảnh chụp đến bản đồ trực quan.
+      {/* 4. Bottom Modern Banner */}
+      <section style={{ maxWidth: '1240px', margin: '40px auto 80px', padding: '0 20px' }}>
+        <div style={{
+          background: 'linear-gradient(135deg, #097bc7 0%, #0369a1 100%)',
+          borderRadius: '24px',
+          padding: '48px 32px',
+          color: '#fff',
+          textAlign: 'center',
+          boxShadow: '0 20px 50px rgba(3, 105, 161, 0.25)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            right: '-10%',
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          }} />
+
+          <h2 style={{ fontSize: 'clamp(24px, 3.2vw, 36px)', fontWeight: 850, margin: '0 0 14px', letterSpacing: '-0.02em' }}>
+            Bắt đầu kiểm tra hệ thống thoát nước khu vực của bạn
+          </h2>
+          <p style={{ maxWidth: '580px', margin: '0 auto 28px', color: '#e0f2fe', fontSize: '15px', lineHeight: 1.6 }}>
+            Chụp ảnh nhanh bằng điện thoại và nhận kết quả phân tích mức độ bít tắc kèm tọa độ GPS tức thì.
           </p>
-        </div>
 
-        <div className="steps-container">
-          {steps.map((s, idx) => {
-            const Icon = s.icon;
-            return (
-              <div key={s.title} className="step-box">
-                <div className="step-top">
-                  <span className="step-counter">0{idx + 1}</span>
-                  <div className="step-icon">
-                    <Icon size={20} />
-                  </div>
-                </div>
-                <h4 className="step-name">{s.title}</h4>
-                <p className="step-detail">{s.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Warning Levels Guide Section */}
-      <section className="home-section">
-        <div className="guide-card">
-          <div className="guide-head">
-            <div>
-              <div className="eyebrow">TIÊU CHUẨN ĐÁNH GIÁ</div>
-              <h3 className="guide-title">Các mức độ tắc nghẽn miệng thu nước</h3>
-              <p className="guide-desc">
-                AI phân tích tỷ lệ diện tích bề mặt miệng cống bị rác thải, bùn đất hoặc lá cây che lấp.
-              </p>
-            </div>
-            <Link href="/analyze" className="button outline sm">
-              <Camera size={15} /> Thử nghiệm ảnh ngay
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link
+              href="/analyze"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#ffffff',
+                color: '#0284c7',
+                fontWeight: 800,
+                fontSize: '14px',
+                padding: '12px 22px',
+                borderRadius: '12px',
+                textDecoration: 'none',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
+              }}
+            >
+              <Camera size={18} />
+              <span>Chụp ảnh phân tích ngay</span>
             </Link>
-          </div>
-
-          <div className="status-grid">
-            <div className="status-item tone-low">
-              <div className="status-item-head">
-                <StatusBadge status="LOW" />
-                <span className="status-pct">0% — 20%</span>
-              </div>
-              <h4>Thông thoáng</h4>
-              <p>Miệng thu nước sạch sẽ, nước mưa có thể thoát nhanh chóng vào hệ thống ngầm.</p>
-            </div>
-
-            <div className="status-item tone-moderate">
-              <div className="status-item-head">
-                <StatusBadge status="MODERATE" />
-                <span className="status-pct">21% — 50%</span>
-              </div>
-              <h4>Có nguy cơ tắc</h4>
-              <p>Có rác, lá cây hoặc túi nilon bắt đầu che phủ một phần miệng cống.</p>
-            </div>
-
-            <div className="status-item tone-high">
-              <div className="status-item-head">
-                <StatusBadge status="HIGH" />
-                <span className="status-pct">51% — 75%</span>
-              </div>
-              <h4>Tắc nhiều</h4>
-              <p>Bề mặt thoát nước bị thu hẹp đáng kể, khả năng tiêu thoát nước giảm mạnh khi mưa lớn.</p>
-            </div>
-
-            <div className="status-item tone-critical">
-              <div className="status-item-head">
-                <StatusBadge status="CRITICAL" />
-                <span className="status-pct">&gt; 75%</span>
-              </div>
-              <h4>Tắc nghiêm trọng</h4>
-              <p>Miệng thu gần như bị bít kín hoàn toàn, nguy cơ gây ngập cục bộ rất cao, cần dọn dẹp ngay.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Bottom Banner */}
-      <section className="cta-banner">
-        <div className="cta-banner-content">
-          <div className="cta-icon-badge">
-            <Droplets size={28} />
-          </div>
-          <h2>Cùng bảo vệ khu dân cư của bạn an toàn trong mùa mưa</h2>
-          <p>
-            Mỗi bức ảnh phản ánh của bạn là dữ liệu quý giá giúp xây dựng bản đồ hạ tầng đô thị thông minh.
-          </p>
-          <div className="cta-banner-actions">
-            <Link href="/analyze" className="button hero-cta-primary">
-              <Camera size={18} /> Gửi ảnh kiểm tra ngay
-            </Link>
-            <Link href="/map" className="button outline-light">
-              <MapIcon size={18} /> Bản đồ cảnh báo
+            <Link
+              href="/map"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'rgba(255,255,255,0.15)',
+                backdropFilter: 'blur(10px)',
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '14px',
+                padding: '12px 20px',
+                borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.3)',
+                textDecoration: 'none',
+              }}
+            >
+              <MapIcon size={18} />
+              <span>Xem bản đồ đô thị</span>
             </Link>
           </div>
         </div>

@@ -626,3 +626,491 @@ body:has(.gis-viewport) .site-footer {
 .upload-actions label.button {
   cursor: pointer;
 }
+
+/* ==========================================================================
+   MODERN SAAS UI STYLING (Inspired by Linear, Apple & Vercel)
+   ========================================================================== */
+
+/* Modern Hero Section */
+.modern-hero {
+  padding: 56px 20px 48px;
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.hero-glow-bg {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(850px, 92vw);
+  height: 400px;
+  background: radial-gradient(ellipse at center, rgba(16, 184, 213, 0.15) 0%, rgba(13, 114, 199, 0.08) 45%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(50px);
+}
+
+.modern-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(16, 184, 213, 0.35);
+  box-shadow: 0 4px 18px rgba(13, 114, 199, 0.08);
+  font-size: 12px;
+  font-weight: 700;
+  color: #0b4e7b;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.pill-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b8d5;
+  box-shadow: 0 0 0 3px rgba(16, 184, 213, 0.25);
+  animation: pillPulse 2s infinite ease-in-out;
+}
+@keyframes pillPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.6; }
+}
+
+.modern-hero-title {
+  font-size: clamp(34px, 5.2vw, 62px);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  color: #081e36;
+  max-width: 900px;
+  margin: 0 auto 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-gradient-text {
+  background: linear-gradient(135deg, #097bc7 0%, #0099cc 50%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.modern-hero-subtitle {
+  font-size: clamp(16px, 1.8vw, 19px);
+  color: #486581;
+  max-width: 680px;
+  line-height: 1.55;
+  margin: 0 auto 32px;
+  position: relative;
+  z-index: 1;
+}
+
+.modern-hero-cta {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 48px;
+}
+
+.cta-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 13px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+.cta-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(2, 132, 199, 0.42);
+}
+
+.cta-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  color: #102a43 !important;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 13px 22px;
+  border-radius: 12px;
+  border: 1px solid #d5e5f0;
+  box-shadow: 0 4px 16px rgba(15, 42, 67, 0.05);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+.cta-btn-secondary:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+  border-color: #bcd5e5;
+  box-shadow: 0 8px 20px rgba(15, 42, 67, 0.08);
+}
+
+/* Hero Terminal & Interactive AI Inspector */
+.hero-visual-terminal {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #d7e7f2;
+  box-shadow: 0 24px 64px -12px rgba(12, 38, 64, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #f8fbfe;
+  border-bottom: 1px solid #e7f0f6;
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 7px;
+}
+.terminal-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.dot-red { background: #ff5f56; }
+.dot-yellow { background: #ffbd2e; }
+.dot-green { background: #27c93f; }
+
+.terminal-title-pill {
+  font-size: 12px;
+  font-weight: 700;
+  color: #486581;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #ffffff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid #e2edf5;
+}
+
+.terminal-toggle-group {
+  display: flex;
+  background: #eef4f9;
+  padding: 3px;
+  border-radius: 10px;
+  gap: 2px;
+}
+.terminal-tab-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #627d98;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.terminal-tab-btn.is-active {
+  background: #ffffff;
+  color: #0284c7;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.terminal-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 540px;
+  background: #0b1522;
+  overflow: hidden;
+}
+
+.terminal-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Scanner Beam Effect */
+.scanner-laser-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #00f2fe;
+  box-shadow: 0 0 16px 4px #00f2fe, 0 0 32px 8px rgba(0, 242, 254, 0.5);
+  animation: laserScan 3.5s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 3;
+}
+.scanner-laser-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(180deg, rgba(0, 242, 254, 0.25) 0%, transparent 100%);
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+@keyframes laserScan {
+  0% { top: 4%; }
+  100% { top: 96%; }
+}
+
+/* Floating HUD Overlay Chips */
+.floating-hud {
+  position: absolute;
+  z-index: 4;
+  background: rgba(11, 21, 34, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 10px 14px;
+  color: #fff;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  animation: hudFloat 4s ease-in-out infinite alternate;
+}
+@keyframes hudFloat {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-6px); }
+}
+
+.hud-top-left {
+  top: 18px;
+  left: 18px;
+}
+.hud-bottom-right {
+  bottom: 18px;
+  right: 18px;
+}
+.hud-badge-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.hud-status-indicator {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+}
+.hud-detail-row {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+.hud-detail-row b {
+  color: #f1f5f9;
+}
+
+/* Modern Bento Grid */
+.modern-bento-section {
+  max-width: 1240px;
+  margin: 72px auto 60px;
+  padding: 0 20px;
+}
+
+.bento-section-header {
+  text-align: center;
+  max-width: 650px;
+  margin: 0 auto 40px;
+}
+.bento-eyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #0284c7;
+  margin-bottom: 8px;
+}
+.bento-heading {
+  font-size: clamp(26px, 3.5vw, 40px);
+  font-weight: 800;
+  color: #0a2540;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.bento-card {
+  background: #ffffff;
+  border: 1px solid #e2edf5;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(15, 42, 67, 0.04);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+.bento-card:hover {
+  transform: translateY(-4px);
+  border-color: #cbdce8;
+  box-shadow: 0 18px 44px rgba(15, 42, 67, 0.09);
+}
+
+.bento-col-8 { grid-column: span 8; }
+.bento-col-4 { grid-column: span 4; }
+.bento-col-6 { grid-column: span 6; }
+
+.bento-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #edf6fc;
+  color: #0284c7;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  width: fit-content;
+  margin-bottom: 16px;
+}
+
+.bento-card-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0a2540;
+  margin: 0 0 8px;
+}
+
+.bento-card-desc {
+  font-size: 14px;
+  color: #5b7084;
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+
+/* Interactive Sample Gallery inside Bento */
+.sample-gallery-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: auto;
+}
+.sample-thumb-item {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+.sample-thumb-item:hover {
+  border-color: #0284c7;
+  transform: scale(1.03);
+}
+.sample-thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.sample-thumb-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 8px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.75) 100%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Visual Gauge Card */
+.visual-gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+.gauge-bar-track {
+  height: 14px;
+  border-radius: 999px;
+  background: #eef3f7;
+  position: relative;
+  overflow: hidden;
+}
+.gauge-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #16a34a 0%, #ca8a04 40%, #ea580c 70%, #dc2626 100%);
+  width: 78%;
+}
+.gauge-legend-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+/* Metrics Pill Counter */
+.metric-mega-number {
+  font-size: 48px;
+  font-weight: 900;
+  color: #0284c7;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-top: auto;
+}
+
+@media(max-width: 900px) {
+  .bento-col-8, .bento-col-4, .bento-col-6 {
+    grid-column: span 12;
+  }
+  .modern-hero {
+    padding: 36px 16px 32px;
+  }
+  .terminal-viewport {
+    aspect-ratio: 4 / 3;
+  }
+}
+
