@@ -14,15 +14,9 @@ export interface MapStyleOption {
 
 export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
   {
-    key: 'modern-light',
-    name: 'Đô thị Hiện đại (Positron)',
-    description: 'Vector 4K siêu nét, phong cách Uber/Apple Maps, tinh gọn & chuẩn GIS',
-    icon: '💎',
-  },
-  {
     key: 'modern-liberty',
-    name: 'Đô thị Sinh động (Liberty)',
-    description: 'Vector đa sắc màu, công viên & sông hồ sắc nét, 100% không quán ăn rác',
+    name: 'Đô thị Sinh động (Mặc định)',
+    description: 'Vector đa sắc màu, công viên & sông hồ sắc nét, chuẩn Google/Apple Maps',
     icon: '🏙️',
   },
   {
@@ -36,6 +30,12 @@ export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
     name: 'Chế độ Đêm (Dark IOC)',
     description: 'Giao diện tối công nghệ cao cho trung tâm giám sát & điều hành',
     icon: '🌙',
+  },
+  {
+    key: 'modern-light',
+    name: 'Đô thị Tối giản (Positron)',
+    description: 'Vector tối giản đơn sắc, tinh gọn & chuẩn GIS',
+    icon: '💎',
   },
 ];
 
@@ -83,16 +83,16 @@ const SATELLITE_STYLE = {
 
 export function getStyleDefinition(key: MapStyleKey): any {
   switch (key) {
-    case 'modern-light':
-      return 'https://tiles.openfreemap.org/styles/positron';
     case 'modern-liberty':
       return 'https://tiles.openfreemap.org/styles/liberty';
-    case 'modern-dark':
-      return 'https://tiles.openfreemap.org/styles/dark';
     case 'satellite':
       return SATELLITE_STYLE;
-    default:
+    case 'modern-dark':
+      return 'https://tiles.openfreemap.org/styles/dark';
+    case 'modern-light':
       return 'https://tiles.openfreemap.org/styles/positron';
+    default:
+      return 'https://tiles.openfreemap.org/styles/liberty';
   }
 }
 
@@ -189,7 +189,7 @@ export function AnalysisMap({
   environment = [],
   selectedLocationKey = null,
   onSelectRecord,
-  mapStyle = 'modern-light',
+  mapStyle = 'modern-liberty',
   showRiskZones = true,
   is3D = false,
   flyToLocation = null,

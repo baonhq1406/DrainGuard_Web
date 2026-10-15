@@ -35,7 +35,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 export default function MapPage() {
   const [statusFilter, setStatusFilter] = useState<'ALL' | Status>('ALL');
   const [search, setSearch] = useState('');
-  const [mapStyle, setMapStyle] = useState<MapStyleKey>('modern-light');
+  const [mapStyle, setMapStyle] = useState<MapStyleKey>('modern-liberty');
   const [layersOpen, setLayersOpen] = useState(false);
   const [is3D, setIs3D] = useState(false);
   const [bearing, setBearing] = useState(0);
@@ -413,7 +413,7 @@ export default function MapPage() {
         >
           <Layers size={19} />
           <span className="fab-tooltip">
-            Lớp bản đồ ({mapStyle === 'modern-light' ? 'Đô thị Hiện đại' : mapStyle === 'modern-liberty' ? 'Đô thị Sinh động' : mapStyle === 'satellite' ? 'Vệ tinh Thực địa' : 'Chế độ đêm'})
+            Lớp bản đồ ({mapStyle === 'modern-liberty' ? 'Đô thị Sinh động' : mapStyle === 'satellite' ? 'Vệ tinh Thực địa' : mapStyle === 'modern-dark' ? 'Chế độ đêm' : 'Đô thị Tối giản'})
           </span>
         </button>
 
@@ -486,21 +486,11 @@ export default function MapPage() {
           <div className="gis-layer-list">
             <button
               type="button"
-              className={`gis-layer-row ${mapStyle === 'modern-light' ? 'active' : ''}`}
-              onClick={() => setMapStyle('modern-light')}
-            >
-              <span className="gis-layer-row-icon">💎</span>
-              <span className="gis-layer-row-name">Đô thị Hiện đại (Positron)</span>
-              {mapStyle === 'modern-light' && <Check size={14} className="gis-layer-check" />}
-            </button>
-
-            <button
-              type="button"
               className={`gis-layer-row ${mapStyle === 'modern-liberty' ? 'active' : ''}`}
               onClick={() => setMapStyle('modern-liberty')}
             >
               <span className="gis-layer-row-icon">🏙️</span>
-              <span className="gis-layer-row-name">Đô thị Sinh động (Liberty)</span>
+              <span className="gis-layer-row-name">Đô thị Sinh động (Mặc định)</span>
               {mapStyle === 'modern-liberty' && <Check size={14} className="gis-layer-check" />}
             </button>
 
@@ -522,6 +512,16 @@ export default function MapPage() {
               <span className="gis-layer-row-icon">🌙</span>
               <span className="gis-layer-row-name">Chế độ đêm (Dark IOC)</span>
               {mapStyle === 'modern-dark' && <Check size={14} className="gis-layer-check" />}
+            </button>
+
+            <button
+              type="button"
+              className={`gis-layer-row ${mapStyle === 'modern-light' ? 'active' : ''}`}
+              onClick={() => setMapStyle('modern-light')}
+            >
+              <span className="gis-layer-row-icon">💎</span>
+              <span className="gis-layer-row-name">Đô thị Tối giản (Positron)</span>
+              {mapStyle === 'modern-light' && <Check size={14} className="gis-layer-check" />}
             </button>
           </div>
 
