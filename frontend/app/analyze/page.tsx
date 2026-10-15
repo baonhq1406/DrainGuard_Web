@@ -147,9 +147,14 @@ export default function Analyze() {
               <p className="label">{(file.size / 1024 / 1024).toFixed(1)} MB</p>
               <div className="upload-actions">
                 <button className="button" disabled={loading} onClick={run}>{loading ? <><Loader2 size={18} className="spin" />Đang phân tích...</> : <><ScanSearch size={18} />Phân tích ảnh</>}</button>
-                <label htmlFor="image-picker" className="button outline" aria-disabled={loading}>
+                <button
+                  type="button"
+                  className="button outline"
+                  disabled={loading}
+                  onClick={() => pickerRef.current?.click()}
+                >
                   Đổi ảnh
-                </label>
+                </button>
               </div>
             </div>
           </div>
