@@ -288,20 +288,20 @@ export default function AdminDashboard() {
                 <div className="radar-sweep-cone" />
               </div>
 
-              {/* Pulsing Radar Pings */}
-              <div className="admin-radar-pin" style={{ top: '46%', left: '52%', '--pin-c': '#ef4444' } as React.CSSProperties} />
-              <div className="admin-radar-pin" style={{ top: '38%', left: '36%', '--pin-c': '#f59e0b' } as React.CSSProperties} />
-              <div className="admin-radar-pin" style={{ top: '56%', left: '68%', '--pin-c': '#10b981' } as React.CSSProperties} />
+              {/* Pulsing Radar Pings at VKU Campus */}
+              <div className="admin-radar-pin" style={{ top: '56%', left: '59%', '--pin-c': '#ef4444' } as React.CSSProperties} />
+              <div className="admin-radar-pin" style={{ top: '48%', left: '46%', '--pin-c': '#f59e0b' } as React.CSSProperties} />
+              <div className="admin-radar-pin" style={{ top: '67%', left: '43%', '--pin-c': '#10b981' } as React.CSSProperties} />
 
               <div className="admin-radar-hud-top">
                 <span className="radar-ping-dot" />
-                <span>VỆ TINH GIÁM SÁT THỜI GIAN THỰC</span>
+                <span>RADAR VỆ TINH · ĐẠI HỌC VKU</span>
               </div>
 
               <div className="admin-radar-hud-bottom">
                 <div>
-                  <div style={{ fontSize: '14px', fontWeight: 850, color: '#ffffff' }}>Bản đồ GIS 3D Đà Nẵng</div>
-                  <div style={{ fontSize: '11.5px', color: '#38bdf8', fontWeight: 700 }}>16.068° N, 108.220° E</div>
+                  <div style={{ fontSize: '14px', fontWeight: 850, color: '#ffffff' }}>Khu Đô Thị Đại Học VKU</div>
+                  <div style={{ fontSize: '11.5px', color: '#38bdf8', fontWeight: 700 }}>15.975° N, 108.253° E</div>
                 </div>
                 <Link href="/map" className="btn-glow-primary" style={{ padding: '8px 14px', fontSize: '12px' }}>
                   <MapIcon size={14} />

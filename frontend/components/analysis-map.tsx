@@ -385,8 +385,8 @@ export function AnalysisMap({
       const map = new lib.Map({
         container: host.current,
         style: initialStyle,
-        center: [108.2, 16.05],
-        zoom: 13,
+        center: [108.2532, 15.975],
+        zoom: 16,
         minZoom: 3,
         maxZoom: 20, // Vector tiles allow smooth high-detail inspection
         pitch: is3D ? 50 : 0,

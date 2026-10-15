@@ -75,9 +75,9 @@ const SCENARIOS = [
 const RADAR_PINS = [
   {
     id: 1,
-    top: '48%',
-    left: '52%',
-    name: 'Cầu Rồng · Bạch Đằng',
+    top: '56%',
+    left: '59%',
+    name: 'Cổng Chính VKU · Trần Đại Nghĩa',
     status: 'Tắc 78% · Rác sinh hoạt',
     riskColor: '#ef4444',
     thumb: '/demo/drain-annotated-2.jpg',
@@ -85,19 +85,19 @@ const RADAR_PINS = [
   },
   {
     id: 2,
-    top: '38%',
-    left: '36%',
-    name: 'Lê Duẩn · Ngã 3 Minh Khai',
-    status: 'Tắc 41% · Cành lá cây',
+    top: '48%',
+    left: '46%',
+    name: 'Giảng Đường Khu K & V · VKU',
+    status: 'Tắc 41% · Lá cây khuôn viên',
     riskColor: '#f59e0b',
     thumb: '/demo/drain-annotated.jpg',
     scenarioIdx: 1,
   },
   {
     id: 3,
-    top: '44%',
-    left: '42%',
-    name: 'Hùng Vương · Chợ Cồn',
+    top: '19%',
+    left: '60%',
+    name: 'Ngã Tư Nam Kỳ Khởi Nghĩa · VKU',
     status: 'Tắc 64% · Bọc nilon',
     riskColor: '#f97316',
     thumb: '/demo/drain-annotated-4.jpg',
@@ -105,19 +105,19 @@ const RADAR_PINS = [
   },
   {
     id: 4,
-    top: '56%',
-    left: '70%',
-    name: 'Võ Văn Kiệt · Biển Mỹ Khê',
-    status: 'Tắc 12% · Cát ven biển',
+    top: '67%',
+    left: '43%',
+    name: 'Khu Ký Túc Xá VKU · Hòa Quý',
+    status: 'Tắc 12% · Cát đọng',
     riskColor: '#10b981',
     thumb: '/demo/drain-annotated-5.jpg',
     scenarioIdx: 3,
   },
   {
     id: 5,
-    top: '26%',
-    left: '58%',
-    name: 'Bạch Đằng · Cầu Sông Hàn',
+    top: '30%',
+    left: '45%',
+    name: 'Sân Vận Động VKU · Khu Thể Chất',
     status: 'Thông thoáng 0%',
     riskColor: '#38bdf8',
     thumb: '/demo/drain-sample-5.jpg',
@@ -399,7 +399,7 @@ export default function Home() {
           <div className="radar-header-overlay">
             <div className="radar-title-badge">
               <span className="radar-ping-dot" />
-              <span>RADAR VỆ TINH THỜI GIAN THỰC · ĐÀ NẴNG</span>
+              <span>RADAR VỆ TINH THỜI GIAN THỰC · ĐẠI HỌC VKU ĐÀ NẴNG</span>
             </div>
           </div>
 
