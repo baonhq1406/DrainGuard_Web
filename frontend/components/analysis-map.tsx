@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import type { RecordItem, EnvironmentItem } from '@/types';
 
-export type MapStyleKey = 'google-clean' | 'google-hybrid' | 'esri-imagery' | 'carto-dark';
+export type MapStyleKey = 'esri-streets' | 'osm-standard' | 'esri-imagery' | 'carto-dark';
 
 export interface MapStyleOption {
   key: MapStyleKey;
@@ -14,60 +14,54 @@ export interface MapStyleOption {
 
 export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
   {
-    key: 'google-clean',
-    name: 'Đô thị GIS (Không quán ăn)',
-    description: 'Tên đường mới nhất 2026, ẩn toàn bộ quán xá & cửa hàng thương mại',
+    key: 'esri-streets',
+    name: 'Giao thông GIS (ESRI)',
+    description: 'Chuẩn GIS quốc tế, tên đường rõ nét, 100% không quán ăn & rác thương mại',
     icon: '🗺️',
   },
   {
-    key: 'google-hybrid',
-    name: 'Vệ tinh Google (Sạch)',
-    description: 'Ảnh vệ tinh thực tế độ nét cao, chỉ hiện đường & sông ngòi',
-    icon: '🛰️',
+    key: 'osm-standard',
+    name: 'Bản đồ Chi tiết (OSM)',
+    description: 'Chi tiết từng ngõ hẻm & công trình hạ tầng đô thị, tên đường mới nhất',
+    icon: '🏛️',
   },
   {
     key: 'esri-imagery',
-    name: 'Vệ tinh ArcGIS (ESRI)',
-    description: 'Chuẩn khí tượng & GIS quốc tế, không có quảng cáo',
-    icon: '🌍',
+    name: 'Vệ tinh Thực địa (ArcGIS)',
+    description: 'Ảnh vệ tinh thực tế độ nét cao kèm nhãn đường, không quảng cáo',
+    icon: '🛰️',
   },
   {
     key: 'carto-dark',
     name: 'Chế độ Đêm Dark GIS',
-    description: 'Nền tối chuyên nghiệp cho phòng điều hành thông minh',
+    description: 'Giao diện tối chuyên nghiệp cho trung tâm điều hành thông minh',
     icon: '🌙',
   },
 ];
 
-// High-DPI Retina @2x Tile Sources without commercial POI clutter
-// apistyle=s.t:3|p.v:off hides ALL Points of Interest (quán ăn, nhà hàng, cafe, shop, khách sạn)
-// apistyle=s.t:4|p.v:off hides transit clutter
+// Clean GIS Basemap Sources - Free of food/coffee/commercial clutter
 const MAP_SOURCES: Record<string, any> = {
-  'google-clean': {
+  'esri-streets': {
     type: 'raster',
     tiles: [
-      'https://mt0.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off|s.t:4|p.v:off',
-      'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off|s.t:4|p.v:off',
-      'https://mt2.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off|s.t:4|p.v:off',
-      'https://mt3.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off|s.t:4|p.v:off',
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
     ],
     tileSize: 256,
     minzoom: 0,
     maxzoom: 19,
-    attribution: '© Google Maps (GIS Mode)',
+    attribution: '© Esri, HERE, Garmin, USGS, NGA',
   },
-  'google-hybrid': {
+  'osm-standard': {
     type: 'raster',
     tiles: [
-      'https://mt0.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off',
-      'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off',
-      'https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off',
-      'https://mt3.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off',
+      'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
     ],
     tileSize: 256,
     minzoom: 0,
     maxzoom: 19,
-    attribution: '© Google Maps',
+    attribution: '© OpenStreetMap contributors',
   },
   'esri-imagery': {
     type: 'raster',
@@ -82,7 +76,7 @@ const MAP_SOURCES: Record<string, any> = {
   'esri-labels': {
     type: 'raster',
     tiles: [
-      'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
     ],
     tileSize: 256,
     minzoom: 0,
@@ -91,7 +85,10 @@ const MAP_SOURCES: Record<string, any> = {
   'carto-dark': {
     type: 'raster',
     tiles: [
-      'https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
+      'https://a.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
+      'https://b.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
+      'https://c.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
+      'https://d.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
     ],
     tileSize: 256,
     minzoom: 0,
@@ -112,9 +109,9 @@ const BASE_STYLE = {
       },
     },
     {
-      id: 'layer-google-clean',
+      id: 'layer-esri-streets',
       type: 'raster' as const,
-      source: 'google-clean',
+      source: 'esri-streets',
       layout: { visibility: 'visible' as const },
       paint: {
         'raster-fade-duration': 0,
@@ -122,9 +119,9 @@ const BASE_STYLE = {
       },
     },
     {
-      id: 'layer-google-hybrid',
+      id: 'layer-osm-standard',
       type: 'raster' as const,
-      source: 'google-hybrid',
+      source: 'osm-standard',
       layout: { visibility: 'none' as const },
       paint: {
         'raster-fade-duration': 0,
@@ -257,7 +254,7 @@ export function AnalysisMap({
   environment = [],
   selectedLocationKey = null,
   onSelectRecord,
-  mapStyle = 'google-clean',
+  mapStyle = 'esri-streets',
   showRiskZones = true,
   is3D = false,
   flyToLocation = null,
@@ -282,22 +279,22 @@ export function AnalysisMap({
 
   // Update visible raster layer based on mapStyle
   function applyMapStyle(map: any, styleKey: MapStyleKey) {
-    const isGoogleClean = styleKey === 'google-clean';
-    const isGoogleHybrid = styleKey === 'google-hybrid';
-    const isEsri = styleKey === 'esri-imagery';
+    const isEsriStreets = styleKey === 'esri-streets';
+    const isOsm = styleKey === 'osm-standard';
+    const isEsriImagery = styleKey === 'esri-imagery';
     const isCartoDark = styleKey === 'carto-dark';
 
-    if (map.getLayer('layer-google-clean')) {
-      map.setLayoutProperty('layer-google-clean', 'visibility', isGoogleClean ? 'visible' : 'none');
+    if (map.getLayer('layer-esri-streets')) {
+      map.setLayoutProperty('layer-esri-streets', 'visibility', isEsriStreets ? 'visible' : 'none');
     }
-    if (map.getLayer('layer-google-hybrid')) {
-      map.setLayoutProperty('layer-google-hybrid', 'visibility', isGoogleHybrid ? 'visible' : 'none');
+    if (map.getLayer('layer-osm-standard')) {
+      map.setLayoutProperty('layer-osm-standard', 'visibility', isOsm ? 'visible' : 'none');
     }
     if (map.getLayer('layer-esri-imagery')) {
-      map.setLayoutProperty('layer-esri-imagery', 'visibility', isEsri ? 'visible' : 'none');
+      map.setLayoutProperty('layer-esri-imagery', 'visibility', isEsriImagery ? 'visible' : 'none');
     }
     if (map.getLayer('layer-esri-labels')) {
-      map.setLayoutProperty('layer-esri-labels', 'visibility', isEsri ? 'visible' : 'none');
+      map.setLayoutProperty('layer-esri-labels', 'visibility', isEsriImagery ? 'visible' : 'none');
     }
     if (map.getLayer('layer-carto-dark')) {
       map.setLayoutProperty('layer-carto-dark', 'visibility', isCartoDark ? 'visible' : 'none');
