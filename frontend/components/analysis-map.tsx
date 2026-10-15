@@ -72,7 +72,7 @@ export function AnalysisMap({records,environment=[]}:{records:RecordItem[];envir
       }
       const groups=[...grouped.values()];
       const points=groups.map(g=>g[0]);
-      map=new lib.Map({container:host.current,style:STYLE_URL,center:[108.2,16.05],zoom:12,attributionControl:true});
+      map=new lib.Map({container:host.current,style:STYLE_URL,center:[108.2,16.05],zoom:12,attributionControl:{compact:true}});
       map.addControl(new lib.NavigationControl({visualizePitch:true}),'top-right');
       map.addControl(new lib.ScaleControl({maxWidth:120,unit:'metric'}),'bottom-left');
       map.on('load',()=>{
@@ -105,9 +105,9 @@ export function AnalysisMap({records,environment=[]}:{records:RecordItem[];envir
                   const point=group[0]; const url=new URL('https://nominatim.openstreetmap.org/reverse');
                   url.searchParams.set('format','jsonv2'); url.searchParams.set('lat',String(point.latitude)); url.searchParams.set('lon',String(point.longitude)); url.searchParams.set('zoom','18'); url.searchParams.set('addressdetails','1');
                   const response=await fetch(url.toString(),{headers:{Accept:'application/json'}}); if(!response.ok)throw new Error();
-                  const data=await response.json(); label=data.display_name||'Không tìm thấy địa chỉ.'; addressCache.current.set(key,label);
+                  const data=await response.json(); label=(data.display_name as string)||'Không tìm thấy địa chỉ.'; addressCache.current.set(key,label);
                 }
-                if(addressNode)addressNode.textContent=label; geoButton.textContent='Đã tra cứu';
+                if(addressNode)addressNode.textContent=label || 'Đã xác định vị trí.'; geoButton.textContent='Đã tra cứu';
               }catch{if(addressNode)addressNode.textContent='Không tra cứu được.';geoButton.disabled=false;geoButton.textContent='Thử lại';}
             };
           });
