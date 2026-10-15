@@ -15,25 +15,25 @@ export interface MapStyleOption {
 export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
   {
     key: 'modern-liberty',
-    name: 'Đô thị Sinh động (Mặc định)',
+    name: 'Đô thị Sinh động',
     description: 'Vector đa sắc màu, công viên & sông hồ sắc nét, chuẩn Google/Apple Maps',
     icon: '🏙️',
   },
   {
     key: 'satellite',
-    name: 'Vệ tinh Thực địa (Siêu nét)',
+    name: 'Vệ tinh Thực địa',
     description: 'Ảnh vệ tinh quang học mới nhất, sắc nét từng mét & 100% sạch rác',
     icon: '🛰️',
   },
   {
     key: 'modern-dark',
-    name: 'Chế độ Đêm (Dark IOC)',
+    name: 'Chế độ Đêm',
     description: 'Giao diện tối công nghệ cao cho trung tâm giám sát & điều hành',
     icon: '🌙',
   },
   {
     key: 'modern-light',
-    name: 'Đô thị Tối giản (Positron)',
+    name: 'Đô thị Tối giản',
     description: 'Vector tối giản đơn sắc, tinh gọn & chuẩn GIS',
     icon: '💎',
   },

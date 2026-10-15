@@ -413,7 +413,7 @@ export default function MapPage() {
         >
           <Layers size={19} />
           <span className="fab-tooltip">
-            Lớp bản đồ ({mapStyle === 'modern-liberty' ? 'Đô thị Sinh động' : mapStyle === 'satellite' ? 'Vệ tinh Thực địa' : mapStyle === 'modern-dark' ? 'Chế độ đêm' : 'Đô thị Tối giản'})
+            Lớp bản đồ: {mapStyle === 'modern-liberty' ? 'Đô thị Sinh động' : mapStyle === 'satellite' ? 'Vệ tinh Thực địa' : mapStyle === 'modern-dark' ? 'Chế độ đêm' : 'Đô thị Tối giản'}
           </span>
         </button>
 
@@ -490,7 +490,7 @@ export default function MapPage() {
               onClick={() => setMapStyle('modern-liberty')}
             >
               <span className="gis-layer-row-icon">🏙️</span>
-              <span className="gis-layer-row-name">Đô thị Sinh động (Mặc định)</span>
+              <span className="gis-layer-row-name">Đô thị Sinh động</span>
               {mapStyle === 'modern-liberty' && <Check size={14} className="gis-layer-check" />}
             </button>
 
@@ -500,7 +500,7 @@ export default function MapPage() {
               onClick={() => setMapStyle('satellite')}
             >
               <span className="gis-layer-row-icon">🛰️</span>
-              <span className="gis-layer-row-name">Vệ tinh Thực địa (Siêu nét)</span>
+              <span className="gis-layer-row-name">Vệ tinh Thực địa</span>
               {mapStyle === 'satellite' && <Check size={14} className="gis-layer-check" />}
             </button>
 
@@ -510,7 +510,7 @@ export default function MapPage() {
               onClick={() => setMapStyle('modern-dark')}
             >
               <span className="gis-layer-row-icon">🌙</span>
-              <span className="gis-layer-row-name">Chế độ đêm (Dark IOC)</span>
+              <span className="gis-layer-row-name">Chế độ đêm</span>
               {mapStyle === 'modern-dark' && <Check size={14} className="gis-layer-check" />}
             </button>
 
@@ -520,7 +520,7 @@ export default function MapPage() {
               onClick={() => setMapStyle('modern-light')}
             >
               <span className="gis-layer-row-icon">💎</span>
-              <span className="gis-layer-row-name">Đô thị Tối giản (Positron)</span>
+              <span className="gis-layer-row-name">Đô thị Tối giản</span>
               {mapStyle === 'modern-light' && <Check size={14} className="gis-layer-check" />}
             </button>
           </div>
