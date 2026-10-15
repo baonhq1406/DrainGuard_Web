@@ -628,28 +628,27 @@ body:has(.gis-viewport) .site-footer {
 }
 
 /* ==========================================================================
-   ENTERPRISE DEEP SPACE & GEOSPATIAL TECH UI (Inspired by Apple, Linear & Planet Labs)
+   PURE VISUAL TECH UI — RADAR SCREEN, PHOTO MARQUEE & INTERACTIVE SLIDER
    ========================================================================== */
 
-/* Full-bleed Home Container */
-.deep-space-home {
+/* Full-bleed Space Container */
+.visual-space-home {
   background: #030712;
   color: #f1f5f9;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Atmospheric Ambient Lights */
+/* Atmospheric Ambient Lighting */
 .space-aurora-glow {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: min(1300px, 100vw);
-  height: 650px;
-  background: radial-gradient(circle at 50% 15%, rgba(2, 132, 199, 0.22) 0%, rgba(16, 185, 129, 0.12) 30%, rgba(3, 7, 18, 0) 70%);
+  width: min(1400px, 100vw);
+  height: 700px;
+  background: radial-gradient(ellipse at 50% 15%, rgba(2, 132, 199, 0.25) 0%, rgba(14, 165, 233, 0.1) 40%, transparent 70%);
   pointer-events: none;
   z-index: 0;
   filter: blur(60px);
@@ -664,199 +663,178 @@ body:has(.gis-viewport) .site-footer {
   background-image: 
     linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse at 50% 20%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 75%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 20%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 75%);
+  background-size: 50px 50px;
+  mask-image: radial-gradient(ellipse at 50% 25%, rgba(0, 0, 0, 1) 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 25%, rgba(0, 0, 0, 1) 0%, transparent 75%);
   pointer-events: none;
   z-index: 0;
 }
 
 /* Hero Section */
-.space-hero-section {
+.hero-visual-wrap {
   position: relative;
   z-index: 1;
-  padding: 68px 24px 64px;
-  max-width: 1240px;
+  padding: 56px 20px 48px;
+  max-width: 1200px;
   margin: 0 auto;
   text-align: center;
 }
 
-.space-status-badge {
+.hero-pill-indicator {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 18px;
+  padding: 6px 16px;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  box-shadow: 0 0 25px rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.15);
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-weight: 750;
   color: #38bdf8;
-  margin-bottom: 26px;
+  margin-bottom: 22px;
 }
 
-.radar-ping-ring {
+.radar-ping-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: #38bdf8;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
   position: relative;
 }
-.radar-ping-ring::after {
+.radar-ping-dot::after {
   content: '';
   position: absolute;
   inset: -4px;
   border-radius: 50%;
   border: 1.5px solid #38bdf8;
-  animation: radarPing 2.2s infinite;
+  animation: radarDotPing 2.2s infinite;
 }
-@keyframes radarPing {
+@keyframes radarDotPing {
   0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.8); opacity: 0; }
 }
 
-.space-hero-heading {
-  font-size: clamp(38px, 6vw, 74px);
+.hero-punchy-title {
+  font-size: clamp(36px, 5.8vw, 68px);
   font-weight: 900;
   letter-spacing: -0.04em;
-  line-height: 1.05;
+  line-height: 1.06;
   color: #ffffff;
-  max-width: 1000px;
-  margin: 0 auto 22px;
+  max-width: 950px;
+  margin: 0 auto 18px;
 }
 
-.heading-gradient-glow {
-  background: linear-gradient(135deg, #ffffff 20%, #7dd3fc 65%, #38bdf8 100%);
+.title-glow-cyan {
+  background: linear-gradient(135deg, #ffffff 10%, #7dd3fc 60%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 40px rgba(56, 189, 248, 0.25);
 }
 
-.space-hero-lead {
-  font-size: clamp(16px, 2vw, 20px);
-  color: #94a3b8;
-  max-width: 720px;
-  line-height: 1.6;
-  margin: 0 auto 36px;
-}
-
-.space-hero-actions {
+.hero-actions-row {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 56px;
+  margin: 28px 0 44px;
 }
 
-.btn-space-primary {
+.btn-glow-primary {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   background: linear-gradient(135deg, #0284c7, #0369a1);
   color: #ffffff !important;
   font-weight: 750;
-  font-size: 15.5px;
-  padding: 14px 28px;
-  border-radius: 14px;
+  font-size: 15px;
+  padding: 13px 26px;
+  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 30px rgba(2, 132, 199, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 25px rgba(2, 132, 199, 0.45);
+  transition: all 0.2s ease;
   text-decoration: none;
 }
-.btn-space-primary:hover {
+.btn-glow-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(2, 132, 199, 0.55);
+  box-shadow: 0 14px 35px rgba(2, 132, 199, 0.6);
 }
 
-.btn-space-glass {
+.btn-glass-secondary {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: rgba(30, 41, 59, 0.6);
+  background: rgba(30, 41, 59, 0.65);
   backdrop-filter: blur(14px);
   color: #f1f5f9 !important;
   font-weight: 700;
-  font-size: 15.5px;
-  padding: 14px 26px;
-  border-radius: 14px;
+  font-size: 15px;
+  padding: 13px 24px;
+  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
   text-decoration: none;
 }
-.btn-space-glass:hover {
-  background: rgba(51, 65, 85, 0.7);
+.btn-glass-secondary:hover {
+  background: rgba(51, 65, 85, 0.75);
   transform: translateY(-2px);
   border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
 /* ==========================================================================
-   REAL INTERACTIVE BEFORE / AFTER SLIDER (Spatial Hardware Mockup)
+   INTERACTIVE COMPARISON SLIDER (Zero Container Clutter)
    ========================================================================== */
-.spatial-slider-container {
+.stage-slider-frame {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1080px;
   margin: 0 auto;
-  border-radius: 26px;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.8), 0 0 60px rgba(2, 132, 199, 0.12);
+  border-radius: 24px;
+  background: #020617;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 80px -15px rgba(0, 0, 0, 0.8), 0 0 50px rgba(2, 132, 199, 0.15);
   overflow: hidden;
   position: relative;
 }
 
-.slider-top-toolbar {
+.stage-slider-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
-  background: rgba(10, 16, 30, 0.95);
+  padding: 12px 20px;
+  background: rgba(15, 23, 42, 0.95);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 13px;
+  font-size: 12px;
 }
-
-.toolbar-device-pill {
+.slider-bar-left {
   display: flex;
   align-items: center;
   gap: 8px;
   color: #94a3b8;
-  font-weight: 600;
+  font-weight: 700;
 }
-
-.toolbar-instruction {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.slider-bar-hint {
   color: #38bdf8;
   font-weight: 700;
-  font-size: 12.5px;
   background: rgba(56, 189, 248, 0.1);
-  padding: 5px 14px;
+  padding: 4px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  border: 1px solid rgba(56, 189, 248, 0.2);
 }
 
-/* Split-Screen Slider Viewport */
-.slider-stage {
+.stage-slider-viewport {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  max-height: 580px;
+  max-height: 560px;
   user-select: none;
   cursor: ew-resize;
   overflow: hidden;
   background: #020617;
 }
 
-/* Base image (Before: Real street photo) */
-.slider-img-base {
+.stage-img-raw {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -865,8 +843,7 @@ body:has(.gis-viewport) .site-footer {
   pointer-events: none;
 }
 
-/* Top image (After: AI annotated photo with clip path) */
-.slider-img-overlay-wrap {
+.stage-img-overlay-clip {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -874,8 +851,7 @@ body:has(.gis-viewport) .site-footer {
   overflow: hidden;
   pointer-events: none;
 }
-
-.slider-img-overlay {
+.stage-img-annotated {
   position: absolute;
   top: 0;
   left: 0;
@@ -884,8 +860,7 @@ body:has(.gis-viewport) .site-footer {
   object-fit: cover;
 }
 
-/* Interactive Divider Line */
-.slider-divider-line {
+.stage-divider {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -896,61 +871,57 @@ body:has(.gis-viewport) .site-footer {
   pointer-events: none;
   transform: translateX(-50%);
 }
-
-/* Center Draggable Handle */
-.slider-handle-thumb {
+.stage-handle {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background: #00f2fe;
-  box-shadow: 0 0 25px #00f2fe, 0 4px 16px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 25px #00f2fe, 0 4px 14px rgba(0, 0, 0, 0.6);
   display: grid;
   place-items: center;
-  color: #030712;
+  color: #020617;
   font-weight: 900;
+  font-size: 16px;
   border: 3px solid #ffffff;
-  pointer-events: none;
 }
 
-/* Side Labels (Floating permanently inside the viewer) */
-.slider-label-pill {
+.stage-tag {
   position: absolute;
   z-index: 8;
-  padding: 6px 14px;
+  padding: 6px 12px;
   border-radius: 8px;
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   pointer-events: none;
   backdrop-filter: blur(12px);
 }
-.label-left {
-  top: 20px;
-  left: 20px;
+.stage-tag-left {
+  top: 18px;
+  left: 18px;
   background: rgba(15, 23, 42, 0.85);
   color: #e2e8f0;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
-.label-right {
-  top: 20px;
-  right: 20px;
+.stage-tag-right {
+  top: 18px;
+  right: 18px;
   background: rgba(2, 132, 199, 0.85);
   color: #ffffff;
   border: 1px solid rgba(56, 189, 248, 0.4);
   box-shadow: 0 0 20px rgba(2, 132, 199, 0.4);
 }
 
-/* Bottom Floating Telemetry Panel */
-.slider-bottom-hud {
+.stage-hud-overlay {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
+  bottom: 18px;
+  left: 18px;
+  right: 18px;
   z-index: 8;
   display: flex;
   justify-content: space-between;
@@ -958,241 +929,411 @@ body:has(.gis-viewport) .site-footer {
   background: rgba(10, 16, 30, 0.85);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  padding: 12px 18px;
+  border-radius: 12px;
+  padding: 10px 16px;
   color: #fff;
   pointer-events: none;
 }
-
-.hud-stat-group {
+.stage-hud-group {
   display: flex;
-  gap: 20px;
+  gap: 18px;
 }
-.hud-stat-item b {
+.stage-hud-item b {
   display: block;
-  font-size: 15px;
-  color: #f8fafc;
+  font-size: 14px;
 }
-.hud-stat-item span {
-  font-size: 11px;
+.stage-hud-item span {
+  font-size: 10px;
   color: #94a3b8;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
-/* ==========================================================================
-   LIVE TELEMETRY TICKER BAR (Full-bleed Stripe)
-   ========================================================================== */
-.telemetry-ticker-bar {
-  background: rgba(15, 23, 42, 0.7);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 22px 24px;
-  margin: 64px 0 72px;
-}
-
-.telemetry-ticker-inner {
-  max-width: 1240px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-}
-
-.telemetry-metric-box {
+/* Scenario Selector Pills */
+.stage-scenario-pills {
   display: flex;
-  flex-direction: column;
-  padding: 0 16px;
-  border-left: 2px solid rgba(56, 189, 248, 0.3);
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 22px auto 0;
+  max-width: 900px;
 }
-.telemetry-num {
-  font-size: 38px;
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  background: linear-gradient(135deg, #ffffff 40%, #38bdf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.telemetry-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #94a3b8;
-  margin-top: 6px;
-}
-
-/* ==========================================================================
-   IMMERSIVE BENTO GRID (Deep Glass Cards)
-   ========================================================================== */
-.space-bento-section {
-  max-width: 1240px;
-  margin: 0 auto 90px;
-  padding: 0 24px;
-}
-
-.space-section-header {
-  text-align: center;
-  max-width: 700px;
-  margin: 0 auto 48px;
-}
-.space-section-eyebrow {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #38bdf8;
-  margin-bottom: 10px;
-}
-.space-section-title {
-  font-size: clamp(28px, 4vw, 44px);
-  font-weight: 850;
-  color: #ffffff;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-}
-
-.space-bento-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 24px;
-}
-
-.space-bento-card {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  padding: 32px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-  display: flex;
-  flex-direction: column;
-}
-.space-bento-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(2, 132, 199, 0.15);
-}
-
-.space-col-8 { grid-column: span 8; }
-.space-col-4 { grid-column: span 4; }
-.space-col-6 { grid-column: span 6; }
-
-.space-card-tag {
+.scenario-pill-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: rgba(56, 189, 248, 0.12);
-  color: #38bdf8;
-  padding: 6px 12px;
+  gap: 8px;
+  padding: 8px 16px;
   border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  width: fit-content;
-  margin-bottom: 20px;
-  border: 1px solid rgba(56, 189, 248, 0.25);
-}
-
-.space-card-title {
-  font-size: 24px;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0 0 10px;
-  letter-spacing: -0.02em;
-}
-
-.space-card-desc {
-  font-size: 14.5px;
+  font-size: 12.5px;
+  font-weight: 700;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #94a3b8;
-  line-height: 1.6;
-  margin: 0 0 24px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scenario-pill-btn:hover {
+  background: rgba(30, 41, 59, 0.85);
+  color: #fff;
+  border-color: rgba(56, 189, 248, 0.35);
+  transform: translateY(-2px);
+}
+.scenario-pill-btn.active {
+  background: rgba(2, 132, 199, 0.22);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 18px rgba(2, 132, 199, 0.3);
+}
+.scenario-pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
 }
 
-/* Interactive Scenario Cards inside Bento */
-.scenario-selector-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: auto;
-}
-.scenario-card-item {
+/* ==========================================================================
+   SECTION 2: 360° SATELLITE RADAR SCREEN (Full-Width Visual)
+   ========================================================================== */
+.radar-section-wrap {
   position: relative;
-  border-radius: 14px;
+  max-width: 1200px;
+  margin: 80px auto;
+  padding: 0 20px;
+}
+
+.radar-screen-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 600px;
+  border-radius: 28px;
   overflow: hidden;
-  aspect-ratio: 4 / 3;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(2, 132, 199, 0.15);
+  background: #020617;
+}
+
+.radar-backdrop-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: contrast(1.1) brightness(0.9);
+}
+
+/* 360 Degree Radar Sweep Beam */
+.radar-sweep-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(800px, 90vw);
+  height: min(800px, 90vw);
+  border-radius: 50%;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.15), inset 0 0 0 1px rgba(56, 189, 248, 0.15);
+  pointer-events: none;
+}
+.radar-concentric-1 {
+  position: absolute;
+  top: 15%;
+  left: 15%;
+  right: 15%;
+  bottom: 15%;
+  border-radius: 50%;
+  border: 1px dashed rgba(56, 189, 248, 0.2);
+}
+.radar-concentric-2 {
+  position: absolute;
+  top: 32%;
+  left: 32%;
+  right: 32%;
+  bottom: 32%;
+  border-radius: 50%;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+}
+
+.radar-sweep-cone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(0, 242, 254, 0.35) 0deg, rgba(0, 242, 254, 0.12) 35deg, transparent 70deg);
+  animation: radarRotate 4.5s linear infinite;
+  pointer-events: none;
+}
+@keyframes radarRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Radar Hotspot Pings */
+.radar-hotspot-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
   cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
+  z-index: 10;
 }
-.scenario-card-item.is-selected {
+.pin-core {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 12px currentColor;
+}
+.pin-wave-ring {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: pingRing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+@keyframes pingRing {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+/* Hotspot Hover Popup */
+.pin-tooltip-card {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  background: rgba(10, 16, 30, 0.96);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 12px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75), 0 0 20px rgba(56, 189, 248, 0.2);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 30;
+}
+.radar-hotspot-pin:hover .pin-tooltip-card,
+.radar-hotspot-pin.is-active .pin-tooltip-card {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.pin-tooltip-card img {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Radar Floating Overlays */
+.radar-header-overlay {
+  position: absolute;
+  top: 22px;
+  left: 24px;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.radar-title-badge {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radar-action-overlay {
+  position: absolute;
+  bottom: 22px;
+  right: 24px;
+  z-index: 12;
+}
+
+/* ==========================================================================
+   SECTION 3: INFINITE PHOTO MARQUEE (Visual Filmstrip)
+   ========================================================================== */
+.photo-marquee-wrap {
+  margin: 70px 0;
+  position: relative;
+  overflow: hidden;
+}
+.photo-marquee-track {
+  display: flex;
+  gap: 18px;
+  width: max-content;
+  animation: marqueeRoll 32s linear infinite;
+}
+.photo-marquee-wrap:hover .photo-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marqueeRoll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-photo-card {
+  position: relative;
+  width: 280px;
+  height: 190px;
+  border-radius: 18px;
+  overflow: hidden;
+  flex: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.marquee-photo-card:hover {
+  transform: scale(1.04) translateY(-4px);
   border-color: #38bdf8;
-  box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(56, 189, 248, 0.35);
 }
-.scenario-card-item img {
+.marquee-photo-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-.scenario-card-badge {
+.marquee-card-badge {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 8px 10px;
-  background: linear-gradient(180deg, transparent 0%, rgba(3, 7, 18, 0.95) 100%);
-  color: #ffffff;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, transparent 0%, rgba(2, 6, 23, 0.95) 100%);
+  color: #fff;
   font-size: 11.5px;
-  font-weight: 750;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Glowing Progress Bar */
-.space-gauge-track {
-  height: 16px;
-  border-radius: 999px;
-  background: rgba(30, 41, 59, 0.8);
+/* ==========================================================================
+   SECTION 4: PURE VISUAL WORKFLOW (3 Dynamic Visual Stages)
+   ========================================================================== */
+.visual-workflow-wrap {
+  max-width: 1100px;
+  margin: 70px auto 90px;
+  padding: 0 20px;
+  text-align: center;
+}
+.workflow-nodes-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  margin-top: auto;
+  margin-top: 40px;
+  gap: 20px;
 }
-.space-gauge-fill {
+.workflow-nodes-row::before {
+  content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #10b981 0%, #f59e0b 45%, #f97316 75%, #ef4444 100%);
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-  width: 78%;
+  top: 40px;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  background: linear-gradient(90deg, #38bdf8 0%, #10b981 50%, #38bdf8 100%);
+  opacity: 0.35;
+  z-index: 0;
 }
 
-/* Responsive Rules */
-@media(max-width: 960px) {
-  .space-col-8, .space-col-4, .space-col-6 {
-    grid-column: span 12;
+.workflow-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+.workflow-icon-bubble {
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  display: grid;
+  place-items: center;
+  color: #38bdf8;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(56, 189, 248, 0.15);
+  margin-bottom: 14px;
+  transition: all 0.25s ease;
+}
+.workflow-node:hover .workflow-icon-bubble {
+  transform: translateY(-4px) scale(1.06);
+  border-color: #38bdf8;
+  box-shadow: 0 15px 40px rgba(56, 189, 248, 0.3);
+}
+.workflow-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+.workflow-sub {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+@media(max-width: 768px) {
+  .workflow-nodes-row {
+    flex-direction: column;
+    gap: 32px;
   }
-  .telemetry-ticker-inner {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+  .workflow-nodes-row::before {
+    display: none;
   }
-  .space-hero-section {
-    padding: 48px 18px 40px;
-  }
-  .slider-stage {
+  .radar-screen-card {
     aspect-ratio: 4 / 3;
   }
-  .slider-bottom-hud {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
 }
-
-
+/* ==========================================================================
+   SECTION 5: MINIMAL AURORA CTA BANNER
+   ========================================================================== */
+.minimal-cta-wrap {
+  max-width: 1100px;
+  margin: 70px auto 100px;
+  padding: 0 20px;
+}
+.minimal-cta-box {
+  position: relative;
+  background: radial-gradient(ellipse at 50% 0%, rgba(2, 132, 199, 0.28) 0%, rgba(15, 23, 42, 0.75) 75%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 28px;
+  padding: 56px 32px;
+  text-align: center;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 50px rgba(2, 132, 199, 0.12);
+  overflow: hidden;
+}
+.minimal-cta-title {
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  margin: 0 0 14px;
+}
+.minimal-cta-sub {
+  color: #94a3b8;
+  font-size: 15px;
+  max-width: 580px;
+  margin: 0 auto 30px;
+  line-height: 1.6;
+}

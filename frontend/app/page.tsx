@@ -3,57 +3,144 @@
 import { useState, useRef, type MouseEvent, type TouchEvent } from 'react';
 import Link from 'next/link';
 import {
-  Activity,
   ArrowRight,
   Camera,
-  Compass,
   Cpu,
   Layers,
   Map as MapIcon,
-  Maximize2,
-  Scan,
-  ShieldCheck,
-  Sparkles,
-  Zap,
 } from 'lucide-react';
 
+const SCENARIOS = [
+  {
+    id: 0,
+    title: 'Hải Châu · Hùng Vương',
+    tag: 'Báo động cấp 4 · 78%',
+    dotColor: '#ef4444',
+    rawImg: '/demo/drain-sample-2.jpg',
+    annotatedImg: '/demo/drain-annotated-2.jpg',
+    blockage: '78%',
+    debris: '5 vị trí rác túi nilon lớn',
+    risk: 'BÁO ĐỘNG ĐỎ',
+    riskColor: '#ef4444',
+    latency: '36ms',
+    gps: '16.0682° N, 108.2195° E',
+  },
+  {
+    id: 1,
+    title: 'Thanh Khê · Lê Duẩn',
+    tag: 'Cảnh báo cấp 2 · 41%',
+    dotColor: '#f59e0b',
+    rawImg: '/demo/drain-raw.jpg',
+    annotatedImg: '/demo/drain-annotated.jpg',
+    blockage: '41%',
+    debris: '7 điểm lá cây & bùn cát',
+    risk: 'CÓ NGUY CƠ',
+    riskColor: '#f59e0b',
+    latency: '38ms',
+    gps: '16.0694° N, 108.2120° E',
+  },
+  {
+    id: 2,
+    title: 'Hải Châu · Chợ Cồn',
+    tag: 'Nguy cơ cao · 64%',
+    dotColor: '#f97316',
+    rawImg: '/demo/drain-sample-4.jpg',
+    annotatedImg: '/demo/drain-annotated-4.jpg',
+    blockage: '64%',
+    debris: '4 túi rác sinh hoạt',
+    risk: 'NGUY HIỂM',
+    riskColor: '#f97316',
+    latency: '34ms',
+    gps: '16.0621° N, 108.2155° E',
+  },
+  {
+    id: 3,
+    title: 'Sơn Trà · Bạch Đằng',
+    tag: 'Đã thông thoát · 0%',
+    dotColor: '#10b981',
+    rawImg: '/demo/drain-sample-5.jpg',
+    annotatedImg: '/demo/drain-annotated-5.jpg',
+    blockage: '0%',
+    debris: 'Mặt lưới thông thoáng',
+    risk: 'AN TOÀN',
+    riskColor: '#10b981',
+    latency: '31ms',
+    gps: '16.0715° N, 108.2241° E',
+  },
+];
+
+const RADAR_PINS = [
+  {
+    id: 1,
+    top: '48%',
+    left: '52%',
+    name: 'Cầu Rồng · Bạch Đằng',
+    status: 'Tắc 78% · Rác sinh hoạt',
+    riskColor: '#ef4444',
+    thumb: '/demo/drain-annotated-2.jpg',
+    scenarioIdx: 0,
+  },
+  {
+    id: 2,
+    top: '38%',
+    left: '36%',
+    name: 'Lê Duẩn · Ngã 3 Minh Khai',
+    status: 'Tắc 41% · Cành lá cây',
+    riskColor: '#f59e0b',
+    thumb: '/demo/drain-annotated.jpg',
+    scenarioIdx: 1,
+  },
+  {
+    id: 3,
+    top: '44%',
+    left: '42%',
+    name: 'Hùng Vương · Chợ Cồn',
+    status: 'Tắc 64% · Bọc nilon',
+    riskColor: '#f97316',
+    thumb: '/demo/drain-annotated-4.jpg',
+    scenarioIdx: 2,
+  },
+  {
+    id: 4,
+    top: '56%',
+    left: '70%',
+    name: 'Võ Văn Kiệt · Biển Mỹ Khê',
+    status: 'Tắc 12% · Cát ven biển',
+    riskColor: '#10b981',
+    thumb: '/demo/drain-annotated-5.jpg',
+    scenarioIdx: 3,
+  },
+  {
+    id: 5,
+    top: '26%',
+    left: '58%',
+    name: 'Bạch Đằng · Cầu Sông Hàn',
+    status: 'Thông thoáng 0%',
+    riskColor: '#38bdf8',
+    thumb: '/demo/drain-sample-5.jpg',
+    scenarioIdx: 3,
+  },
+];
+
+const MARQUEE_ITEMS = [
+  { img: '/demo/drain-sample-2.jpg', tag: 'Thực địa', sub: 'Hùng Vương', color: '#94a3b8' },
+  { img: '/demo/drain-annotated-2.jpg', tag: 'Tắc 78%', sub: 'Báo động', color: '#ef4444' },
+  { img: '/demo/drain-raw.jpg', tag: 'Thực địa', sub: 'Lê Duẩn', color: '#94a3b8' },
+  { img: '/demo/drain-annotated.jpg', tag: 'Tắc 41%', sub: 'Lá cây', color: '#f59e0b' },
+  { img: '/demo/drain-sample-4.jpg', tag: 'Thực địa', sub: 'Nguyễn Văn Linh', color: '#94a3b8' },
+  { img: '/demo/drain-annotated-4.jpg', tag: 'Tắc 64%', sub: 'Bọc nilon', color: '#f97316' },
+  { img: '/demo/drain-sample-5.jpg', tag: 'Thực địa', sub: 'Bạch Đằng', color: '#94a3b8' },
+  { img: '/demo/drain-annotated-5.jpg', tag: 'Thông thoáng', sub: 'An toàn 0%', color: '#10b981' },
+];
+
 export default function Home() {
-  // Real Interactive Split-Screen Slider Position (0 to 100%)
   const [sliderPos, setSliderPos] = useState(50);
-  const [isDragging, setIsDragging] = useState(false);
   const [activeScenario, setActiveScenario] = useState(0);
+  const [hoveredPin, setHoveredPin] = useState<number | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  const scenarios = [
-    {
-      id: 0,
-      title: 'Đường Hùng Vương - Bọc rác sinh hoạt lớn',
-      badge: 'Báo động cấp 4 · Tắc 78%',
-      rawImg: '/demo/drain-sample-2.jpg',
-      annotatedImg: '/demo/drain-annotated-2.jpg',
-      blockage: '78%',
-      debrisCount: '5 vị trí rác',
-      riskLevel: 'NGUY HIỂM',
-      riskColor: '#ef4444',
-      latency: '36ms',
-    },
-    {
-      id: 1,
-      title: 'Đường Lê Duẩn - Lá cây & rác che phủ mặt lưới',
-      badge: 'Cảnh báo cấp 2 · Tắc 41%',
-      rawImg: '/demo/drain-raw.jpg',
-      annotatedImg: '/demo/drain-annotated.jpg',
-      blockage: '41%',
-      debrisCount: '7 điểm rác & lá',
-      riskLevel: 'CÓ NGUY CƠ',
-      riskColor: '#f59e0b',
-      latency: '38ms',
-    },
-  ];
+  const current = SCENARIOS[activeScenario];
 
-  const current = scenarios[activeScenario];
-
-  // Handle Dragging
   function handleMove(clientX: number) {
     if (!sliderRef.current) return;
     const rect = sliderRef.current.getBoundingClientRect();
@@ -71,311 +158,278 @@ export default function Home() {
   }
 
   return (
-    <div className="deep-space-home">
-      {/* 1. Ambient Backdrop Glow & Space Coordinate Grid */}
+    <div className="visual-space-home">
+      {/* 1. Ambient Lighting & Space Coordinates */}
       <div className="space-aurora-glow" />
       <div className="gis-grid-backdrop" />
 
-      {/* 2. Hero Section */}
-      <section className="space-hero-section">
-        <div className="space-status-badge">
-          <span className="radar-ping-ring" />
-          <span>HỆ THỐNG GIÁM SÁT ĐÔ THỊ THÔNG MINH · AI & GIS 2026</span>
+      {/* 2. Hero Section (Zero Boxed Cards) */}
+      <section className="hero-visual-wrap">
+        <div className="hero-pill-indicator">
+          <span className="radar-ping-dot" />
+          <span>HỆ THỐNG GIÁM SÁT THỦY VĂN ĐÔ THỊ · AI & GIS 2026</span>
         </div>
 
-        <h1 className="space-hero-heading">
-          Thấu thị lòng đô thị. <br />
-          <span className="heading-gradient-glow">Chấm dứt nỗi lo ngập úng.</span>
+        <h1 className="hero-punchy-title">
+          Thấu thị dòng chảy ngầm.<br />
+          <span className="title-glow-cyan">Chấm dứt ngập lụt đô thị.</span>
         </h1>
 
-        <p className="space-hero-lead">
-          Nền tảng ứng dụng Thị giác Máy tính YOLOv11 phân tách rác thải, tự động đo lường độ bít tắc miệng thu
-          và lập bản đồ thủy văn cảnh báo ngập lụt theo thời gian thực.
+        <p style={{ color: '#94a3b8', fontSize: '16px', maxWidth: '640px', margin: '0 auto 24px', lineHeight: 1.5 }}>
+          Thị giác máy tính YOLOv11 phát hiện rác bít tắc trong 38ms &amp; lập bản đồ cảnh báo ngập lụt thời gian thực.
         </p>
 
-        <div className="space-hero-actions">
-          <Link href="/analyze" className="btn-space-primary">
-            <Camera size={19} />
+        <div className="hero-actions-row">
+          <Link href="/analyze" className="btn-glow-primary">
+            <Camera size={18} />
             <span>Chụp ảnh kiểm tra ngay</span>
+            <ArrowRight size={16} />
           </Link>
-          <Link href="/map" className="btn-space-glass">
-            <MapIcon size={19} />
+          <Link href="/map" className="btn-glass-secondary">
+            <MapIcon size={18} />
             <span>Bản đồ giám sát GIS 3D</span>
           </Link>
         </div>
 
-        {/* 3. Real Interactive Before/After Split-Screen Slider */}
-        <div className="spatial-slider-container">
-          <div className="slider-top-toolbar">
-            <div className="toolbar-device-pill">
-              <Cpu size={16} className="text-sky-400" />
-              <span>YOLOv11x-Seg · Phân tích thị giác trực tiếp tại hiện trường</span>
+        {/* 3. Interactive Before/After Split-Screen Stage */}
+        <div className="stage-slider-frame">
+          <div className="stage-slider-bar">
+            <div className="slider-bar-left">
+              <Cpu size={15} className="text-sky-400" />
+              <span>YOLOv11x-Seg · {current.title}</span>
             </div>
-            <div className="toolbar-instruction">
-              <span>↔ Kéo rê chuột để so sánh Thực địa vs AI</span>
+            <div className="slider-bar-hint">
+              <span>↔ Rê chuột hoặc chạm để so sánh thực địa</span>
             </div>
           </div>
 
           <div
             ref={sliderRef}
-            className="slider-stage"
+            className="stage-slider-viewport"
             onMouseMove={onMouseMove}
             onTouchMove={onTouchMove}
             onClick={e => handleMove(e.clientX)}
           >
-            {/* Base Image (Real Raw Street Photo) */}
+            {/* Raw Street Photo */}
             <img
               src={current.rawImg}
               alt="Ảnh thực địa nguyên bản"
-              className="slider-img-base"
+              className="stage-img-raw"
             />
 
-            {/* Overlay Image (AI Annotated with Dynamic Clip Path) */}
+            {/* AI Annotated Photo with Dynamic Polygon Clip Path */}
             <div
-              className="slider-img-overlay-wrap"
+              className="stage-img-overlay-clip"
               style={{ clipPath: `polygon(${sliderPos}% 0, 100% 0, 100% 100%, ${sliderPos}% 100%)` }}
             >
               <img
                 src={current.annotatedImg}
-                alt="Ảnh AI phân tích"
-                className="slider-img-overlay"
+                alt="Ảnh AI phân tách vật cản"
+                className="stage-img-annotated"
               />
             </div>
 
-            {/* Glowing Divider Line */}
+            {/* Glowing Laser Divider */}
             <div
-              className="slider-divider-line"
+              className="stage-divider"
               style={{ left: `${sliderPos}%` }}
             >
-              <div className="slider-handle-thumb">
+              <div className="stage-handle">
                 <span>↔</span>
               </div>
             </div>
 
             {/* Side Badges */}
-            <div className="slider-label-pill label-left">
+            <div className="stage-tag stage-tag-left">
               📷 Thực địa nguyên bản
             </div>
-            <div className="slider-label-pill label-right">
+            <div className="stage-tag stage-tag-right">
               ✨ AI YOLOv11 phát hiện rác
             </div>
 
-            {/* Bottom HUD Bar */}
-            <div className="slider-bottom-hud">
-              <div className="hud-stat-group">
-                <div className="hud-stat-item">
-                  <b style={{ color: current.riskColor }}>{current.riskLevel} ({current.blockage})</b>
+            {/* Floating Glass HUD Bar Inside Stage */}
+            <div className="stage-hud-overlay">
+              <div className="stage-hud-group">
+                <div className="stage-hud-item">
+                  <b style={{ color: current.riskColor }}>{current.risk} ({current.blockage})</b>
                   <span>Mức độ bít tắc</span>
                 </div>
-                <div className="hud-stat-item">
-                  <b>{current.debrisCount}</b>
-                  <span>Vật thể phát hiện</span>
+                <div className="stage-hud-item">
+                  <b>{current.debris}</b>
+                  <span>Vật cản nhận diện</span>
                 </div>
-                <div className="hud-stat-item">
+                <div className="stage-hud-item">
                   <b style={{ color: '#38bdf8' }}>{current.latency}</b>
-                  <span>Độ trễ xử lý</span>
+                  <span>Độ trễ suy luận</span>
                 </div>
               </div>
-              <div className="hud-stat-item" style={{ textAlign: 'right' }}>
-                <b>16.0678° N, 108.2208° E</b>
+              <div className="stage-hud-item" style={{ textAlign: 'right' }}>
+                <b>{current.gps}</b>
                 <span>Tọa độ thực địa</span>
               </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* 4. Live Telemetry Metric Ticker */}
-      <section className="telemetry-ticker-bar">
-        <div className="telemetry-ticker-inner">
-          <div className="telemetry-metric-box">
-            <span className="telemetry-num">38ms</span>
-            <span className="telemetry-label">Tốc độ suy luận AI thời gian thực</span>
-          </div>
-          <div className="telemetry-metric-box">
-            <span className="telemetry-num">98.6%</span>
-            <span className="telemetry-label">Độ chính xác phân tách rác & cành cây</span>
-          </div>
-          <div className="telemetry-metric-box">
-            <span className="telemetry-num">1,284+</span>
-            <span className="telemetry-label">Miệng thu nước đã số hóa GIS</span>
-          </div>
-          <div className="telemetry-metric-box">
-            <span className="telemetry-num">0%</span>
-            <span className="telemetry-label">Điểm mù ngập úng nhờ dữ liệu mở</span>
-          </div>
+        {/* Minimal Scenario Selector Pills */}
+        <div className="stage-scenario-pills">
+          {SCENARIOS.map((sc, idx) => (
+            <button
+              key={sc.id}
+              type="button"
+              className={`scenario-pill-btn ${activeScenario === idx ? 'active' : ''}`}
+              onClick={() => setActiveScenario(idx)}
+            >
+              <span className="scenario-pill-dot" style={{ background: sc.dotColor }} />
+              <span>{sc.title}</span>
+              <span style={{ opacity: 0.7, fontSize: '11px' }}>({sc.blockage})</span>
+            </button>
+          ))}
         </div>
       </section>
 
-      {/* 5. Deep Space Bento Grid Showcase */}
-      <section className="space-bento-section">
-        <div className="space-section-header">
-          <div className="space-section-eyebrow">HỆ SINH THÁI GIÁM SÁT TOÀN DIỆN</div>
-          <h2 className="space-section-title">Kiến trúc cho Trung tâm Điều hành Thông minh</h2>
-        </div>
+      {/* SECTION 2: 360° SATELLITE RADAR SCREEN */}
+      <section className="radar-section-wrap">
+        <div className="radar-screen-card">
+          {/* Danang High-Resolution Optical Satellite Backdrop */}
+          <img
+            src="/demo/satellite-danang-radar.jpg"
+            alt="Vệ tinh Đà Nẵng 360 độ"
+            className="radar-backdrop-img"
+          />
 
-        <div className="space-bento-grid">
-          {/* Card 1: GIS 3D Realtime Map (Span 8) */}
-          <Link href="/map" className="space-bento-card space-col-8">
-            <span className="space-card-tag">
-              <Layers size={13} /> BẢN ĐỒ KHÔNG GIAN ĐỊA LÝ 3D
-            </span>
-            <h3 className="space-card-title">Bản đồ Giám sát Ngập lụt Đô thị</h3>
-            <p className="space-card-desc">
-              Tích hợp ảnh vệ tinh thực địa độ nét cao và bản đồ vector thế hệ mới. Hiển thị tọa độ chính xác của từng miệng thu nước, bán kính nguy cơ ngập lụt và trạng thái thông thoáng theo thời gian thực.
-            </p>
+          {/* 360° Animated Laser Radar Sweep Cone */}
+          <div className="radar-sweep-center">
+            <div className="radar-concentric-1" />
+            <div className="radar-concentric-2" />
+            <div className="radar-sweep-cone" />
+          </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '14px',
-              borderRadius: '16px',
-              overflow: 'hidden',
-              marginTop: 'auto',
-              marginBottom: '16px',
-            }}>
-              <div style={{ position: 'relative', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden' }}>
-                <img src="/demo/drain-annotated-2.jpg" alt="Điểm nóng 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px 10px', background: 'rgba(3,7,18,0.85)', fontSize: '11px', fontWeight: 700 }}>
-                  📍 Hải Châu · Nguy cơ cao (78%)
+          {/* Top-Left Floating Radar Badge */}
+          <div className="radar-header-overlay">
+            <div className="radar-title-badge">
+              <span className="radar-ping-dot" />
+              <span>QUAN SÁT THỰC ĐỊA · TRUNG TÂM ĐÀ NẴNG</span>
+            </div>
+          </div>
+
+          {/* Bottom-Right Floating Fullscreen Button */}
+          <div className="radar-action-overlay">
+            <Link href="/map" className="btn-glow-primary" style={{ padding: '9px 18px', fontSize: '13px' }}>
+              <span>Mở bản đồ GIS 1,280+ miệng thu</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          {/* Interactive Radar Hotspot Pings */}
+          {RADAR_PINS.map(pin => (
+            <div
+              key={pin.id}
+              className={`radar-hotspot-pin ${hoveredPin === pin.id ? 'is-active' : ''}`}
+              style={{ top: pin.top, left: pin.left }}
+              onMouseEnter={() => setHoveredPin(pin.id)}
+              onMouseLeave={() => setHoveredPin(null)}
+              onClick={() => setActiveScenario(pin.scenarioIdx)}
+            >
+              <div className="pin-core" style={{ color: pin.riskColor, background: pin.riskColor }} />
+              <div className="pin-wave-ring" style={{ color: pin.riskColor }} />
+
+              {/* Floating Tooltip Card with Photo Thumbnail */}
+              <div className="pin-tooltip-card">
+                <img src={pin.thumb} alt={pin.name} />
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#ffffff' }}>{pin.name}</div>
+                  <div style={{ fontSize: '11px', color: pin.riskColor, fontWeight: 700 }}>{pin.status}</div>
                 </div>
               </div>
-              <div style={{ position: 'relative', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden' }}>
-                <img src="/demo/drain-annotated.jpg" alt="Điểm nóng 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px 10px', background: 'rgba(3,7,18,0.85)', fontSize: '11px', fontWeight: 700 }}>
-                  📍 Thanh Khê · Có nguy cơ (41%)
-                </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION 3: INFINITE PHOTO MARQUEE (Visual Filmstrip) */}
+      <section className="photo-marquee-wrap">
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.12em', color: '#38bdf8', textTransform: 'uppercase' }}>
+            HÌNH ẢNH HIỆN TRƯỜNG THỰC TẾ
+          </div>
+          <div style={{ fontSize: '20px', fontWeight: 800, color: '#fff', marginTop: '4px' }}>
+            Dữ liệu thị giác kiểm định trực tiếp từ đường phố
+          </div>
+        </div>
+
+        <div className="photo-marquee-track">
+          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, idx) => (
+            <Link
+              key={idx}
+              href="/analyze"
+              className="marquee-photo-card"
+            >
+              <img src={item.img} alt={item.sub} />
+              <div className="marquee-card-badge">
+                <span style={{ color: item.color }}>● {item.tag}</span>
+                <span style={{ color: '#94a3b8', fontSize: '11px' }}>{item.sub}</span>
               </div>
-            </div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', fontWeight: 800, fontSize: '14px' }}>
-              <span>Mở bản đồ điều hành GIS toàn màn hình</span>
-              <ArrowRight size={16} />
-            </div>
-          </Link>
+      {/* SECTION 4: PURE VISUAL FLOW PIPELINE (Zero paragraph boxes) */}
+      <section className="visual-workflow-wrap">
+        <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.12em', color: '#38bdf8', textTransform: 'uppercase' }}>
+          QUY TRÌNH TỐI GIẢN
+        </div>
+        <div style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', marginTop: '6px', letterSpacing: '-0.02em' }}>
+          Từ bức ảnh hiện trường đến điều phối nạo vét
+        </div>
 
-          {/* Card 2: AI Speed & Processing (Span 4) */}
-          <div className="space-bento-card space-col-4">
-            <span className="space-card-tag">
-              <Zap size={13} /> SỨC MẠNH TÍNH TOÁN
-            </span>
-            <h3 className="space-card-title">Xử lý Ngay tại Hiện trường</h3>
-            <p className="space-card-desc">
-              Mô hình YOLOv11x-Seg chạy trực tiếp trên GPU/NPU di động, xử lý ảnh độ phân giải cao chỉ trong tích tắc.
-            </p>
-            <div style={{
-              fontSize: '52px',
-              fontWeight: 900,
-              color: '#38bdf8',
-              letterSpacing: '-0.04em',
-              lineHeight: 1,
-              marginTop: 'auto',
-            }}>
-              38ms
+        <div className="workflow-nodes-row">
+          <div className="workflow-node">
+            <div className="workflow-icon-bubble">
+              <Camera size={32} />
             </div>
-            <span style={{ fontSize: '12.5px', color: '#94a3b8', marginTop: '8px', fontWeight: 600 }}>
-              Không cần đường truyền mạng tốc độ cao
-            </span>
+            <div className="workflow-label">1. Chụp Hiện Trường</div>
+            <div className="workflow-sub">1 chạm từ smartphone</div>
           </div>
 
-          {/* Card 3: Visual Risk Gauge (Span 4) */}
-          <div className="space-bento-card space-col-4">
-            <span className="space-card-tag">
-              <Activity size={13} /> PHÂN CẤP NGUY CƠ
-            </span>
-            <h3 className="space-card-title">Ước tính Diện tích Bít tắc</h3>
-            <p className="space-card-desc">
-              Thuật toán tự động tính phần trăm diện tích miệng cống bị rác thải che lấp để phân loại mức độ ưu tiên nạo vét.
-            </p>
-
-            <div className="space-gauge-track">
-              <div className="space-gauge-fill" />
+          <div className="workflow-node">
+            <div className="workflow-icon-bubble" style={{ borderColor: '#38bdf8', color: '#38bdf8' }}>
+              <Cpu size={32} />
             </div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontSize: '11px',
-              fontWeight: 750,
-              color: '#94a3b8',
-              marginTop: '10px',
-            }}>
-              <span style={{ color: '#10b981' }}>Thông thoáng</span>
-              <span style={{ color: '#f59e0b' }}>Có nguy cơ</span>
-              <span style={{ color: '#f97316' }}>Tắc nhiều</span>
-              <span style={{ color: '#ef4444' }}>Nguy hiểm</span>
-            </div>
+            <div className="workflow-label">2. YOLOv11 AI</div>
+            <div className="workflow-sub">Phân tách vật cản trong 38ms</div>
           </div>
 
-          {/* Card 4: Interactive Scenario Switcher (Span 8) */}
-          <div className="space-bento-card space-col-8">
-            <span className="space-card-tag">
-              <Scan size={13} /> PHÒNG THÍ NGHIỆM TRỰC QUAN
-            </span>
-            <h3 className="space-card-title">Chọn kịch bản thực tế để quan sát</h3>
-            <p className="space-card-desc">
-              Nhấp vào một trong các kịch bản thực địa dưới đây để thay đổi trực tiếp màn hình thanh trượt phía trên.
-            </p>
-
-            <div className="scenario-selector-grid">
-              {scenarios.map((sc, idx) => (
-                <div
-                  key={sc.id}
-                  className={`scenario-card-item ${activeScenario === idx ? 'is-selected' : ''}`}
-                  onClick={() => setActiveScenario(idx)}
-                >
-                  <img src={sc.annotatedImg} alt={sc.title} />
-                  <span className="scenario-card-badge">{sc.badge}</span>
-                </div>
-              ))}
-              <Link
-                href="/analyze"
-                className="scenario-card-item"
-                style={{
-                  display: 'grid',
-                  placeItems: 'center',
-                  background: 'rgba(56, 189, 248, 0.08)',
-                  color: '#38bdf8',
-                  border: '2px dashed rgba(56, 189, 248, 0.3)',
-                  textDecoration: 'none',
-                  padding: '16px',
-                  textAlign: 'center',
-                }}
-              >
-                <div>
-                  <Camera size={26} style={{ margin: '0 auto 8px' }} />
-                  <span style={{ fontSize: '12px', fontWeight: 800, display: 'block' }}>Tải ảnh của bạn</span>
-                </div>
-              </Link>
+          <div className="workflow-node">
+            <div className="workflow-icon-bubble" style={{ borderColor: '#10b981', color: '#10b981' }}>
+              <Layers size={32} />
             </div>
+            <div className="workflow-label">3. Bản Đồ GIS 3D</div>
+            <div className="workflow-sub">Định vị &amp; điều phối ứng cứu</div>
           </div>
         </div>
       </section>
 
-      {/* 6. Enterprise Bottom Action Strip */}
-      <section style={{ maxWidth: '1240px', margin: '0 auto 90px', padding: '0 24px' }}>
-        <div style={{
-          background: 'radial-gradient(ellipse at 50% 0%, rgba(2, 132, 199, 0.3) 0%, rgba(15, 23, 42, 0.8) 70%)',
-          borderRadius: '26px',
-          border: '1px solid rgba(56, 189, 248, 0.25)',
-          padding: '56px 36px',
-          textAlign: 'center',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6), 0 0 50px rgba(2, 132, 199, 0.15)',
-        }}>
-          <h2 style={{ fontSize: 'clamp(26px, 3.8vw, 42px)', fontWeight: 900, color: '#ffffff', margin: '0 0 16px', letterSpacing: '-0.03em' }}>
-            Bắt đầu bảo vệ khu dân cư của bạn ngay hôm nay
+      {/* SECTION 5: MINIMAL AURORA CTA BANNER */}
+      <section className="minimal-cta-wrap">
+        <div className="minimal-cta-box">
+          <h2 className="minimal-cta-title">
+            Bảo vệ đô thị trước mọi cơn bão.
           </h2>
-          <p style={{ maxWidth: '620px', margin: '0 auto 32px', color: '#94a3b8', fontSize: '16px', lineHeight: 1.6 }}>
-            Chỉ cần 1 bức ảnh chụp từ điện thoại thông minh, bạn đã góp phần ngăn chặn kịp thời những trận ngập úng đô thị cục bộ.
+          <p className="minimal-cta-sub">
+            Chỉ cần 1 bức ảnh chụp từ hiện trường để ngăn chặn kịp thời những trận ngập úng đô thị cục bộ.
           </p>
 
           <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/analyze" className="btn-space-primary">
-              <Camera size={19} />
+            <Link href="/analyze" className="btn-glow-primary">
+              <Camera size={18} />
               <span>Chụp ảnh phân tích ngay</span>
+              <ArrowRight size={16} />
             </Link>
-            <Link href="/map" className="btn-space-glass">
-              <MapIcon size={19} />
-              <span>Khám phá bản đồ</span>
+            <Link href="/map" className="btn-glass-secondary">
+              <MapIcon size={18} />
+              <span>Khám phá bản đồ GIS</span>
             </Link>
           </div>
         </div>
