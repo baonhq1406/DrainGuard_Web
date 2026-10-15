@@ -2,7 +2,7 @@
 
 import { useRef, useState, type DragEvent } from 'react';
 import { Camera, ImagePlus, Loader2, MapPin, ScanSearch } from 'lucide-react';
-import { files } from '@/services/api';
+import { api, files } from '@/services/api';
 
 type AnalysisResponse = {
   annotated_image_url: string;
@@ -69,13 +69,19 @@ export default function Analyze() {
     if (!file) return;
     setLoading(true); setError(''); setResult(undefined);
     try {
-      const form = new FormData(); form.append('image', file); await getLocation(form);
-      const response = await fetch((process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api') + '/analyze', { method: 'POST', body: form });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Không thể phân tích ảnh.');
+      const form = new FormData();
+      form.append('image', file);
+      await getLocation(form);
+      const data = await api<AnalysisResponse>('/analyze', {
+        method: 'POST',
+        body: form,
+      });
       setResult(data);
-    } catch (e) { setError(e instanceof Error ? e.message : 'Không thể phân tích ảnh.'); }
-    finally { setLoading(false); }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Không thể phân tích ảnh.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   const status = result?.result.status || '';
