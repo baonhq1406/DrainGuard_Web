@@ -1,169 +1,650 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { RefreshCw, MapPin, ShieldCheck, AlertTriangle, Siren, Loader2 } from 'lucide-react';
-import { api } from '@/services/api';
+import {
+  AlertTriangle,
+  ArrowRight,
+  Camera,
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  Crosshair,
+  ExternalLink,
+  Eye,
+  Filter,
+  Layers,
+  ListFilter,
+  Loader2,
+  MapPin,
+  Navigation as NavigationIcon,
+  RefreshCw,
+  Search,
+  ShieldAlert,
+  ShieldCheck,
+  Siren,
+  SlidersHorizontal,
+  Sparkles,
+  TrendingUp,
+  X,
+} from 'lucide-react';
+import { api, files } from '@/services/api';
 import type { RecordItem, Status, EnvironmentItem } from '@/types';
-import { AnalysisMap } from '@/components/analysis-map';
+import { AnalysisMap, statusColor, statusLabel } from '@/components/analysis-map';
+import { StatusBadge } from '@/components/ui';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const labels: Record<string,string> = {
-  LOW:'Thông thoáng',
-  MODERATE:'Theo dõi',
-  HIGH:'Cảnh báo',
-  CRITICAL:'Nguy hiểm',
-};
-
-const filterOptions: Array<'ALL'|Status> = ['ALL','LOW','MODERATE','HIGH','CRITICAL'];
-
 export default function MapPage() {
-  const [status,setStatus]=useState<'ALL'|Status>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | Status>('ALL');
+  const [search, setSearch] = useState('');
+  const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
+  const [showRiskZones, setShowRiskZones] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedDrain, setSelectedDrain] = useState<{
+    record: RecordItem;
+    group: RecordItem[];
+    env?: EnvironmentItem;
+  } | null>(null);
+  const [photoView, setPhotoView] = useState<'annotated' | 'original'>('annotated');
+  const [flyToTarget, setFlyToTarget] = useState<{ lat: number; lng: number; zoom?: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locatingUser, setLocatingUser] = useState(false);
+  const [fitBoundsSignal, setFitBoundsSignal] = useState(1);
+  const [addressCache, setAddressCache] = useState<Record<string, string>>({});
+  const [fetchingAddress, setFetchingAddress] = useState(false);
 
-  const {data=[],error,isFetching,isLoading,refetch}=useQuery({
-    queryKey:['map-records'],
-    queryFn:()=>api<RecordItem[]>('/records?limit=100'),
+  // Fetch all records
+  const { data = [], error, isFetching, isLoading, refetch } = useQuery({
+    queryKey: ['map-records'],
+    queryFn: () => api<RecordItem[]>('/records?limit=100'),
   });
 
-  const mapped=useMemo(
-    ()=>data.filter(x=>x.latitude!=null&&x.longitude!=null&&(status==='ALL'||x.status===status)),
-    [data,status]
+  // Filter valid GPS records
+  const mapped = useMemo(
+    () => data.filter(x => x.latitude != null && x.longitude != null),
+    [data]
   );
 
-  const environmentQuery=useQuery({
-    queryKey:['map-environment', mapped.map(x=>x.latitude!.toFixed(5)+','+x.longitude!.toFixed(5)).join('|')],
-    enabled:mapped.length>0,
-    queryFn:()=>{
-      const grouped=new Map<string,RecordItem>();
+  // Filtered for display
+  const displayRecords = useMemo(() => {
+    return mapped.filter(x => {
+      const matchStatus = statusFilter === 'ALL' || x.status === statusFilter;
+      const matchSearch =
+        !search.trim() ||
+        String(x.id).includes(search.trim()) ||
+        x.status.toLowerCase().includes(search.toLowerCase()) ||
+        (x.model?.name && x.model.name.toLowerCase().includes(search.toLowerCase()));
+      return matchStatus && matchSearch;
+    });
+  }, [mapped, statusFilter, search]);
+
+  // Environment query for weather & elevation
+  const environmentQuery = useQuery({
+    queryKey: ['map-environment', mapped.map(x => x.latitude!.toFixed(5) + ',' + x.longitude!.toFixed(5)).join('|')],
+    enabled: mapped.length > 0,
+    queryFn: () => {
+      const grouped = new Map<string, RecordItem>();
       [...mapped]
-        .sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime())
-        .forEach(x=>{
-          const key=x.latitude!.toFixed(5)+','+x.longitude!.toFixed(5);
-          const current=grouped.get(key);
-          if(!current || current.blockage_percent==null || x.blockage_percent!=null) grouped.set(key,x);
+        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        .forEach(x => {
+          const key = x.latitude!.toFixed(5) + ',' + x.longitude!.toFixed(5);
+          const current = grouped.get(key);
+          if (!current || current.blockage_percent == null || x.blockage_percent != null) grouped.set(key, x);
         });
-      const values=[...grouped.values()];
-      const params=new URLSearchParams({
-        latitudes:values.map(x=>String(x.latitude!)).join(','),
-        longitudes:values.map(x=>String(x.longitude!)).join(','),
-        blockages:values.map(x=>x.blockage_percent==null?'null':String(x.blockage_percent)).join(',')
+      const values = [...grouped.values()];
+      const params = new URLSearchParams({
+        latitudes: values.map(x => String(x.latitude!)).join(','),
+        longitudes: values.map(x => String(x.longitude!)).join(','),
+        blockages: values.map(x => (x.blockage_percent == null ? 'null' : String(x.blockage_percent))).join(','),
       });
-      return api<{items:EnvironmentItem[]}>('/map/environment?'+params.toString());
+      return api<{ items: EnvironmentItem[] }>('/map/environment?' + params.toString());
     },
   });
 
-  const uniqueLocations=useMemo(
-    ()=>new Set(mapped.map(x=>x.latitude!.toFixed(5)+','+x.longitude!.toFixed(5))).size,
+  const environmentItems = environmentQuery.data?.items || [];
+  const envMap = useMemo(
+    () => new Map(environmentItems.map(x => [x.latitude.toFixed(5) + ',' + x.longitude.toFixed(5), x])),
+    [environmentItems]
+  );
+
+  // Summary counts
+  const counts = useMemo(
+    () => ({
+      all: mapped.length,
+      low: mapped.filter(x => x.status === 'LOW').length,
+      moderate: mapped.filter(x => x.status === 'MODERATE').length,
+      high: mapped.filter(x => x.status === 'HIGH').length,
+      critical: mapped.filter(x => x.status === 'CRITICAL').length,
+    }),
     [mapped]
   );
 
-  const counts=useMemo(()=>({
-    low:data.filter(x=>x.status==='LOW'&&x.latitude!=null&&x.longitude!=null).length,
-    moderate:data.filter(x=>x.status==='MODERATE'&&x.latitude!=null&&x.longitude!=null).length,
-    high:data.filter(x=>x.status==='HIGH'&&x.latitude!=null&&x.longitude!=null).length,
-    critical:data.filter(x=>x.status==='CRITICAL'&&x.latitude!=null&&x.longitude!=null).length,
-  }),[data]);
+  // Environment averages
+  const envStats = useMemo(() => {
+    const precips = environmentItems.map(x => x.precipitation_mm_h).filter((x): x is number => x != null);
+    const elevs = environmentItems.map(x => x.elevation_m).filter((x): x is number => x != null);
+    const risks = environmentItems.map(x => x.flood_risk_score).filter((x): x is number => x != null);
+
+    return {
+      rainAvg: precips.length ? (precips.reduce((a, b) => a + b, 0) / precips.length).toFixed(1) : null,
+      elevationAvg: elevs.length ? Math.round(elevs.reduce((a, b) => a + b, 0) / elevs.length) : null,
+      maxRisk: risks.length ? Math.max(...risks).toFixed(1) : null,
+    };
+  }, [environmentItems]);
+
+  // Reverse Geocoding when a drain is selected
+  useEffect(() => {
+    if (!selectedDrain?.record) return;
+    const { latitude, longitude } = selectedDrain.record;
+    if (latitude == null || longitude == null) return;
+    const key = `${latitude.toFixed(5)},${longitude.toFixed(5)}`;
+    if (addressCache[key]) return;
+
+    setFetchingAddress(true);
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`)
+      .then(res => res.json())
+      .then(data => {
+        const addr = data.display_name || 'Vị trí đã định vị GPS';
+        setAddressCache(prev => ({ ...prev, [key]: addr }));
+      })
+      .catch(() => {
+        setAddressCache(prev => ({ ...prev, [key]: `${latitude.toFixed(5)}, ${longitude.toFixed(5)}` }));
+      })
+      .finally(() => setFetchingAddress(false));
+  }, [selectedDrain?.record?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // User GPS Locate Me
+  function locateUser() {
+    if (!navigator.geolocation) {
+      window.alert('Trình duyệt không hỗ trợ Geolocation.');
+      return;
+    }
+    setLocatingUser(true);
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setUserLocation({ lat, lng });
+        setFlyToTarget({ lat, lng, zoom: 17 });
+        setLocatingUser(false);
+      },
+      err => {
+        setLocatingUser(false);
+        window.alert('Không thể xác định vị trí hiện tại: ' + err.message);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }
+
+  function handleSelectFromMap(record: RecordItem, group: RecordItem[], env?: EnvironmentItem) {
+    setSelectedDrain({ record, group, env });
+    setPhotoView('annotated');
+  }
+
+  function handleSelectFromList(record: RecordItem) {
+    const key = record.latitude!.toFixed(5) + ',' + record.longitude!.toFixed(5);
+    const group = mapped.filter(x => x.latitude!.toFixed(5) + ',' + x.longitude!.toFixed(5) === key);
+    const env = envMap.get(key);
+    setSelectedDrain({ record, group, env });
+    setPhotoView('annotated');
+    setFlyToTarget({ lat: record.latitude!, lng: record.longitude!, zoom: 17 });
+  }
+
+  const selectedKey = selectedDrain?.record
+    ? selectedDrain.record.latitude!.toFixed(5) + ',' + selectedDrain.record.longitude!.toFixed(5)
+    : null;
 
   return (
-    <main id="main" className="main user-page map-page">
-      <div className="map-page-header">
-        <div>
-          <div className="eyebrow">DRAINGUARD AI · MONITORING MAP</div>
-          <div className="map-title-row">
-            <h1 className="title user-title">Bản đồ giám sát</h1>
-            <span className="live-chip"><span /> LIVE</span>
+    <div className="gis-viewport">
+      {/* 1. Map Canvas Background */}
+      <div className="gis-map-canvas-container">
+        <AnalysisMap
+          records={displayRecords}
+          environment={environmentItems}
+          selectedLocationKey={selectedKey}
+          onSelectRecord={handleSelectFromMap}
+          mapStyle={mapStyle}
+          showRiskZones={showRiskZones}
+          flyToLocation={flyToTarget}
+          userLocation={userLocation}
+          fitBoundsSignal={fitBoundsSignal}
+        />
+      </div>
+
+      {/* 2. Top Floating Telemetry & Quick Header */}
+      <header className="gis-top-bar" aria-label="Thanh thông tin môi trường">
+        <div className="gis-title-group">
+          <button
+            type="button"
+            className="gis-sidebar-toggle-btn"
+            onClick={() => setSidebarOpen(prev => !prev)}
+            title={sidebarOpen ? 'Ẩn danh sách' : 'Hiện danh sách điểm thu'}
+            aria-expanded={sidebarOpen}
+          >
+            {sidebarOpen ? <ChevronLeft size={18} /> : <ListFilter size={18} />}
+            <span className="btn-text">{sidebarOpen ? 'Thu gọn' : 'Danh sách'}</span>
+          </button>
+          <div className="gis-live-tag">
+            <span className="live-pulse-dot" />
+            <span>GIÁM SÁT THỜI GIAN THỰC</span>
           </div>
-          <p className="lead">Theo dõi vị trí các miệng thu nước và mức cảnh báo được ghi nhận từ ảnh thực tế.</p>
         </div>
-        <button className="map-refresh" onClick={()=>refetch()} disabled={isFetching}>
-          <RefreshCw size={16} className={isFetching ? 'spin' : ''}/>
-          {isFetching ? 'Đang cập nhật' : 'Cập nhật'}
+
+        {/* Telemetry Chips */}
+        <div className="gis-telemetry-strip">
+          <div className="gis-telemetry-chip" title="Lượng mưa trung bình theo thời gian thực (Open-Meteo)">
+            <span className="chip-label">🌧️ Mưa TB:</span>
+            <b>{environmentQuery.isLoading ? '…' : envStats.rainAvg ? `${envStats.rainAvg} mm/h` : '0 mm/h'}</b>
+          </div>
+          <div className="gis-telemetry-chip" title="Độ cao địa hình trung bình (SRTM)">
+            <span className="chip-label">⛰️ Cao độ TB:</span>
+            <b>{environmentQuery.isLoading ? '…' : envStats.elevationAvg ? `${envStats.elevationAvg} m` : '—'}</b>
+          </div>
+          <div className="gis-telemetry-chip" title="Chỉ số rủi ro ngập lụt cao nhất trong khu vực">
+            <span className="chip-label">⚠️ Rủi ro max:</span>
+            <b>{environmentQuery.isLoading ? '…' : envStats.maxRisk ? `${envStats.maxRisk} / 100` : '—'}</b>
+          </div>
+          <button
+            type="button"
+            className="gis-action-icon-btn"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            title="Làm mới dữ liệu bản đồ"
+          >
+            <RefreshCw size={15} className={isFetching ? 'spin' : ''} />
+          </button>
+        </div>
+      </header>
+
+      {/* 3. Left Sliding Sidebar: Drain Directory & Filters */}
+      <aside className={`gis-sidebar ${sidebarOpen ? 'is-open' : 'is-closed'}`} aria-label="Danh sách miệng cống">
+        <div className="gis-sidebar-inner">
+          <div className="gis-sidebar-head">
+            <div className="gis-sidebar-title-row">
+              <h3>Miệng thu nước</h3>
+              <span className="gis-count-badge">{displayRecords.length} điểm</span>
+            </div>
+            <p className="gis-sidebar-sub">Theo dõi tỷ lệ tắc nghẽn và nguy cơ ngập</p>
+
+            {/* Search Input */}
+            <div className="gis-search-wrap">
+              <Search size={16} className="gis-search-icon" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo mã, trạng thái..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+              {search && (
+                <button type="button" className="gis-search-clear" onClick={() => setSearch('')}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Filter Pills */}
+            <div className="gis-filter-pills">
+              <button
+                type="button"
+                className={`gis-pill ${statusFilter === 'ALL' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('ALL')}
+              >
+                Tất cả ({counts.all})
+              </button>
+              <button
+                type="button"
+                className={`gis-pill tone-critical ${statusFilter === 'CRITICAL' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('CRITICAL')}
+              >
+                Nguy hiểm ({counts.critical})
+              </button>
+              <button
+                type="button"
+                className={`gis-pill tone-high ${statusFilter === 'HIGH' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('HIGH')}
+              >
+                Cảnh báo ({counts.high})
+              </button>
+              <button
+                type="button"
+                className={`gis-pill tone-moderate ${statusFilter === 'MODERATE' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('MODERATE')}
+              >
+                Theo dõi ({counts.moderate})
+              </button>
+              <button
+                type="button"
+                className={`gis-pill tone-low ${statusFilter === 'LOW' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('LOW')}
+              >
+                Ổn định ({counts.low})
+              </button>
+            </div>
+          </div>
+
+          {/* Drains Scroll List */}
+          <div className="gis-sidebar-list">
+            {isLoading ? (
+              <div className="gis-list-loading">
+                <Loader2 size={24} className="spin" />
+                <span>Đang tải dữ liệu miệng cống…</span>
+              </div>
+            ) : displayRecords.length ? (
+              displayRecords.map(item => {
+                const key = item.latitude!.toFixed(5) + ',' + item.longitude!.toFixed(5);
+                const isSelected = selectedKey === key;
+                const env = envMap.get(key);
+                const address = addressCache[key];
+
+                return (
+                  <article
+                    key={item.id}
+                    className={`gis-drain-item ${isSelected ? 'is-selected' : ''}`}
+                    onClick={() => handleSelectFromList(item)}
+                  >
+                    <div className="drain-thumb-box">
+                      {item.annotated_image_url ? (
+                        <img src={files(item.annotated_image_url)} alt="Thumbnail" loading="lazy" />
+                      ) : (
+                        <div className="drain-thumb-placeholder">
+                          <MapPin size={18} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="drain-item-info">
+                      <div className="drain-item-top">
+                        <span className="drain-item-id">Miệng cống #{item.id}</span>
+                        <StatusBadge status={item.status} />
+                      </div>
+                      <div className="drain-item-addr" title={address || `${item.latitude?.toFixed(4)}, ${item.longitude?.toFixed(4)}`}>
+                        {address || `${item.latitude?.toFixed(4)}, ${item.longitude?.toFixed(4)}`}
+                      </div>
+                      <div className="drain-item-metrics">
+                        <span className="metric-chip">
+                          Bít tắc: <b>{item.blockage_percent != null ? `${item.blockage_percent}%` : '—'}</b>
+                        </span>
+                        {env?.flood_risk_score != null && (
+                          <span className="metric-chip risk">
+                            Risk: <b>{env.flood_risk_score}/100</b>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })
+            ) : (
+              <div className="gis-list-empty">
+                <Filter size={28} />
+                <p>Không tìm thấy miệng thu nước phù hợp với bộ lọc.</p>
+                <button type="button" className="button outline sm" onClick={() => { setStatusFilter('ALL'); setSearch(''); }}>
+                  Bỏ lọc
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </aside>
+
+      {/* 4. Floating GIS Tools (FABs on Right Canvas) */}
+      <div className="gis-fab-group" role="toolbar" aria-label="Công cụ bản đồ">
+        {/* Layer Switcher (Street vs Satellite) */}
+        <button
+          type="button"
+          className={`gis-fab ${mapStyle === 'satellite' ? 'is-active' : ''}`}
+          onClick={() => setMapStyle(prev => (prev === 'street' ? 'satellite' : 'street'))}
+          title={mapStyle === 'satellite' ? 'Chuyển sang bản đồ giao thông' : 'Chuyển sang ảnh vệ tinh'}
+        >
+          <Layers size={19} />
+          <span className="fab-tooltip">{mapStyle === 'satellite' ? 'Bản đồ Vệ tinh' : 'Bản đồ Đường phố'}</span>
+        </button>
+
+        {/* Toggle Risk Circles */}
+        <button
+          type="button"
+          className={`gis-fab ${showRiskZones ? 'is-active' : ''}`}
+          onClick={() => setShowRiskZones(prev => !prev)}
+          title={showRiskZones ? 'Ẩn vùng rủi ro ngập' : 'Hiện vùng rủi ro ngập'}
+        >
+          <AlertTriangle size={19} />
+          <span className="fab-tooltip">Vùng ảnh hưởng ngập</span>
+        </button>
+
+        {/* Fit Bounds */}
+        <button
+          type="button"
+          className="gis-fab"
+          onClick={() => setFitBoundsSignal(s => s + 1)}
+          title="Thu phóng toàn cảnh các miệng cống"
+        >
+          <Compass size={19} />
+          <span className="fab-tooltip">Xem toàn cảnh</span>
+        </button>
+
+        {/* Locate Me */}
+        <button
+          type="button"
+          className={`gis-fab ${locatingUser ? 'is-loading' : ''}`}
+          onClick={locateUser}
+          disabled={locatingUser}
+          title="Định vị vị trí của tôi"
+        >
+          <Crosshair size={19} className={locatingUser ? 'spin' : ''} />
+          <span className="fab-tooltip">Vị trí của tôi</span>
         </button>
       </div>
 
-      <section className="map-workspace">
-        <div className="map-topbar">
-          <div className="map-location-summary">
-            <div className="map-summary-icon"><MapPin size={18}/></div>
-            <div>
-              <b>{uniqueLocations} vị trí</b>
-              <span>{mapped.length} lượt kiểm tra trong vùng đang xem</span>
-            </div>
+      {/* 5. Floating Bottom-Left Legend */}
+      <div className="gis-legend-card" aria-label="Chú giải bản đồ">
+        <div className="gis-legend-title">Mức độ rủi ro</div>
+        <div className="gis-legend-items">
+          <div className="gis-legend-row">
+            <span className="legend-swatch low" />
+            <span>Thông thoáng (0-20%)</span>
           </div>
-
-          <div className="map-filter">
-            <span>Hiển thị</span>
-            <select value={status} onChange={e=>setStatus(e.target.value as 'ALL'|Status)}>
-              <option value="ALL">Tất cả mức cảnh báo</option>
-              {filterOptions.slice(1).map(x=><option key={x} value={x}>{labels[x]}</option>)}
-            </select>
+          <div className="gis-legend-row">
+            <span className="legend-swatch moderate" />
+            <span>Theo dõi (21-50%)</span>
+          </div>
+          <div className="gis-legend-row">
+            <span className="legend-swatch high" />
+            <span>Cảnh báo (51-75%)</span>
+          </div>
+          <div className="gis-legend-row">
+            <span className="legend-swatch critical" />
+            <span>Nguy hiểm (&gt;75%)</span>
           </div>
         </div>
+      </div>
 
-        {error && <div className="notice error map-error" role="alert">{error.message}</div>}
-
-        {mapped.length ? (
-          <div className="map-stage">
-            <AnalysisMap records={mapped} environment={environmentQuery.data?.items||[]}/>
-
-            <div className="map-overlay map-overlay-left">
-              <div className="map-overlay-title">Mức cảnh báo</div>
-              <div className="map-legend-grid">
-                <span><i className="legend-drain"/> Miệng thu nước</span>
-                <span><i className="legend-zone low"/> {labels.LOW}</span>
-                <span><i className="legend-zone moderate"/> {labels.MODERATE}</span>
-                <span><i className="legend-zone high"/> {labels.HIGH}</span>
-                <span><i className="legend-zone critical"/> {labels.CRITICAL}</span>
+      {/* 6. Selected Drain Inspector Drawer (Detailed Slide-out Panel) */}
+      {selectedDrain && (
+        <section className="gis-inspector-drawer" aria-label="Chi tiết miệng thu nước">
+          <div className="inspector-card">
+            {/* Inspector Header */}
+            <div className="inspector-head">
+              <div>
+                <div className="eyebrow">CHI TIẾT ĐIỂM KIỂM TRA</div>
+                <h3 className="inspector-title">Miệng cống #{selectedDrain.record.id}</h3>
+                <div className="inspector-time">
+                  {new Date(selectedDrain.record.created_at).toLocaleString('vi-VN')}
+                </div>
+              </div>
+              <div className="inspector-head-actions">
+                <StatusBadge status={selectedDrain.record.status} />
+                <button
+                  type="button"
+                  className="inspector-close-btn"
+                  onClick={() => setSelectedDrain(null)}
+                  aria-label="Đóng bảng chi tiết"
+                >
+                  <X size={18} />
+                </button>
               </div>
             </div>
 
-            <div className="map-overlay map-overlay-right">
-              <div className="map-mini-stat"><ShieldCheck size={16}/><b>{counts.low}</b><span>ổn định</span></div>
-              <div className="map-mini-stat warn"><AlertTriangle size={16}/><b>{counts.moderate + counts.high}</b><span>cần theo dõi</span></div>
-              <div className="map-mini-stat danger"><Siren size={16}/><b>{counts.critical}</b><span>nguy hiểm</span></div>
+            {/* Inspector Image & Toggle */}
+            <div className="inspector-photo-section">
+              <div className="inspector-photo-box">
+                {photoView === 'annotated' ? (
+                  selectedDrain.record.annotated_image_url ? (
+                    <img src={files(selectedDrain.record.annotated_image_url)} alt="Ảnh phân tích AI" />
+                  ) : (
+                    <div className="photo-placeholder">Không có ảnh AI</div>
+                  )
+                ) : selectedDrain.record.original_image_url ? (
+                  <img src={files(selectedDrain.record.original_image_url)} alt="Ảnh gốc chụp" />
+                ) : (
+                  <div className="photo-placeholder">Không có ảnh gốc</div>
+                )}
+              </div>
+              <div className="photo-toggle-bar">
+                <button
+                  type="button"
+                  className={`photo-toggle-btn ${photoView === 'annotated' ? 'active' : ''}`}
+                  onClick={() => setPhotoView('annotated')}
+                >
+                  <Sparkles size={14} /> Ảnh AI phân tích
+                </button>
+                <button
+                  type="button"
+                  className={`photo-toggle-btn ${photoView === 'original' ? 'active' : ''}`}
+                  onClick={() => setPhotoView('original')}
+                >
+                  <Eye size={14} /> Ảnh chụp gốc
+                </button>
+              </div>
             </div>
 
-            <div className="map-overlay map-overlay-bottom">
-              <span>Rủi ro ngập = blockage + lượng mưa + cao độ · thời tiết từ Open-Meteo.</span>
+            {/* Blockage Progress Meter */}
+            <div className="inspector-meter-section">
+              <div className="meter-label-row">
+                <span>Mức độ bít tắc rác</span>
+                <b>{selectedDrain.record.blockage_percent != null ? `${selectedDrain.record.blockage_percent}%` : 'Chưa có dữ liệu'}</b>
+              </div>
+              <div className="meter-track">
+                <div
+                  className="meter-fill"
+                  style={{
+                    width: `${Math.min(100, Math.max(0, selectedDrain.record.blockage_percent || 0))}%`,
+                    backgroundColor: statusColor[selectedDrain.record.status] || '#0879c9',
+                  }}
+                />
+              </div>
             </div>
-            <div className="map-environment-strip">
-              <div><span>Mưa hiện tại · TB</span><b>{environmentQuery.isLoading?'...':(()=>{
-                const v=(environmentQuery.data?.items||[]).map(x=>x.precipitation_mm_h).filter((x):x is number=>x!=null);
-                return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1)+' mm/h':'—';
-              })()}</b></div>
-              <div><span>Cao độ · TB</span><b>{environmentQuery.isLoading?'...':(()=>{
-                const v=(environmentQuery.data?.items||[]).map(x=>x.elevation_m).filter((x):x is number=>x!=null);
-                return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1)+' m':'—';
-              })()}</b></div>
-              <div><span>Risk cao nhất</span><b>{environmentQuery.isLoading?'...':(()=>{
-                const v=(environmentQuery.data?.items||[]).map(x=>x.flood_risk_score).filter((x):x is number=>x!=null);
-                return v.length?Math.max(...v).toFixed(1)+' / 100':'Chưa đủ dữ liệu';
-              })()}</b></div>
+
+            {/* Metrics 3-Col Grid */}
+            <div className="inspector-grid">
+              <div className="inspector-metric-box">
+                <span className="box-label">Miệng thu</span>
+                <b className="box-val">{selectedDrain.record.drain_count}</b>
+              </div>
+              <div className="inspector-metric-box">
+                <span className="box-label">Độ tin cậy AI</span>
+                <b className="box-val">
+                  {selectedDrain.record.confidence != null ? `${(selectedDrain.record.confidence * 100).toFixed(0)}%` : '—'}
+                </b>
+              </div>
+              <div className="inspector-metric-box">
+                <span className="box-label">Model AI</span>
+                <b className="box-val" title={selectedDrain.record.model?.name || 'YOLO'}>
+                  {selectedDrain.record.model?.version || 'v0'}
+                </b>
+              </div>
             </div>
-            {environmentQuery.error&&<div className="map-environment-error">Không lấy được dữ liệu môi trường. Kiểm tra backend và kết nối Internet.</div>}
+
+            {/* Environmental Weather & Risk Card */}
+            <div className="inspector-env-card">
+              <div className="env-card-title">
+                <AlertTriangle size={15} />
+                <span>Môi trường & Nguy cơ ngập úng</span>
+              </div>
+              <div className="env-grid">
+                <div className="env-item">
+                  <span className="env-label">Lượng mưa hiện tại</span>
+                  <b className="env-val">
+                    {selectedDrain.env?.precipitation_mm_h != null ? `${selectedDrain.env.precipitation_mm_h} mm/h` : '0 mm/h'}
+                  </b>
+                </div>
+                <div className="env-item">
+                  <span className="env-label">Cao độ mặt đất</span>
+                  <b className="env-val">
+                    {selectedDrain.env?.elevation_m != null ? `${selectedDrain.env.elevation_m} m` : '—'}
+                  </b>
+                </div>
+                <div className="env-item">
+                  <span className="env-label">Điểm rủi ro ngập</span>
+                  <b className="env-val highlight">
+                    {selectedDrain.env?.flood_risk_score != null ? `${selectedDrain.env.flood_risk_score} / 100` : '—'}
+                  </b>
+                </div>
+              </div>
+            </div>
+
+            {/* Address & GPS Location */}
+            <div className="inspector-location-card">
+              <div className="location-row">
+                <MapPin size={18} className="location-pin-icon" />
+                <div className="location-text">
+                  <b>{addressCache[selectedKey || ''] || (fetchingAddress ? 'Đang tra cứu địa chỉ…' : 'Địa chỉ tọa độ GPS')}</b>
+                  <span>
+                    Tọa độ: {selectedDrain.record.latitude?.toFixed(6)}, {selectedDrain.record.longitude?.toFixed(6)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="inspector-actions">
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${selectedDrain.record.latitude},${selectedDrain.record.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="button outline sm inspector-action-btn"
+              >
+                <NavigationIcon size={15} />
+                <span>Chỉ đường Google Maps</span>
+                <ExternalLink size={13} />
+              </a>
+
+              <Link
+                href="/analyze"
+                className="button sm inspector-action-btn primary"
+              >
+                <Camera size={15} />
+                <span>Kiểm tra lại điểm này</span>
+              </Link>
+            </div>
+
+            {/* History at this spot */}
+            {selectedDrain.group.length > 1 && (
+              <div className="inspector-history-section">
+                <div className="history-head-label">
+                  Lịch sử tại điểm này ({selectedDrain.group.length} lần kiểm tra)
+                </div>
+                <div className="history-mini-list">
+                  {selectedDrain.group
+                    .slice()
+                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                    .map(h => (
+                      <div key={h.id} className="history-mini-item">
+                        <div>
+                          <b>#{h.id}</b>
+                          <span>{new Date(h.created_at).toLocaleDateString('vi-VN')}</span>
+                        </div>
+                        <div className="history-mini-status">
+                          <span>{h.blockage_percent != null ? `${h.blockage_percent}%` : '—'}</span>
+                          <StatusBadge status={h.status} />
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
-        ) : isLoading ? (
-          <div className="empty-map" role="status">
-            <div className="empty-map-icon"><Loader2 size={30} className="spin"/></div>
-            <h2>Đang tải dữ liệu bản đồ…</h2>
-          </div>
-        ) : data.some(x=>x.latitude!=null&&x.longitude!=null) ? (
-          <div className="empty-map">
-            <div className="empty-map-icon"><MapPin size={30}/></div>
-            <h2>Không có vị trí ở mức cảnh báo này</h2>
-            <p>Hãy chọn mức cảnh báo khác để xem các vị trí đã ghi nhận.</p>
-            <button className="button outline" style={{marginTop:16}} onClick={()=>setStatus('ALL')}>Hiển thị tất cả</button>
-          </div>
-        ) : (
-          <div className="empty-map">
-            <div className="empty-map-icon"><MapPin size={30}/></div>
-            <h2>Chưa có vị trí trên bản đồ</h2>
-            <p>Phân tích ảnh và cho phép GPS để DrainGuard ghi nhận vị trí kiểm tra.</p>
-            <Link href="/analyze" className="button" style={{marginTop:16}}>Phân tích ảnh</Link>
-          </div>
-        )}
-      </section>
-    </main>
+        </section>
+      )}
+    </div>
   );
 }
