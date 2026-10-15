@@ -15,38 +15,39 @@ export interface MapStyleOption {
 export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
   {
     key: 'google-roadmap',
-    name: 'Google Maps Mới nhất',
-    description: 'Tên đường tiếng Việt mới nhất 2026, chính xác 100%',
+    name: 'Google Maps Siêu nét (HD)',
+    description: 'Tên đường tiếng Việt mới nhất 2026, Retina 2X sắc nét',
     icon: '🗺️',
   },
   {
     key: 'google-hybrid',
-    name: 'Google Vệ tinh Hybrid',
+    name: 'Google Vệ tinh Hybrid (HD)',
     description: 'Ảnh vệ tinh thực tế độ nét cao kèm tên đường',
     icon: '🛰️',
   },
   {
     key: 'google-terrain',
-    name: 'Google Maps Địa hình',
+    name: 'Google Địa hình (HD)',
     description: 'Bản đồ địa hình, độ cao & lưu vực sông suối',
     icon: '⛰️',
   },
   {
     key: 'carto-dark',
-    name: 'Chế độ Đêm Dark GIS',
+    name: 'Chế độ Đêm Dark GIS (HD)',
     description: 'Nền tối chuyên nghiệp cho trung tâm điều hành',
     icon: '🌙',
   },
 ];
 
+// High-DPI Retina @2x Tile Sources (512x512 physical pixels packed into 256 CSS px)
 const MAP_SOURCES: Record<string, any> = {
   'google-roadmap': {
     type: 'raster',
     tiles: [
-      'https://mt0.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi',
-      'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi',
-      'https://mt2.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi',
-      'https://mt3.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt0.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt2.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt3.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2',
     ],
     tileSize: 256,
     maxzoom: 22,
@@ -55,10 +56,10 @@ const MAP_SOURCES: Record<string, any> = {
   'google-hybrid': {
     type: 'raster',
     tiles: [
-      'https://mt0.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi',
-      'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi',
-      'https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi',
-      'https://mt3.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt0.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt3.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2',
     ],
     tileSize: 256,
     maxzoom: 22,
@@ -67,10 +68,10 @@ const MAP_SOURCES: Record<string, any> = {
   'google-terrain': {
     type: 'raster',
     tiles: [
-      'https://mt0.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi',
-      'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi',
-      'https://mt2.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi',
-      'https://mt3.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt0.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt2.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt3.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi&scale=2',
     ],
     tileSize: 256,
     maxzoom: 22,
@@ -79,7 +80,7 @@ const MAP_SOURCES: Record<string, any> = {
   'carto-dark': {
     type: 'raster',
     tiles: [
-      'https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+      'https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
     ],
     tileSize: 256,
     maxzoom: 20,
@@ -96,24 +97,40 @@ const BASE_STYLE = {
       type: 'raster' as const,
       source: 'google-roadmap',
       layout: { visibility: 'visible' as const },
+      paint: {
+        'raster-fade-duration': 0,
+        'raster-resampling': 'linear' as const,
+      },
     },
     {
       id: 'layer-google-hybrid',
       type: 'raster' as const,
       source: 'google-hybrid',
       layout: { visibility: 'none' as const },
+      paint: {
+        'raster-fade-duration': 0,
+        'raster-resampling': 'linear' as const,
+      },
     },
     {
       id: 'layer-google-terrain',
       type: 'raster' as const,
       source: 'google-terrain',
       layout: { visibility: 'none' as const },
+      paint: {
+        'raster-fade-duration': 0,
+        'raster-resampling': 'linear' as const,
+      },
     },
     {
       id: 'layer-carto-dark',
       type: 'raster' as const,
       source: 'carto-dark',
       layout: { visibility: 'none' as const },
+      paint: {
+        'raster-fade-duration': 0,
+        'raster-resampling': 'linear' as const,
+      },
     },
   ],
 };
@@ -382,12 +399,20 @@ export function AnalysisMap({
     }
   }
 
-  // Initialize Map with Google Maps base style
+  // Initialize Map with Google Maps Retina 2X base style
   useEffect(() => {
     let cancelled = false;
+    let resizeObserver: ResizeObserver | null = null;
+
     (async () => {
       const lib = await import('maplibre-gl');
       if (cancelled || !host.current) return;
+
+      // Force pixelRatio to at least 2 for crisp Retina rendering on all screens
+      const targetPixelRatio =
+        typeof window !== 'undefined'
+          ? Math.max(window.devicePixelRatio || 1, 2)
+          : 2;
 
       const map = new lib.Map({
         container: host.current,
@@ -397,6 +422,8 @@ export function AnalysisMap({
         pitch: is3D ? 50 : 0,
         bearing: 0,
         attributionControl: { compact: true },
+        pixelRatio: targetPixelRatio,
+        fadeDuration: 0, // Eliminate fade blur during zoom transitions
       });
 
       map.addControl(new lib.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left');
@@ -411,13 +438,28 @@ export function AnalysisMap({
         mapInstance.current = map;
         if (onMapReady) onMapReady(map);
 
+        // Immediate and post-mount resize to ensure 100% canvas buffer alignment
+        map.resize();
+        setTimeout(() => map.resize(), 120);
+
         applyMapStyle(map, mapStyle);
         renderLayersAndMarkers(lib, map);
       });
+
+      // Keep WebGL buffer size perfectly synchronized with container dimensions
+      if (host.current && typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(() => {
+          if (!cancelled && mapInstance.current) {
+            mapInstance.current.resize();
+          }
+        });
+        resizeObserver.observe(host.current);
+      }
     })();
 
     return () => {
       cancelled = true;
+      if (resizeObserver) resizeObserver.disconnect();
       mapLoaded.current = false;
       markersRef.current.forEach(m => m.remove());
       markersRef.current = [];

@@ -420,6 +420,7 @@ body:has(.gis-viewport) .site-footer {
 .gis-viewport{position:relative;width:100%;height:calc(100vh - 68px);overflow:hidden;background:#0c1b2a;display:flex}
 .gis-map-canvas-container{position:absolute;inset:0;z-index:1}
 .analysis-map-canvas{width:100%;height:100%}
+.analysis-map-canvas canvas{outline:none;image-rendering:-webkit-optimize-contrast}
 
 /* Top Floating Bar */
 .gis-top-bar{position:absolute;top:16px;left:18px;right:18px;z-index:20;display:flex;justify-content:space-between;align-items:center;pointer-events:none;gap:12px}
