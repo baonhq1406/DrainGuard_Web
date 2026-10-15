@@ -40,6 +40,7 @@ export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
 ];
 
 // High-DPI Retina @2x Tile Sources (512x512 physical pixels packed into 256 CSS px)
+// maxzoom is set to 19 (16 for terrain) so MapLibre overscales instead of requesting missing zoom 20+ tiles (prevents black screen)
 const MAP_SOURCES: Record<string, any> = {
   'google-roadmap': {
     type: 'raster',
@@ -50,7 +51,8 @@ const MAP_SOURCES: Record<string, any> = {
       'https://mt3.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2',
     ],
     tileSize: 256,
-    maxzoom: 22,
+    minzoom: 0,
+    maxzoom: 19,
     attribution: '© Google Maps',
   },
   'google-hybrid': {
@@ -62,7 +64,8 @@ const MAP_SOURCES: Record<string, any> = {
       'https://mt3.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2',
     ],
     tileSize: 256,
-    maxzoom: 22,
+    minzoom: 0,
+    maxzoom: 19,
     attribution: '© Google Maps',
   },
   'google-terrain': {
@@ -74,7 +77,8 @@ const MAP_SOURCES: Record<string, any> = {
       'https://mt3.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi&scale=2',
     ],
     tileSize: 256,
-    maxzoom: 22,
+    minzoom: 0,
+    maxzoom: 16,
     attribution: '© Google Maps',
   },
   'carto-dark': {
@@ -83,7 +87,8 @@ const MAP_SOURCES: Record<string, any> = {
       'https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
     ],
     tileSize: 256,
-    maxzoom: 20,
+    minzoom: 0,
+    maxzoom: 19,
     attribution: '© CARTO, © OpenStreetMap',
   },
 };
@@ -92,6 +97,13 @@ const BASE_STYLE = {
   version: 8 as const,
   sources: MAP_SOURCES,
   layers: [
+    {
+      id: 'map-fallback-background',
+      type: 'background' as const,
+      paint: {
+        'background-color': '#eef2f5',
+      },
+    },
     {
       id: 'layer-google-roadmap',
       type: 'raster' as const,
@@ -419,6 +431,8 @@ export function AnalysisMap({
         style: BASE_STYLE,
         center: [108.2, 16.05],
         zoom: 13,
+        minZoom: 3,
+        maxZoom: 19.5, // Giới hạn tối đa 5m theo chuẩn Google Maps, chống đen màn hình
         pitch: is3D ? 50 : 0,
         bearing: 0,
         attributionControl: { compact: true },
@@ -510,7 +524,7 @@ export function AnalysisMap({
     if (!mapInstance.current || !flyToLocation) return;
     mapInstance.current.flyTo({
       center: [flyToLocation.lng, flyToLocation.lat],
-      zoom: flyToLocation.zoom || 17.5,
+      zoom: Math.min(18.5, flyToLocation.zoom || 17.5),
       pitch: is3D ? 50 : 30,
       duration: 800,
       essential: true,

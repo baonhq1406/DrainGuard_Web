@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   Box,
   Camera,
+  Check,
   ChevronLeft,
   ChevronRight,
   Compass,
@@ -467,60 +468,60 @@ export default function MapPage() {
         </button>
       </div>
 
-      {/* 5. Layer Picker Popover Card (Google Maps Style) */}
+      {/* 5. Layer Picker Popover Card (Compact Google/Apple Maps Style) */}
       {layersOpen && (
         <div className="gis-layer-picker" role="dialog" aria-label="Bộ chọn lớp bản đồ">
           <div className="gis-layer-picker-head">
-            <h4>Lớp bản đồ</h4>
+            <span className="gis-layer-title-eyebrow">KIỂU BẢN ĐỒ</span>
             <button
               type="button"
               className="gis-layer-close-btn"
               onClick={() => setLayersOpen(false)}
               aria-label="Đóng"
             >
-              <X size={16} />
+              <X size={14} />
             </button>
           </div>
 
-          <div className="gis-layer-grid">
+          <div className="gis-layer-list">
             <button
               type="button"
-              className={`gis-layer-tile ${mapStyle === 'google-roadmap' ? 'active' : ''}`}
+              className={`gis-layer-row ${mapStyle === 'google-roadmap' ? 'active' : ''}`}
               onClick={() => setMapStyle('google-roadmap')}
             >
-              <span className="gis-layer-tile-icon">🗺️</span>
-              <span className="gis-layer-tile-name">Google Maps</span>
-              <span className="gis-layer-tile-sub">Tên đường mới nhất 2026</span>
+              <span className="gis-layer-row-icon">🗺️</span>
+              <span className="gis-layer-row-name">Google Maps</span>
+              {mapStyle === 'google-roadmap' && <Check size={14} className="gis-layer-check" />}
             </button>
 
             <button
               type="button"
-              className={`gis-layer-tile ${mapStyle === 'google-hybrid' ? 'active' : ''}`}
+              className={`gis-layer-row ${mapStyle === 'google-hybrid' ? 'active' : ''}`}
               onClick={() => setMapStyle('google-hybrid')}
             >
-              <span className="gis-layer-tile-icon">🛰️</span>
-              <span className="gis-layer-tile-name">Google Vệ tinh</span>
-              <span className="gis-layer-tile-sub">Ảnh vệ tinh + Tên đường</span>
+              <span className="gis-layer-row-icon">🛰️</span>
+              <span className="gis-layer-row-name">Vệ tinh Hybrid</span>
+              {mapStyle === 'google-hybrid' && <Check size={14} className="gis-layer-check" />}
             </button>
 
             <button
               type="button"
-              className={`gis-layer-tile ${mapStyle === 'google-terrain' ? 'active' : ''}`}
+              className={`gis-layer-row ${mapStyle === 'google-terrain' ? 'active' : ''}`}
               onClick={() => setMapStyle('google-terrain')}
             >
-              <span className="gis-layer-tile-icon">⛰️</span>
-              <span className="gis-layer-tile-name">Google Địa hình</span>
-              <span className="gis-layer-tile-sub">Độ cao & sông ngòi</span>
+              <span className="gis-layer-row-icon">⛰️</span>
+              <span className="gis-layer-row-name">Địa hình</span>
+              {mapStyle === 'google-terrain' && <Check size={14} className="gis-layer-check" />}
             </button>
 
             <button
               type="button"
-              className={`gis-layer-tile ${mapStyle === 'carto-dark' ? 'active' : ''}`}
+              className={`gis-layer-row ${mapStyle === 'carto-dark' ? 'active' : ''}`}
               onClick={() => setMapStyle('carto-dark')}
             >
-              <span className="gis-layer-tile-icon">🌙</span>
-              <span className="gis-layer-tile-name">Chế độ đêm</span>
-              <span className="gis-layer-tile-sub">Nền tối Dark GIS</span>
+              <span className="gis-layer-row-icon">🌙</span>
+              <span className="gis-layer-row-name">Chế độ đêm</span>
+              {mapStyle === 'carto-dark' && <Check size={14} className="gis-layer-check" />}
             </button>
           </div>
 

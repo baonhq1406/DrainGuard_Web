@@ -487,29 +487,29 @@ body:has(.gis-viewport) .site-footer {
 .fab-tooltip{position:absolute;right:calc(100% + 10px);top:50%;transform:translateY(-50%);background:#0c2338;color:#fff;font-size:11px;font-weight:700;padding:5px 9px;border-radius:7px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
 .gis-fab:hover .fab-tooltip{opacity:1}
 
-/* Layer Switcher Popover */
-.gis-layer-picker{position:absolute;right:72px;top:72px;width:300px;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(215,230,242,.95);border-radius:18px;box-shadow:0 16px 42px rgba(10,35,65,.16);padding:16px;z-index:26;animation:fadeInPop .18s ease-out}
-@keyframes fadeInPop{from{opacity:0;transform:scale(.96) translateX(8px)}to{opacity:1;transform:scale(1) translateX(0)}}
-.gis-layer-picker-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.gis-layer-picker-head h4{margin:0;font-size:14px;font-weight:800;color:#0d2c48}
-.gis-layer-close-btn{background:transparent;border:0;color:#70899d;cursor:pointer;display:grid;place-items:center;padding:3px;border-radius:6px}
+/* Layer Switcher Popover (Compact Apple/Google Maps Style) */
+.gis-layer-picker{position:absolute;right:70px;top:72px;width:215px;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(215,230,242,.95);border-radius:14px;box-shadow:0 12px 32px rgba(10,35,65,.14);padding:10px 11px;z-index:26;animation:fadeInPop .15s ease-out}
+@keyframes fadeInPop{from{opacity:0;transform:scale(.97) translateX(6px)}to{opacity:1;transform:scale(1) translateX(0)}}
+.gis-layer-picker-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;padding:0 2px}
+.gis-layer-title-eyebrow{font-size:10px;font-weight:800;letter-spacing:.08em;color:#627e94;text-transform:uppercase}
+.gis-layer-close-btn{background:transparent;border:0;color:#7891a5;cursor:pointer;display:grid;place-items:center;padding:2px;border-radius:6px}
 .gis-layer-close-btn:hover{color:#0d2c48;background:#ebf2f7}
 
-.gis-layer-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.gis-layer-tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px;border-radius:12px;border:1.5px solid #d8e6f1;background:#f7fafc;cursor:pointer;transition:all .15s;text-align:center}
-.gis-layer-tile:hover{background:#eef6fd;border-color:#0879c9}
-.gis-layer-tile.active{background:#edf6fd;border-color:#0879c9;box-shadow:0 0 0 2px rgba(8,121,201,.2)}
-.gis-layer-tile-icon{font-size:22px;line-height:1}
-.gis-layer-tile-name{font-size:11.5px;font-weight:750;color:#12324f}
-.gis-layer-tile-sub{font-size:9.5px;color:#6b8499;line-height:1.2}
+.gis-layer-list{display:flex;flex-direction:column;gap:3px}
+.gis-layer-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:9px;border:1px solid transparent;background:transparent;cursor:pointer;transition:all .12s;text-align:left;width:100%;font-size:12.5px;color:#1e3d59;font-weight:600}
+.gis-layer-row:hover{background:#f0f6fa}
+.gis-layer-row.active{background:#edf6fd;color:#0879c9;border-color:#c2dff5;font-weight:750}
+.gis-layer-row-icon{font-size:16px;line-height:1;flex:none}
+.gis-layer-row-name{flex:1;white-space:nowrap}
+.gis-layer-check{color:#0879c9;flex:none}
 
-.gis-layer-divider{height:1px;background:#e5eff5;margin:12px 0 10px}
-.gis-layer-toggle-row{display:flex;justify-content:space-between;align-items:center;padding:7px 4px;font-size:12px;font-weight:650;color:#20405c;cursor:pointer;border-radius:8px}
-.gis-layer-toggle-row:hover{background:#f1f7fc}
-.gis-toggle-switch{width:36px;height:20px;border-radius:999px;background:#c8d9e6;position:relative;transition:background .2s;flex:none}
+.gis-layer-divider{height:1px;background:#e5eff5;margin:8px 0 6px}
+.gis-layer-toggle-row{display:flex;justify-content:space-between;align-items:center;padding:5px 6px;font-size:11.5px;font-weight:600;color:#284865;cursor:pointer;border-radius:7px}
+.gis-layer-toggle-row:hover{background:#f2f7fb}
+.gis-toggle-switch{width:32px;height:18px;border-radius:999px;background:#cbdbe7;position:relative;transition:background .2s;flex:none}
 .gis-toggle-switch.on{background:#0879c9}
-.gis-toggle-switch-handle{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.gis-toggle-switch.on .gis-toggle-switch-handle{transform:translateX(16px)}
+.gis-toggle-switch-handle{width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.gis-toggle-switch.on .gis-toggle-switch-handle{transform:translateX(14px)}
 
 /* Compass needle */
 .compass-needle{transition:transform .2s ease-out;display:inline-block}
