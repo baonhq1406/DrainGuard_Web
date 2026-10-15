@@ -4,9 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Activity,
-  ArrowUpRight,
-  Camera,
-  Cpu,
   Droplets,
   History,
   Home,
@@ -19,49 +16,40 @@ const VISUAL_LEVELS = [
   {
     code: 'LOW',
     label: 'THÔNG THOÁNG',
-    range: '0 – 20%',
-    pct: 14,
+    range: '0–20%',
+    pct: 16,
     color: '#10b981',
-    glow: 'rgba(16, 185, 129, 0.35)',
     img: '/demo/drain-sample-5.jpg',
-    sub: 'Thoát nước tối ưu',
   },
   {
     code: 'MODERATE',
-    label: 'CẢNH BÁO SỚM',
-    range: '21 – 50%',
+    label: 'CẢNH BÁO',
+    range: '21–50%',
     pct: 41,
     color: '#f59e0b',
-    glow: 'rgba(245, 158, 11, 0.35)',
     img: '/demo/drain-raw.jpg',
-    sub: 'Lá cây & bùn đất',
   },
   {
     code: 'HIGH',
-    label: 'TẮC NGHẼN CAO',
-    range: '51 – 75%',
+    label: 'TẮC CAO',
+    range: '51–75%',
     pct: 64,
     color: '#f97316',
-    glow: 'rgba(249, 115, 22, 0.35)',
     img: '/demo/drain-sample-4.jpg',
-    sub: 'Rác nilon che phủ',
   },
   {
     code: 'CRITICAL',
     label: 'BÁO ĐỘNG ĐỎ',
-    range: '> 75%',
+    range: '>75%',
     pct: 88,
     color: '#ef4444',
-    glow: 'rgba(239, 68, 68, 0.45)',
     img: '/demo/drain-annotated-2.jpg',
-    sub: 'Cần nạo vét khẩn',
   },
 ];
 
 export function Footer() {
   const pathname = usePathname();
 
-  // Trang bản đồ hiển thị full màn hình GIS
   if (pathname === '/map' || pathname?.startsWith('/map/')) {
     return null;
   }
@@ -74,49 +62,39 @@ export function Footer() {
       </div>
 
       <div className="cyber-footer-container">
-        {/* Visual Severity Matrix (Replaces text-heavy bullet lists) */}
-        <div className="footer-visual-header">
-          <div className="footer-eyebrow">
-            <Cpu size={14} className="text-sky-400" />
-            <span>THANG ĐO THỊ GIÁC AI YOLOv11-SEG</span>
+        {/* Sleek Single-Bar Visual Severity Ribbon (No bulky boxes) */}
+        <div className="footer-ribbon-bar">
+          <div className="footer-ribbon-tag">
+            <span className="radar-ping-dot" />
+            <span>THANG ĐO AI</span>
           </div>
-          <Link href="/analyze" className="footer-quick-try">
-            <span>Thử nghiệm ngay</span>
-            <ArrowUpRight size={14} />
-          </Link>
-        </div>
 
-        <div className="footer-severity-grid">
-          {VISUAL_LEVELS.map(lv => (
-            <Link
-              key={lv.code}
-              href="/analyze"
-              className="footer-severity-card"
-              style={{ '--lv-color': lv.color, '--lv-glow': lv.glow } as React.CSSProperties}
-            >
-              <div className="severity-card-img-wrap">
-                <img src={lv.img} alt={lv.label} loading="lazy" />
-                <div className="severity-scan-line" />
-                <div className="severity-range-pill" style={{ background: lv.color }}>
-                  {lv.range}
+          <div className="footer-ribbon-items">
+            {VISUAL_LEVELS.map(lv => (
+              <Link
+                key={lv.code}
+                href="/analyze"
+                className="footer-ribbon-item"
+                style={{ '--lv-color': lv.color } as React.CSSProperties}
+              >
+                <div className="ribbon-avatar-ring" style={{ borderColor: lv.color }}>
+                  <img src={lv.img} alt={lv.label} loading="lazy" />
                 </div>
-              </div>
-
-              <div className="severity-card-info">
-                <div className="severity-card-top">
-                  <span className="severity-dot" style={{ background: lv.color, boxShadow: `0 0 10px ${lv.color}` }} />
-                  <span className="severity-label" style={{ color: lv.color }}>{lv.label}</span>
+                <div className="ribbon-item-meta">
+                  <div className="ribbon-item-top">
+                    <b style={{ color: lv.color }}>{lv.label}</b>
+                    <span>{lv.range}</span>
+                  </div>
+                  <div className="ribbon-mini-bar">
+                    <div
+                      className="ribbon-mini-fill"
+                      style={{ width: `${lv.pct}%`, background: lv.color, boxShadow: `0 0 8px ${lv.color}` }}
+                    />
+                  </div>
                 </div>
-                <div className="severity-sub">{lv.sub}</div>
-                <div className="severity-bar-track">
-                  <div
-                    className="severity-bar-fill"
-                    style={{ width: `${lv.pct}%`, background: lv.color, boxShadow: `0 0 12px ${lv.color}` }}
-                  />
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Bottom Dock: Brand + Animated Telemetry + Visual Quick Nav Pills */}
@@ -134,8 +112,8 @@ export function Footer() {
             </Link>
 
             <div className="footer-telemetry-wave">
-              <Activity size={15} className="wave-icon-pulse" />
-              <span>38ms · ĐÀ NẴNG GIS</span>
+              <Activity size={14} className="wave-icon-pulse" />
+              <span>38ms · YOLOv11-Seg · ĐÀ NẴNG GIS</span>
               <span className="online-ping-dot" />
             </div>
           </div>

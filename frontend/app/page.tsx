@@ -321,25 +321,44 @@ export default function Home() {
               ✨ AI Segmentation
             </div>
 
-            {/* Floating Glass HUD Bar Inside Stage */}
+            {/* Floating Holographic Bottom HUD Info Bar Inside Stage */}
             <div className="stage-hud-overlay">
-              <div className="stage-hud-group">
-                <div className="stage-hud-item">
-                  <b style={{ color: current.riskColor }}>{current.risk} ({current.blockage})</b>
-                  <span>Mức độ bít tắc</span>
+              <div className="stage-hud-left">
+                <div className="stage-hud-gauge">
+                  <svg width="42" height="42" viewBox="0 0 44 44" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle cx="22" cy="22" r="17" fill="transparent" stroke="rgba(255,255,255,0.12)" strokeWidth="4" />
+                    <circle
+                      cx="22"
+                      cy="22"
+                      r="17"
+                      fill="transparent"
+                      stroke={current.riskColor}
+                      strokeWidth="4"
+                      strokeDasharray={2 * Math.PI * 17}
+                      strokeDashoffset={2 * Math.PI * 17 * (1 - parseInt(current.blockage, 10) / 100)}
+                      strokeLinecap="round"
+                      style={{ transition: 'stroke-dashoffset 0.5s ease, stroke 0.3s ease' }}
+                    />
+                  </svg>
+                  <span className="stage-hud-gauge-pct" style={{ color: current.riskColor }}>
+                    {current.blockage}
+                  </span>
                 </div>
-                <div className="stage-hud-item">
-                  <b>{current.debris}</b>
-                  <span>Vật cản AI</span>
-                </div>
-                <div className="stage-hud-item">
-                  <b style={{ color: '#38bdf8' }}>{current.latency}</b>
-                  <span>Tốc độ xử lý</span>
+                <div className="stage-hud-status-text">
+                  <b style={{ color: current.riskColor }}>● {current.risk}</b>
+                  <span>{current.debris}</span>
                 </div>
               </div>
-              <div className="stage-hud-item" style={{ textAlign: 'right' }}>
-                <b>{current.gps}</b>
-                <span>Tọa độ GPS</span>
+
+              <div className="stage-hud-pills">
+                <div className="stage-hud-chip">
+                  <Zap size={13} className="text-sky-400" />
+                  <span>AI: <b>{current.latency}</b></span>
+                </div>
+                <div className="stage-hud-chip">
+                  <Radar size={13} className="text-emerald-400" />
+                  <span>GPS: <b>{current.gps}</b></span>
+                </div>
               </div>
             </div>
           </div>

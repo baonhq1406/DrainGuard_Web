@@ -570,27 +570,52 @@ export default function MapPage() {
         </div>
       )}
 
-      {/* 6. Floating Bottom-Left Legend */}
-      <div className="gis-legend-card" aria-label="Chú giải bản đồ">
-        <div className="gis-legend-title">Mức độ rủi ro</div>
-        <div className="gis-legend-items">
-          <div className="gis-legend-row">
-            <span className="legend-swatch low" />
-            <span>Thông thoáng (0-20%)</span>
-          </div>
-          <div className="gis-legend-row">
-            <span className="legend-swatch moderate" />
-            <span>Theo dõi (21-50%)</span>
-          </div>
-          <div className="gis-legend-row">
-            <span className="legend-swatch high" />
-            <span>Cảnh báo (51-75%)</span>
-          </div>
-          <div className="gis-legend-row">
-            <span className="legend-swatch critical" />
-            <span>Nguy hiểm (&gt;75%)</span>
-          </div>
-        </div>
+      {/* 6. Floating Bottom-Center Interactive Info & Legend Bar */}
+      <div className="gis-bottom-info-bar" role="region" aria-label="Thanh thông tin mức độ rủi ro">
+        <button
+          type="button"
+          className={`gis-bottom-pill ${statusFilter === 'ALL' ? 'is-active' : ''}`}
+          onClick={() => setStatusFilter('ALL')}
+        >
+          <span className="radar-ping-dot" />
+          <span>Tất cả <b>{counts.all}</b></span>
+        </button>
+
+        <button
+          type="button"
+          className={`gis-bottom-pill ${statusFilter === 'LOW' ? 'is-active' : ''}`}
+          onClick={() => setStatusFilter(statusFilter === 'LOW' ? 'ALL' : 'LOW')}
+        >
+          <span className="legend-swatch low" />
+          <span>Thông thoáng (0–20%) <b>{counts.low}</b></span>
+        </button>
+
+        <button
+          type="button"
+          className={`gis-bottom-pill ${statusFilter === 'MODERATE' ? 'is-active' : ''}`}
+          onClick={() => setStatusFilter(statusFilter === 'MODERATE' ? 'ALL' : 'MODERATE')}
+        >
+          <span className="legend-swatch moderate" />
+          <span>Theo dõi (21–50%) <b>{counts.moderate}</b></span>
+        </button>
+
+        <button
+          type="button"
+          className={`gis-bottom-pill ${statusFilter === 'HIGH' ? 'is-active' : ''}`}
+          onClick={() => setStatusFilter(statusFilter === 'HIGH' ? 'ALL' : 'HIGH')}
+        >
+          <span className="legend-swatch high" />
+          <span>Cảnh báo (51–75%) <b>{counts.high}</b></span>
+        </button>
+
+        <button
+          type="button"
+          className={`gis-bottom-pill ${statusFilter === 'CRITICAL' ? 'is-active' : ''}`}
+          onClick={() => setStatusFilter(statusFilter === 'CRITICAL' ? 'ALL' : 'CRITICAL')}
+        >
+          <span className="legend-swatch critical" />
+          <span>Nguy hiểm (&gt;75%) <b>{counts.critical}</b></span>
+        </button>
       </div>
 
       {/* 7. Selected Drain Inspector Drawer (Detailed Slide-out Panel) */}
