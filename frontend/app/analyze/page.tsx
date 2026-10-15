@@ -250,10 +250,6 @@ export default function Analyze() {
             Chẩn đoán miệng thu nước. <br />
             <span className="title-glow-cyan">Định vị bít tắc &amp; phân tách AI.</span>
           </h1>
-
-          <p className="analyze-sub">
-            Chụp ảnh trực tiếp từ camera hoặc tải ảnh hiện trường. Mô hình AI sẽ quét vật thể cản trở và tự động gán tọa độ GPS vào bản đồ đô thị.
-          </p>
         </div>
 
         {/* 2. Optical Diagnostic Viewport Frame */}
@@ -281,12 +277,15 @@ export default function Analyze() {
                   <ScanSearch size={36} />
                 </div>
 
-                <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
-                  Kéo thả ảnh hoặc Chụp trực tiếp từ hiện trường
+                <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', margin: '0 0 12px' }}>
+                  Thả ảnh hoặc Chụp trực tiếp hiện trường
                 </h2>
-                <p style={{ color: '#94a3b8', fontSize: '14px', margin: '0 auto 20px', maxWidth: '440px', lineHeight: 1.5 }}>
-                  Hệ thống tiếp nhận ảnh độ nét cao JPG, PNG hoặc WebP và tự động kích hoạt GPS thiết bị.
-                </p>
+
+                <div className="hero-telemetry-chips" style={{ marginBottom: '22px' }}>
+                  <span className="hero-telemetry-pill">📷 JPG / PNG / WEBP</span>
+                  <span className="hero-telemetry-pill">📍 Tự động gắn GPS</span>
+                  <span className="hero-telemetry-pill">⚡ YOLOv11 38ms</span>
+                </div>
 
                 <div className="diagnostic-actions-row" onClick={e => e.stopPropagation()}>
                   <label htmlFor="camera-picker" className="btn-glow-primary" style={{ cursor: 'pointer' }}>

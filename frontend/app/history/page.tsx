@@ -116,10 +116,6 @@ export default function History() {
             Lịch sử Phản ánh &amp; Giám sát. <br />
             <span className="title-glow-cyan">Dữ liệu thị giác kiểm định 2026.</span>
           </h1>
-
-          <p className="history-sub">
-            Tra cứu toàn bộ hồ sơ hình ảnh đã được mô hình YOLOv11 phân tách vật cản và số hóa vị trí trên bản đồ GIS.
-          </p>
         </div>
 
         {/* 2. Cybernetic Filter Command Bar */}
@@ -325,6 +321,9 @@ export default function History() {
                         <Camera size={32} />
                       </div>
                     )}
+
+                    {/* Hover Laser Scanline */}
+                    <div className="marquee-hover-scan" />
 
                     {/* Floating Status Pill */}
                     <div

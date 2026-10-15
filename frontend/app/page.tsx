@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useRef, type MouseEvent, type TouchEvent } from 'react';
+import { useState, useRef, useEffect, type MouseEvent, type TouchEvent } from 'react';
 import Link from 'next/link';
 import {
+  Activity,
   ArrowRight,
   Camera,
   Cpu,
-  Layers,
   Map as MapIcon,
+  Radar,
+  Sparkles,
+  Zap,
 } from 'lucide-react';
 
 const SCENARIOS = [
@@ -19,7 +22,7 @@ const SCENARIOS = [
     rawImg: '/demo/drain-sample-2.jpg',
     annotatedImg: '/demo/drain-annotated-2.jpg',
     blockage: '78%',
-    debris: '5 vị trí rác túi nilon lớn',
+    debris: '5 túi nilon lớn',
     risk: 'BÁO ĐỘNG ĐỎ',
     riskColor: '#ef4444',
     latency: '36ms',
@@ -33,8 +36,8 @@ const SCENARIOS = [
     rawImg: '/demo/drain-raw.jpg',
     annotatedImg: '/demo/drain-annotated.jpg',
     blockage: '41%',
-    debris: '7 điểm lá cây & bùn cát',
-    risk: 'CÓ NGUY CƠ',
+    debris: '7 điểm lá cây & bùn',
+    risk: 'CẢNH BÁO',
     riskColor: '#f59e0b',
     latency: '38ms',
     gps: '16.0694° N, 108.2120° E',
@@ -47,8 +50,8 @@ const SCENARIOS = [
     rawImg: '/demo/drain-sample-4.jpg',
     annotatedImg: '/demo/drain-annotated-4.jpg',
     blockage: '64%',
-    debris: '4 túi rác sinh hoạt',
-    risk: 'NGUY HIỂM',
+    debris: '4 bọc rác sinh hoạt',
+    risk: 'TẮC NHIỀU',
     riskColor: '#f97316',
     latency: '34ms',
     gps: '16.0621° N, 108.2155° E',
@@ -56,12 +59,12 @@ const SCENARIOS = [
   {
     id: 3,
     title: 'Sơn Trà · Bạch Đằng',
-    tag: 'Đã thông thoát · 0%',
+    tag: 'Thông thoáng · 0%',
     dotColor: '#10b981',
     rawImg: '/demo/drain-sample-5.jpg',
     annotatedImg: '/demo/drain-annotated-5.jpg',
     blockage: '0%',
-    debris: 'Mặt lưới thông thoáng',
+    debris: 'Mặt lưới sạch',
     risk: 'AN TOÀN',
     riskColor: '#10b981',
     latency: '31ms',
@@ -123,23 +126,72 @@ const RADAR_PINS = [
 ];
 
 const MARQUEE_ITEMS = [
-  { img: '/demo/drain-sample-2.jpg', tag: 'Thực địa', sub: 'Hùng Vương', color: '#94a3b8' },
-  { img: '/demo/drain-annotated-2.jpg', tag: 'Tắc 78%', sub: 'Báo động', color: '#ef4444' },
-  { img: '/demo/drain-raw.jpg', tag: 'Thực địa', sub: 'Lê Duẩn', color: '#94a3b8' },
-  { img: '/demo/drain-annotated.jpg', tag: 'Tắc 41%', sub: 'Lá cây', color: '#f59e0b' },
-  { img: '/demo/drain-sample-4.jpg', tag: 'Thực địa', sub: 'Nguyễn Văn Linh', color: '#94a3b8' },
-  { img: '/demo/drain-annotated-4.jpg', tag: 'Tắc 64%', sub: 'Bọc nilon', color: '#f97316' },
-  { img: '/demo/drain-sample-5.jpg', tag: 'Thực địa', sub: 'Bạch Đằng', color: '#94a3b8' },
-  { img: '/demo/drain-annotated-5.jpg', tag: 'Thông thoáng', sub: 'An toàn 0%', color: '#10b981' },
+  { img: '/demo/drain-sample-2.jpg', tag: 'RAW', sub: 'Hùng Vương', color: '#94a3b8' },
+  { img: '/demo/drain-annotated-2.jpg', tag: '78% TẮC', sub: 'Báo động đỏ', color: '#ef4444' },
+  { img: '/demo/drain-raw.jpg', tag: 'RAW', sub: 'Lê Duẩn', color: '#94a3b8' },
+  { img: '/demo/drain-annotated.jpg', tag: '41% TẮC', sub: 'Lá cây', color: '#f59e0b' },
+  { img: '/demo/drain-sample-4.jpg', tag: 'RAW', sub: 'Chợ Cồn', color: '#94a3b8' },
+  { img: '/demo/drain-annotated-4.jpg', tag: '64% TẮC', sub: 'Bọc nilon', color: '#f97316' },
+  { img: '/demo/drain-sample-5.jpg', tag: 'RAW', sub: 'Bạch Đằng', color: '#94a3b8' },
+  { img: '/demo/drain-annotated-5.jpg', tag: '0% SẠCH', sub: 'An toàn', color: '#10b981' },
+];
+
+const VISUAL_PORTALS = [
+  {
+    step: '01',
+    badge: 'OPTICAL CAPTURE',
+    title: 'Quét Hiện Trường',
+    metric: '1 Chạm · Tự động GPS',
+    img: '/demo/drain-sample-2.jpg',
+    color: '#38bdf8',
+    mode: 'reticle',
+    href: '/analyze',
+  },
+  {
+    step: '02',
+    badge: 'YOLOv11-SEG VISION',
+    title: 'Bóc Tách Vật Cản',
+    metric: '38ms · Chính xác 99.2%',
+    img: '/demo/drain-annotated-2.jpg',
+    color: '#f97316',
+    mode: 'laser',
+    href: '/analyze',
+  },
+  {
+    step: '03',
+    badge: 'REALTIME GIS 3D',
+    title: 'Điều Phối Ứng Cứu',
+    metric: '1,280+ Trạm Đà Nẵng',
+    img: '/demo/satellite-danang-radar.jpg',
+    color: '#10b981',
+    mode: 'sonar',
+    href: '/map',
+  },
 ];
 
 export default function Home() {
   const [sliderPos, setSliderPos] = useState(50);
+  const [isInteracting, setIsInteracting] = useState(false);
   const [activeScenario, setActiveScenario] = useState(0);
   const [hoveredPin, setHoveredPin] = useState<number | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const current = SCENARIOS[activeScenario];
+
+  // Auto-oscillating laser scanner when user is not hovering/dragging
+  useEffect(() => {
+    if (isInteracting) return;
+    let frameId: number;
+    const start = performance.now();
+    const animate = (now: number) => {
+      const elapsed = (now - start) / 1000;
+      const nextPos = 50 + Math.sin(elapsed * 1.35) * 32;
+      setSliderPos(nextPos);
+      frameId = requestAnimationFrame(animate);
+    };
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [isInteracting]);
 
   function handleMove(clientX: number) {
     if (!sliderRef.current) return;
@@ -150,24 +202,26 @@ export default function Home() {
   }
 
   function onMouseMove(e: MouseEvent<HTMLDivElement>) {
+    setIsInteracting(true);
     handleMove(e.clientX);
   }
 
   function onTouchMove(e: TouchEvent<HTMLDivElement>) {
+    setIsInteracting(true);
     handleMove(e.touches[0].clientX);
   }
 
   return (
     <div className="visual-space-home">
-      {/* 1. Ambient Lighting & Space Coordinates */}
+      {/* Ambient Lighting & Space Coordinates */}
       <div className="space-aurora-glow" />
       <div className="gis-grid-backdrop" />
 
-      {/* 2. Hero Section (Zero Boxed Cards) */}
+      {/* SECTION 1: HERO & AUTO-SCANNING SPLIT STAGE */}
       <section className="hero-visual-wrap">
         <div className="hero-pill-indicator">
           <span className="radar-ping-dot" />
-          <span>HỆ THỐNG GIÁM SÁT THỦY VĂN ĐÔ THỊ · AI & GIS 2026</span>
+          <span>AI HYDROLOGY VISION · ĐÀ NẴNG 2026</span>
         </div>
 
         <h1 className="hero-punchy-title">
@@ -175,9 +229,21 @@ export default function Home() {
           <span className="title-glow-cyan">Chấm dứt ngập lụt đô thị.</span>
         </h1>
 
-        <p style={{ color: '#94a3b8', fontSize: '16px', maxWidth: '640px', margin: '0 auto 24px', lineHeight: 1.5 }}>
-          Thị giác máy tính YOLOv11 phát hiện rác bít tắc trong 38ms &amp; lập bản đồ cảnh báo ngập lụt thời gian thực.
-        </p>
+        {/* Ultra-Minimal Live Telemetry Pills instead of long paragraph */}
+        <div className="hero-telemetry-chips">
+          <div className="hero-telemetry-pill">
+            <Zap size={14} className="text-sky-400" />
+            <span><b>38ms</b> YOLOv11-Seg</span>
+          </div>
+          <div className="hero-telemetry-pill">
+            <Radar size={14} className="text-emerald-400" />
+            <span><b>1,280+</b> Trạm GIS</span>
+          </div>
+          <div className="hero-telemetry-pill">
+            <Sparkles size={14} className="text-amber-400" />
+            <span><b>99.2%</b> Độ chính xác</span>
+          </div>
+        </div>
 
         <div className="hero-actions-row">
           <Link href="/analyze" className="btn-glow-primary">
@@ -191,22 +257,28 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* 3. Interactive Before/After Split-Screen Stage */}
+        {/* Interactive Before/After Split-Screen Stage */}
         <div className="stage-slider-frame">
           <div className="stage-slider-bar">
             <div className="slider-bar-left">
-              <Cpu size={15} className="text-sky-400" />
+              <Cpu size={15} className="text-sky-400 spin-slow" />
               <span>YOLOv11x-Seg · {current.title}</span>
             </div>
             <div className="slider-bar-hint">
-              <span>↔ Rê chuột hoặc chạm để so sánh thực địa</span>
+              <span className="pulse-text-cyan">
+                {isInteracting ? '↔ Đang điều khiển thủ công' : '⚡ Quét tự động · Chạm để kéo'}
+              </span>
             </div>
           </div>
 
           <div
             ref={sliderRef}
             className="stage-slider-viewport"
+            onMouseEnter={() => setIsInteracting(true)}
+            onMouseLeave={() => setIsInteracting(false)}
             onMouseMove={onMouseMove}
+            onTouchStart={() => setIsInteracting(true)}
+            onTouchEnd={() => setIsInteracting(false)}
             onTouchMove={onTouchMove}
             onClick={e => handleMove(e.clientX)}
           >
@@ -227,6 +299,8 @@ export default function Home() {
                 alt="Ảnh AI phân tách vật cản"
                 className="stage-img-annotated"
               />
+              {/* Subtle Horizontal Laser Sweep inside AI Zone */}
+              <div className="ai-zone-scanline" />
             </div>
 
             {/* Glowing Laser Divider */}
@@ -241,10 +315,10 @@ export default function Home() {
 
             {/* Side Badges */}
             <div className="stage-tag stage-tag-left">
-              📷 Thực địa nguyên bản
+              📷 Thực địa RAW
             </div>
             <div className="stage-tag stage-tag-right">
-              ✨ AI YOLOv11 phát hiện rác
+              ✨ AI Segmentation
             </div>
 
             {/* Floating Glass HUD Bar Inside Stage */}
@@ -256,22 +330,22 @@ export default function Home() {
                 </div>
                 <div className="stage-hud-item">
                   <b>{current.debris}</b>
-                  <span>Vật cản nhận diện</span>
+                  <span>Vật cản AI</span>
                 </div>
                 <div className="stage-hud-item">
                   <b style={{ color: '#38bdf8' }}>{current.latency}</b>
-                  <span>Độ trễ suy luận</span>
+                  <span>Tốc độ xử lý</span>
                 </div>
               </div>
               <div className="stage-hud-item" style={{ textAlign: 'right' }}>
                 <b>{current.gps}</b>
-                <span>Tọa độ thực địa</span>
+                <span>Tọa độ GPS</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Minimal Scenario Selector Pills */}
+        {/* Thumbnail Scenario Selector Pills with Real Mini Previews */}
         <div className="stage-scenario-pills">
           {SCENARIOS.map((sc, idx) => (
             <button
@@ -280,9 +354,9 @@ export default function Home() {
               className={`scenario-pill-btn ${activeScenario === idx ? 'active' : ''}`}
               onClick={() => setActiveScenario(idx)}
             >
-              <span className="scenario-pill-dot" style={{ background: sc.dotColor }} />
+              <img src={sc.annotatedImg} alt={sc.title} className="scenario-pill-thumb" />
               <span>{sc.title}</span>
-              <span style={{ opacity: 0.7, fontSize: '11px' }}>({sc.blockage})</span>
+              <span className="scenario-pill-pct" style={{ color: sc.dotColor }}>{sc.blockage}</span>
             </button>
           ))}
         </div>
@@ -291,37 +365,32 @@ export default function Home() {
       {/* SECTION 2: 360° SATELLITE RADAR SCREEN */}
       <section className="radar-section-wrap">
         <div className="radar-screen-card">
-          {/* Danang High-Resolution Optical Satellite Backdrop */}
           <img
             src="/demo/satellite-danang-radar.jpg"
             alt="Vệ tinh Đà Nẵng 360 độ"
             className="radar-backdrop-img"
           />
 
-          {/* 360° Animated Laser Radar Sweep Cone */}
           <div className="radar-sweep-center">
             <div className="radar-concentric-1" />
             <div className="radar-concentric-2" />
             <div className="radar-sweep-cone" />
           </div>
 
-          {/* Top-Left Floating Radar Badge */}
           <div className="radar-header-overlay">
             <div className="radar-title-badge">
               <span className="radar-ping-dot" />
-              <span>QUAN SÁT THỰC ĐỊA · TRUNG TÂM ĐÀ NẴNG</span>
+              <span>RADAR VỆ TINH THỜI GIAN THỰC · ĐÀ NẴNG</span>
             </div>
           </div>
 
-          {/* Bottom-Right Floating Fullscreen Button */}
           <div className="radar-action-overlay">
-            <Link href="/map" className="btn-glow-primary" style={{ padding: '9px 18px', fontSize: '13px' }}>
-              <span>Mở bản đồ GIS 1,280+ miệng thu</span>
+            <Link href="/map" className="btn-glow-primary" style={{ padding: '10px 18px', fontSize: '13px' }}>
+              <span>Mở bản đồ GIS 3D</span>
               <ArrowRight size={14} />
             </Link>
           </div>
 
-          {/* Interactive Radar Hotspot Pings */}
           {RADAR_PINS.map(pin => (
             <div
               key={pin.id}
@@ -334,7 +403,6 @@ export default function Home() {
               <div className="pin-core" style={{ color: pin.riskColor, background: pin.riskColor }} />
               <div className="pin-wave-ring" style={{ color: pin.riskColor }} />
 
-              {/* Floating Tooltip Card with Photo Thumbnail */}
               <div className="pin-tooltip-card">
                 <img src={pin.thumb} alt={pin.name} />
                 <div style={{ textAlign: 'left' }}>
@@ -349,13 +417,11 @@ export default function Home() {
 
       {/* SECTION 3: INFINITE PHOTO MARQUEE (Visual Filmstrip) */}
       <section className="photo-marquee-wrap">
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.12em', color: '#38bdf8', textTransform: 'uppercase' }}>
-            HÌNH ẢNH HIỆN TRƯỜNG THỰC TẾ
-          </div>
-          <div style={{ fontSize: '20px', fontWeight: 800, color: '#fff', marginTop: '4px' }}>
-            Dữ liệu thị giác kiểm định trực tiếp từ đường phố
-          </div>
+        <div className="marquee-header-minimal">
+          <span className="marquee-live-pill">
+            <Activity size={13} className="text-sky-400" />
+            <span>LIVE OPTICAL STREAM · HIỆN TRƯỜNG ĐƯỜNG PHỐ</span>
+          </span>
         </div>
 
         <div className="photo-marquee-track">
@@ -366,71 +432,121 @@ export default function Home() {
               className="marquee-photo-card"
             >
               <img src={item.img} alt={item.sub} />
+              <div className="marquee-hover-scan" />
               <div className="marquee-card-badge">
                 <span style={{ color: item.color }}>● {item.tag}</span>
-                <span style={{ color: '#94a3b8', fontSize: '11px' }}>{item.sub}</span>
+                <span style={{ color: '#e2e8f0', fontSize: '11px' }}>{item.sub}</span>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* SECTION 4: PURE VISUAL FLOW PIPELINE (Zero paragraph boxes) */}
-      <section className="visual-workflow-wrap">
-        <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.12em', color: '#38bdf8', textTransform: 'uppercase' }}>
-          QUY TRÌNH TỐI GIẢN
-        </div>
-        <div style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', marginTop: '6px', letterSpacing: '-0.02em' }}>
-          Từ bức ảnh hiện trường đến điều phối nạo vét
+      {/* SECTION 4: 3 HOLOGRAPHIC PHOTO PORTALS WITH ANIMATED LASER CONDUITS */}
+      <section className="hologram-portals-section">
+        <div className="portals-header">
+          <span className="portals-eyebrow">PIPELINE TỰ ĐỘNG HÓA 100%</span>
+          <h2 className="portals-title">3 Bước Thị Giác Thời Gian Thực</h2>
         </div>
 
-        <div className="workflow-nodes-row">
-          <div className="workflow-node">
-            <div className="workflow-icon-bubble">
-              <Camera size={32} />
-            </div>
-            <div className="workflow-label">1. Chụp Hiện Trường</div>
-            <div className="workflow-sub">1 chạm từ smartphone</div>
-          </div>
+        <div className="hologram-portals-grid">
+          {VISUAL_PORTALS.map((portal, idx) => (
+            <Link
+              key={portal.step}
+              href={portal.href}
+              className="hologram-portal-card"
+              style={{ '--portal-color': portal.color } as React.CSSProperties}
+            >
+              <div className="portal-image-stage">
+                <img src={portal.img} alt={portal.title} />
 
-          <div className="workflow-node">
-            <div className="workflow-icon-bubble" style={{ borderColor: '#38bdf8', color: '#38bdf8' }}>
-              <Cpu size={32} />
-            </div>
-            <div className="workflow-label">2. YOLOv11 AI</div>
-            <div className="workflow-sub">Phân tách vật cản trong 38ms</div>
-          </div>
+                {/* Animated Overlay Specific to Each Step */}
+                {portal.mode === 'reticle' && (
+                  <div className="portal-fx-reticle">
+                    <span className="reticle-corner tl" />
+                    <span className="reticle-corner tr" />
+                    <span className="reticle-corner bl" />
+                    <span className="reticle-corner br" />
+                    <div className="reticle-center-ring" />
+                  </div>
+                )}
 
-          <div className="workflow-node">
-            <div className="workflow-icon-bubble" style={{ borderColor: '#10b981', color: '#10b981' }}>
-              <Layers size={32} />
-            </div>
-            <div className="workflow-label">3. Bản Đồ GIS 3D</div>
-            <div className="workflow-sub">Định vị &amp; điều phối ứng cứu</div>
-          </div>
+                {portal.mode === 'laser' && (
+                  <div className="portal-fx-laser">
+                    <div className="portal-laser-beam" />
+                    <div className="portal-bbox-pulse" />
+                  </div>
+                )}
+
+                {portal.mode === 'sonar' && (
+                  <div className="portal-fx-sonar">
+                    <div className="sonar-ring r1" />
+                    <div className="sonar-ring r2" />
+                    <div className="sonar-dot" />
+                  </div>
+                )}
+
+                <div className="portal-step-chip" style={{ borderColor: portal.color, color: portal.color }}>
+                  STEP {portal.step}
+                </div>
+                <div className="portal-metric-badge">
+                  <span>{portal.metric}</span>
+                </div>
+              </div>
+
+              <div className="portal-card-footer">
+                <div>
+                  <div className="portal-badge-mini" style={{ color: portal.color }}>{portal.badge}</div>
+                  <div className="portal-card-title">{portal.title}</div>
+                </div>
+                <div className="portal-arrow-circle">
+                  <ArrowRight size={16} />
+                </div>
+              </div>
+
+              {/* Animated Energy Conduit between portals on desktop */}
+              {idx < VISUAL_PORTALS.length - 1 && (
+                <div className="portal-energy-conduit" aria-hidden="true">
+                  <div className="conduit-pulse" />
+                </div>
+              )}
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* SECTION 5: MINIMAL AURORA CTA BANNER */}
-      <section className="minimal-cta-wrap">
-        <div className="minimal-cta-box">
-          <h2 className="minimal-cta-title">
-            Bảo vệ đô thị trước mọi cơn bão.
-          </h2>
-          <p className="minimal-cta-sub">
-            Chỉ cần 1 bức ảnh chụp từ hiện trường để ngăn chặn kịp thời những trận ngập úng đô thị cục bộ.
-          </p>
+      {/* SECTION 5: IMMERSIVE VISUAL MOSAIC PORTAL BANNER */}
+      <section className="visual-portal-cta-wrap">
+        <div className="visual-portal-cta-card">
+          {/* Dual Visual Background Mosaic */}
+          <div className="cta-mosaic-bg">
+            <img src="/demo/satellite-danang-radar.jpg" alt="" className="cta-bg-left" />
+            <img src="/demo/drain-annotated-2.jpg" alt="" className="cta-bg-right" />
+            <div className="cta-mosaic-overlay" />
+            <div className="cta-cyber-scanline" />
+          </div>
 
-          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/analyze" className="btn-glow-primary">
-              <Camera size={18} />
-              <span>Chụp ảnh phân tích ngay</span>
-              <ArrowRight size={16} />
-            </Link>
-            <Link href="/map" className="btn-glass-secondary">
-              <MapIcon size={18} />
-              <span>Khám phá bản đồ GIS</span>
-            </Link>
+          <div className="cta-portal-content">
+            <div className="cta-live-tag">
+              <span className="radar-ping-dot" />
+              <span>TRỰC TUYẾN 24/7 · SẴN SÀNG PHÂN TÍCH</span>
+            </div>
+
+            <h2 className="cta-portal-headline">
+              1 Chạm. <span className="title-glow-cyan">Bảo Vệ Đô Thị.</span>
+            </h2>
+
+            <div className="cta-portal-actions">
+              <Link href="/analyze" className="btn-glow-primary">
+                <Camera size={18} />
+                <span>Chụp ảnh phân tích ngay</span>
+                <ArrowRight size={16} />
+              </Link>
+              <Link href="/map" className="btn-glass-secondary">
+                <MapIcon size={18} />
+                <span>Mở bản đồ GIS 3D</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
