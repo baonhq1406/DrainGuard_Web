@@ -21,8 +21,8 @@ export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
   },
   {
     key: 'satellite',
-    name: 'Vệ tinh Thực địa (ArcGIS)',
-    description: 'Ảnh vệ tinh độ phân giải cao kết hợp nhãn đường giao thông',
+    name: 'Vệ tinh Thực địa (Siêu nét)',
+    description: 'Ảnh vệ tinh quang học mới nhất, sắc nét từng mét & 100% sạch rác',
     icon: '🛰️',
   },
   {
@@ -39,20 +39,23 @@ export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
   },
 ];
 
-// Clean Satellite Style Definition with transparent road labels
+// High-resolution Clean Satellite Style (Pure Optical Satellite + Clean Street Labels)
 const SATELLITE_STYLE = {
   version: 8 as const,
   sources: {
-    'esri-imagery': {
+    'satellite-optical': {
       type: 'raster',
       tiles: [
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        'https://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+        'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+        'https://mt2.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+        'https://mt3.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
       ],
       tileSize: 256,
-      maxzoom: 19,
-      attribution: '© Esri, Maxar, Earthstar Geographics',
+      maxzoom: 20,
+      attribution: '© Google Satellite Imagery',
     },
-    'esri-labels': {
+    'satellite-labels': {
       type: 'raster',
       tiles: [
         'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
@@ -65,7 +68,7 @@ const SATELLITE_STYLE = {
     {
       id: 'satellite-base',
       type: 'raster' as const,
-      source: 'esri-imagery',
+      source: 'satellite-optical',
       paint: {
         'raster-fade-duration': 0,
       },
@@ -73,7 +76,7 @@ const SATELLITE_STYLE = {
     {
       id: 'satellite-labels',
       type: 'raster' as const,
-      source: 'esri-labels',
+      source: 'satellite-labels',
       paint: {
         'raster-fade-duration': 0,
       },

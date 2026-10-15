@@ -500,7 +500,7 @@ export default function MapPage() {
               onClick={() => setMapStyle('satellite')}
             >
               <span className="gis-layer-row-icon">🛰️</span>
-              <span className="gis-layer-row-name">Vệ tinh Thực địa</span>
+              <span className="gis-layer-row-name">Vệ tinh Thực địa (Siêu nét)</span>
               {mapStyle === 'satellite' && <Check size={14} className="gis-layer-check" />}
             </button>
 
