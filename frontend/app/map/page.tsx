@@ -34,7 +34,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 export default function MapPage() {
   const [statusFilter, setStatusFilter] = useState<'ALL' | Status>('ALL');
   const [search, setSearch] = useState('');
-  const [mapStyle, setMapStyle] = useState<MapStyleKey>('voyager');
+  const [mapStyle, setMapStyle] = useState<MapStyleKey>('google-roadmap');
   const [layersOpen, setLayersOpen] = useState(false);
   const [is3D, setIs3D] = useState(false);
   const [bearing, setBearing] = useState(0);
@@ -411,7 +411,9 @@ export default function MapPage() {
           title="Lớp bản đồ & Chế độ xem (Layers)"
         >
           <Layers size={19} />
-          <span className="fab-tooltip">Lớp bản đồ ({mapStyle === 'voyager' ? 'Đô thị' : mapStyle === 'satellite' ? 'Vệ tinh' : mapStyle === 'dark' ? 'Đêm' : 'Tối giản'})</span>
+          <span className="fab-tooltip">
+            Lớp bản đồ ({mapStyle === 'google-roadmap' ? 'Google Maps' : mapStyle === 'google-hybrid' ? 'Vệ tinh' : mapStyle === 'google-terrain' ? 'Địa hình' : 'Chế độ đêm'})
+          </span>
         </button>
 
         {/* 3D Perspective Tilt Button */}
@@ -483,42 +485,42 @@ export default function MapPage() {
           <div className="gis-layer-grid">
             <button
               type="button"
-              className={`gis-layer-tile ${mapStyle === 'voyager' ? 'active' : ''}`}
-              onClick={() => setMapStyle('voyager')}
+              className={`gis-layer-tile ${mapStyle === 'google-roadmap' ? 'active' : ''}`}
+              onClick={() => setMapStyle('google-roadmap')}
             >
-              <span className="gis-layer-tile-icon">🏙️</span>
-              <span className="gis-layer-tile-name">Đô thị CARTO</span>
-              <span className="gis-layer-tile-sub">Sắc nét, chuẩn Web</span>
+              <span className="gis-layer-tile-icon">🗺️</span>
+              <span className="gis-layer-tile-name">Google Maps</span>
+              <span className="gis-layer-tile-sub">Tên đường mới nhất 2026</span>
             </button>
 
             <button
               type="button"
-              className={`gis-layer-tile ${mapStyle === 'satellite' ? 'active' : ''}`}
-              onClick={() => setMapStyle('satellite')}
+              className={`gis-layer-tile ${mapStyle === 'google-hybrid' ? 'active' : ''}`}
+              onClick={() => setMapStyle('google-hybrid')}
             >
               <span className="gis-layer-tile-icon">🛰️</span>
-              <span className="gis-layer-tile-name">Vệ tinh ESRI HD</span>
+              <span className="gis-layer-tile-name">Google Vệ tinh</span>
               <span className="gis-layer-tile-sub">Ảnh vệ tinh + Tên đường</span>
             </button>
 
             <button
               type="button"
-              className={`gis-layer-tile ${mapStyle === 'dark' ? 'active' : ''}`}
-              onClick={() => setMapStyle('dark')}
+              className={`gis-layer-tile ${mapStyle === 'google-terrain' ? 'active' : ''}`}
+              onClick={() => setMapStyle('google-terrain')}
             >
-              <span className="gis-layer-tile-icon">🌙</span>
-              <span className="gis-layer-tile-name">Chế độ đêm</span>
-              <span className="gis-layer-tile-sub">Phong cách Dark GIS</span>
+              <span className="gis-layer-tile-icon">⛰️</span>
+              <span className="gis-layer-tile-name">Google Địa hình</span>
+              <span className="gis-layer-tile-sub">Độ cao & sông ngòi</span>
             </button>
 
             <button
               type="button"
-              className={`gis-layer-tile ${mapStyle === 'positron' ? 'active' : ''}`}
-              onClick={() => setMapStyle('positron')}
+              className={`gis-layer-tile ${mapStyle === 'carto-dark' ? 'active' : ''}`}
+              onClick={() => setMapStyle('carto-dark')}
             >
-              <span className="gis-layer-tile-icon">⚪</span>
-              <span className="gis-layer-tile-name">Tối giản Trắng</span>
-              <span className="gis-layer-tile-sub">Nổi bật điểm ngập</span>
+              <span className="gis-layer-tile-icon">🌙</span>
+              <span className="gis-layer-tile-name">Chế độ đêm</span>
+              <span className="gis-layer-tile-sub">Nền tối Dark GIS</span>
             </button>
           </div>
 

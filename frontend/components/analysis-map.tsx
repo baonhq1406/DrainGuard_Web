@@ -3,13 +3,119 @@
 import { useEffect, useRef } from 'react';
 import type { RecordItem, EnvironmentItem } from '@/types';
 
-export type MapStyleKey = 'voyager' | 'satellite' | 'dark' | 'positron';
+export type MapStyleKey = 'google-roadmap' | 'google-hybrid' | 'google-terrain' | 'carto-dark';
 
-export const STYLE_URLS: Record<MapStyleKey, string> = {
-  voyager: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-  dark: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-  positron: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  satellite: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', // uses voyager as base with ESRI imagery overlay
+export interface MapStyleOption {
+  key: MapStyleKey;
+  name: string;
+  description: string;
+  icon: string;
+}
+
+export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
+  {
+    key: 'google-roadmap',
+    name: 'Google Maps Mới nhất',
+    description: 'Tên đường tiếng Việt mới nhất 2026, chính xác 100%',
+    icon: '🗺️',
+  },
+  {
+    key: 'google-hybrid',
+    name: 'Google Vệ tinh Hybrid',
+    description: 'Ảnh vệ tinh thực tế độ nét cao kèm tên đường',
+    icon: '🛰️',
+  },
+  {
+    key: 'google-terrain',
+    name: 'Google Maps Địa hình',
+    description: 'Bản đồ địa hình, độ cao & lưu vực sông suối',
+    icon: '⛰️',
+  },
+  {
+    key: 'carto-dark',
+    name: 'Chế độ Đêm Dark GIS',
+    description: 'Nền tối chuyên nghiệp cho trung tâm điều hành',
+    icon: '🌙',
+  },
+];
+
+const MAP_SOURCES: Record<string, any> = {
+  'google-roadmap': {
+    type: 'raster',
+    tiles: [
+      'https://mt0.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt2.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt3.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi',
+    ],
+    tileSize: 256,
+    maxzoom: 22,
+    attribution: '© Google Maps',
+  },
+  'google-hybrid': {
+    type: 'raster',
+    tiles: [
+      'https://mt0.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt3.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi',
+    ],
+    tileSize: 256,
+    maxzoom: 22,
+    attribution: '© Google Maps',
+  },
+  'google-terrain': {
+    type: 'raster',
+    tiles: [
+      'https://mt0.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt2.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi',
+      'https://mt3.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi',
+    ],
+    tileSize: 256,
+    maxzoom: 22,
+    attribution: '© Google Maps',
+  },
+  'carto-dark': {
+    type: 'raster',
+    tiles: [
+      'https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+    ],
+    tileSize: 256,
+    maxzoom: 20,
+    attribution: '© CARTO, © OpenStreetMap',
+  },
+};
+
+const BASE_STYLE = {
+  version: 8 as const,
+  sources: MAP_SOURCES,
+  layers: [
+    {
+      id: 'layer-google-roadmap',
+      type: 'raster' as const,
+      source: 'google-roadmap',
+      layout: { visibility: 'visible' as const },
+    },
+    {
+      id: 'layer-google-hybrid',
+      type: 'raster' as const,
+      source: 'google-hybrid',
+      layout: { visibility: 'none' as const },
+    },
+    {
+      id: 'layer-google-terrain',
+      type: 'raster' as const,
+      source: 'google-terrain',
+      layout: { visibility: 'none' as const },
+    },
+    {
+      id: 'layer-carto-dark',
+      type: 'raster' as const,
+      source: 'carto-dark',
+      layout: { visibility: 'none' as const },
+    },
+  ],
 };
 
 const statusRank: Record<string, number> = {
@@ -105,7 +211,7 @@ export function AnalysisMap({
   environment = [],
   selectedLocationKey = null,
   onSelectRecord,
-  mapStyle = 'voyager',
+  mapStyle = 'google-roadmap',
   showRiskZones = true,
   is3D = false,
   flyToLocation = null,
@@ -120,7 +226,6 @@ export function AnalysisMap({
   const markersRef = useRef<any[]>([]);
   const userMarkerRef = useRef<any>(null);
   const environmentCache = useRef<Map<string, EnvironmentItem>>(new Map());
-  const currentBaseStyle = useRef<MapStyleKey>('voyager');
 
   // Update environment map
   useEffect(() => {
@@ -129,49 +234,20 @@ export function AnalysisMap({
     );
   }, [environment]);
 
-  // Setup ESRI Satellite layers on top of base vector map
-  function ensureSatelliteLayers(map: any, isVisible: boolean) {
-    try {
-      if (!map.getSource('esri-satellite')) {
-        map.addSource('esri-satellite', {
-          type: 'raster',
-          tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-          tileSize: 256,
-          attribution: '© Esri, Maxar, Earthstar Geographics',
-        });
-      }
-      if (!map.getSource('esri-labels')) {
-        map.addSource('esri-labels', {
-          type: 'raster',
-          tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'],
-          tileSize: 256,
-        });
-      }
+  // Update visible raster layer based on mapStyle
+  function applyMapStyle(map: any, styleKey: MapStyleKey) {
+    const layerMapping: Record<MapStyleKey, string> = {
+      'google-roadmap': 'layer-google-roadmap',
+      'google-hybrid': 'layer-google-hybrid',
+      'google-terrain': 'layer-google-terrain',
+      'carto-dark': 'layer-carto-dark',
+    };
 
-      if (!map.getLayer('esri-satellite-layer')) {
-        map.addLayer({
-          id: 'esri-satellite-layer',
-          type: 'raster',
-          source: 'esri-satellite',
-          layout: { visibility: isVisible ? 'visible' : 'none' },
-        });
-      } else {
-        map.setLayoutProperty('esri-satellite-layer', 'visibility', isVisible ? 'visible' : 'none');
+    Object.entries(layerMapping).forEach(([k, layerId]) => {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(layerId, 'visibility', k === styleKey ? 'visible' : 'none');
       }
-
-      if (!map.getLayer('esri-labels-layer')) {
-        map.addLayer({
-          id: 'esri-labels-layer',
-          type: 'raster',
-          source: 'esri-labels',
-          layout: { visibility: isVisible ? 'visible' : 'none' },
-        });
-      } else {
-        map.setLayoutProperty('esri-labels-layer', 'visibility', isVisible ? 'visible' : 'none');
-      }
-    } catch {
-      // Ignored if map is in transient state
-    }
+    });
   }
 
   // Render Risk Zones & Markers
@@ -237,15 +313,15 @@ export function AnalysisMap({
               ['linear'],
               ['coalesce', ['get', 'score'], 0],
               0,
-              0.06,
+              0.08,
               35,
-              0.1,
+              0.14,
               60,
-              0.15,
-              80,
               0.2,
+              80,
+              0.26,
               100,
-              0.28,
+              0.34,
             ],
           },
         });
@@ -269,8 +345,8 @@ export function AnalysisMap({
               '#16a34a',
               '#64748b',
             ],
-            'line-width': 1.8,
-            'line-opacity': 0.65,
+            'line-width': 2,
+            'line-opacity': 0.75,
             'line-dasharray': [3, 2],
           },
         });
@@ -306,21 +382,18 @@ export function AnalysisMap({
     }
   }
 
-  // Initialize Map
+  // Initialize Map with Google Maps base style
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const lib = await import('maplibre-gl');
       if (cancelled || !host.current) return;
 
-      const initialStyleUrl = STYLE_URLS[mapStyle === 'satellite' ? 'voyager' : mapStyle];
-      currentBaseStyle.current = mapStyle === 'satellite' ? 'voyager' : mapStyle;
-
       const map = new lib.Map({
         container: host.current,
-        style: initialStyleUrl,
+        style: BASE_STYLE,
         center: [108.2, 16.05],
-        zoom: 12.5,
+        zoom: 13,
         pitch: is3D ? 50 : 0,
         bearing: 0,
         attributionControl: { compact: true },
@@ -338,7 +411,7 @@ export function AnalysisMap({
         mapInstance.current = map;
         if (onMapReady) onMapReady(map);
 
-        ensureSatelliteLayers(map, mapStyle === 'satellite');
+        applyMapStyle(map, mapStyle);
         renderLayersAndMarkers(lib, map);
       });
     })();
@@ -354,31 +427,11 @@ export function AnalysisMap({
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle Map Style switching
+  // Handle Map Style switching with zero-latency layer visibility
   useEffect(() => {
     if (!mapInstance.current || !mapLoaded.current) return;
-    const map = mapInstance.current;
-
-    if (mapStyle === 'satellite') {
-      ensureSatelliteLayers(map, true);
-    } else {
-      ensureSatelliteLayers(map, false);
-
-      // If switching vector styles (e.g. voyager <-> dark <-> positron)
-      if (currentBaseStyle.current !== mapStyle) {
-        currentBaseStyle.current = mapStyle;
-        const newStyleUrl = STYLE_URLS[mapStyle];
-        map.setStyle(newStyleUrl);
-
-        map.once('style.load', () => {
-          import('maplibre-gl').then(lib => {
-            ensureSatelliteLayers(map, false);
-            renderLayersAndMarkers(lib, map);
-          });
-        });
-      }
-    }
-  }, [mapStyle]); // eslint-disable-line react-hooks/exhaustive-deps
+    applyMapStyle(mapInstance.current, mapStyle);
+  }, [mapStyle]);
 
   // Re-render markers and risk zones when records change
   useEffect(() => {
