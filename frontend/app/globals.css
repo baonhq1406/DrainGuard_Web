@@ -294,3 +294,21 @@ tr.is-selected,tr.is-selected:hover{background:#eaf5fd}
   .map-legend-grid{font-size:10px}
   .map-environment-strip span{font-size:9px}.map-environment-strip b{font-size:11px}
 }
+
+
+/* Analyze page: keep file inputs accessible while allowing label-triggered file selection. */
+.visually-hidden-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.upload-actions label.button {
+  cursor: pointer;
+}
