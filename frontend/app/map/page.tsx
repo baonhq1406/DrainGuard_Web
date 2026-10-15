@@ -35,7 +35,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 export default function MapPage() {
   const [statusFilter, setStatusFilter] = useState<'ALL' | Status>('ALL');
   const [search, setSearch] = useState('');
-  const [mapStyle, setMapStyle] = useState<MapStyleKey>('google-roadmap');
+  const [mapStyle, setMapStyle] = useState<MapStyleKey>('google-clean');
   const [layersOpen, setLayersOpen] = useState(false);
   const [is3D, setIs3D] = useState(false);
   const [bearing, setBearing] = useState(0);
@@ -413,7 +413,7 @@ export default function MapPage() {
         >
           <Layers size={19} />
           <span className="fab-tooltip">
-            Lớp bản đồ ({mapStyle === 'google-roadmap' ? 'Google Maps' : mapStyle === 'google-hybrid' ? 'Vệ tinh' : mapStyle === 'google-terrain' ? 'Địa hình' : 'Chế độ đêm'})
+            Lớp bản đồ ({mapStyle === 'google-clean' ? 'Đô thị GIS' : mapStyle === 'google-hybrid' ? 'Vệ tinh' : mapStyle === 'esri-imagery' ? 'Vệ tinh ArcGIS' : 'Chế độ đêm'})
           </span>
         </button>
 
@@ -486,12 +486,12 @@ export default function MapPage() {
           <div className="gis-layer-list">
             <button
               type="button"
-              className={`gis-layer-row ${mapStyle === 'google-roadmap' ? 'active' : ''}`}
-              onClick={() => setMapStyle('google-roadmap')}
+              className={`gis-layer-row ${mapStyle === 'google-clean' ? 'active' : ''}`}
+              onClick={() => setMapStyle('google-clean')}
             >
               <span className="gis-layer-row-icon">🗺️</span>
-              <span className="gis-layer-row-name">Google Maps</span>
-              {mapStyle === 'google-roadmap' && <Check size={14} className="gis-layer-check" />}
+              <span className="gis-layer-row-name">Đô thị GIS (Sạch)</span>
+              {mapStyle === 'google-clean' && <Check size={14} className="gis-layer-check" />}
             </button>
 
             <button
@@ -500,18 +500,18 @@ export default function MapPage() {
               onClick={() => setMapStyle('google-hybrid')}
             >
               <span className="gis-layer-row-icon">🛰️</span>
-              <span className="gis-layer-row-name">Vệ tinh Hybrid</span>
+              <span className="gis-layer-row-name">Vệ tinh Google (Sạch)</span>
               {mapStyle === 'google-hybrid' && <Check size={14} className="gis-layer-check" />}
             </button>
 
             <button
               type="button"
-              className={`gis-layer-row ${mapStyle === 'google-terrain' ? 'active' : ''}`}
-              onClick={() => setMapStyle('google-terrain')}
+              className={`gis-layer-row ${mapStyle === 'esri-imagery' ? 'active' : ''}`}
+              onClick={() => setMapStyle('esri-imagery')}
             >
-              <span className="gis-layer-row-icon">⛰️</span>
-              <span className="gis-layer-row-name">Địa hình</span>
-              {mapStyle === 'google-terrain' && <Check size={14} className="gis-layer-check" />}
+              <span className="gis-layer-row-icon">🌍</span>
+              <span className="gis-layer-row-name">Vệ tinh ArcGIS</span>
+              {mapStyle === 'esri-imagery' && <Check size={14} className="gis-layer-check" />}
             </button>
 
             <button

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import type { RecordItem, EnvironmentItem } from '@/types';
 
-export type MapStyleKey = 'google-roadmap' | 'google-hybrid' | 'google-terrain' | 'carto-dark';
+export type MapStyleKey = 'google-clean' | 'google-hybrid' | 'esri-imagery' | 'carto-dark';
 
 export interface MapStyleOption {
   key: MapStyleKey;
@@ -14,72 +14,79 @@ export interface MapStyleOption {
 
 export const MAP_STYLE_OPTIONS: MapStyleOption[] = [
   {
-    key: 'google-roadmap',
-    name: 'Google Maps Siêu nét (HD)',
-    description: 'Tên đường tiếng Việt mới nhất 2026, Retina 2X sắc nét',
+    key: 'google-clean',
+    name: 'Đô thị GIS (Không quán ăn)',
+    description: 'Tên đường mới nhất 2026, ẩn toàn bộ quán xá & cửa hàng thương mại',
     icon: '🗺️',
   },
   {
     key: 'google-hybrid',
-    name: 'Google Vệ tinh Hybrid (HD)',
-    description: 'Ảnh vệ tinh thực tế độ nét cao kèm tên đường',
+    name: 'Vệ tinh Google (Sạch)',
+    description: 'Ảnh vệ tinh thực tế độ nét cao, chỉ hiện đường & sông ngòi',
     icon: '🛰️',
   },
   {
-    key: 'google-terrain',
-    name: 'Google Địa hình (HD)',
-    description: 'Bản đồ địa hình, độ cao & lưu vực sông suối',
-    icon: '⛰️',
+    key: 'esri-imagery',
+    name: 'Vệ tinh ArcGIS (ESRI)',
+    description: 'Chuẩn khí tượng & GIS quốc tế, không có quảng cáo',
+    icon: '🌍',
   },
   {
     key: 'carto-dark',
-    name: 'Chế độ Đêm Dark GIS (HD)',
-    description: 'Nền tối chuyên nghiệp cho trung tâm điều hành',
+    name: 'Chế độ Đêm Dark GIS',
+    description: 'Nền tối chuyên nghiệp cho phòng điều hành thông minh',
     icon: '🌙',
   },
 ];
 
-// High-DPI Retina @2x Tile Sources (512x512 physical pixels packed into 256 CSS px)
-// maxzoom is set to 19 (16 for terrain) so MapLibre overscales instead of requesting missing zoom 20+ tiles (prevents black screen)
+// High-DPI Retina @2x Tile Sources without commercial POI clutter
+// apistyle=s.t:3|p.v:off hides ALL Points of Interest (quán ăn, nhà hàng, cafe, shop, khách sạn)
+// apistyle=s.t:4|p.v:off hides transit clutter
 const MAP_SOURCES: Record<string, any> = {
-  'google-roadmap': {
+  'google-clean': {
     type: 'raster',
     tiles: [
-      'https://mt0.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2',
-      'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2',
-      'https://mt2.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2',
-      'https://mt3.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt0.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off|s.t:4|p.v:off',
+      'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off|s.t:4|p.v:off',
+      'https://mt2.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off|s.t:4|p.v:off',
+      'https://mt3.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off|s.t:4|p.v:off',
     ],
     tileSize: 256,
     minzoom: 0,
     maxzoom: 19,
-    attribution: '© Google Maps',
+    attribution: '© Google Maps (GIS Mode)',
   },
   'google-hybrid': {
     type: 'raster',
     tiles: [
-      'https://mt0.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2',
-      'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2',
-      'https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2',
-      'https://mt3.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://mt0.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off',
+      'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off',
+      'https://mt2.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off',
+      'https://mt3.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi&scale=2&apistyle=s.t:3|p.v:off',
     ],
     tileSize: 256,
     minzoom: 0,
     maxzoom: 19,
     attribution: '© Google Maps',
   },
-  'google-terrain': {
+  'esri-imagery': {
     type: 'raster',
     tiles: [
-      'https://mt0.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi&scale=2',
-      'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi&scale=2',
-      'https://mt2.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi&scale=2',
-      'https://mt3.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&hl=vi&scale=2',
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     ],
     tileSize: 256,
     minzoom: 0,
-    maxzoom: 16,
-    attribution: '© Google Maps',
+    maxzoom: 19,
+    attribution: '© Esri, Maxar, Earthstar Geographics',
+  },
+  'esri-labels': {
+    type: 'raster',
+    tiles: [
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+    ],
+    tileSize: 256,
+    minzoom: 0,
+    maxzoom: 19,
   },
   'carto-dark': {
     type: 'raster',
@@ -105,9 +112,9 @@ const BASE_STYLE = {
       },
     },
     {
-      id: 'layer-google-roadmap',
+      id: 'layer-google-clean',
       type: 'raster' as const,
-      source: 'google-roadmap',
+      source: 'google-clean',
       layout: { visibility: 'visible' as const },
       paint: {
         'raster-fade-duration': 0,
@@ -125,9 +132,19 @@ const BASE_STYLE = {
       },
     },
     {
-      id: 'layer-google-terrain',
+      id: 'layer-esri-imagery',
       type: 'raster' as const,
-      source: 'google-terrain',
+      source: 'esri-imagery',
+      layout: { visibility: 'none' as const },
+      paint: {
+        'raster-fade-duration': 0,
+        'raster-resampling': 'linear' as const,
+      },
+    },
+    {
+      id: 'layer-esri-labels',
+      type: 'raster' as const,
+      source: 'esri-labels',
       layout: { visibility: 'none' as const },
       paint: {
         'raster-fade-duration': 0,
@@ -240,7 +257,7 @@ export function AnalysisMap({
   environment = [],
   selectedLocationKey = null,
   onSelectRecord,
-  mapStyle = 'google-roadmap',
+  mapStyle = 'google-clean',
   showRiskZones = true,
   is3D = false,
   flyToLocation = null,
@@ -265,18 +282,26 @@ export function AnalysisMap({
 
   // Update visible raster layer based on mapStyle
   function applyMapStyle(map: any, styleKey: MapStyleKey) {
-    const layerMapping: Record<MapStyleKey, string> = {
-      'google-roadmap': 'layer-google-roadmap',
-      'google-hybrid': 'layer-google-hybrid',
-      'google-terrain': 'layer-google-terrain',
-      'carto-dark': 'layer-carto-dark',
-    };
+    const isGoogleClean = styleKey === 'google-clean';
+    const isGoogleHybrid = styleKey === 'google-hybrid';
+    const isEsri = styleKey === 'esri-imagery';
+    const isCartoDark = styleKey === 'carto-dark';
 
-    Object.entries(layerMapping).forEach(([k, layerId]) => {
-      if (map.getLayer(layerId)) {
-        map.setLayoutProperty(layerId, 'visibility', k === styleKey ? 'visible' : 'none');
-      }
-    });
+    if (map.getLayer('layer-google-clean')) {
+      map.setLayoutProperty('layer-google-clean', 'visibility', isGoogleClean ? 'visible' : 'none');
+    }
+    if (map.getLayer('layer-google-hybrid')) {
+      map.setLayoutProperty('layer-google-hybrid', 'visibility', isGoogleHybrid ? 'visible' : 'none');
+    }
+    if (map.getLayer('layer-esri-imagery')) {
+      map.setLayoutProperty('layer-esri-imagery', 'visibility', isEsri ? 'visible' : 'none');
+    }
+    if (map.getLayer('layer-esri-labels')) {
+      map.setLayoutProperty('layer-esri-labels', 'visibility', isEsri ? 'visible' : 'none');
+    }
+    if (map.getLayer('layer-carto-dark')) {
+      map.setLayoutProperty('layer-carto-dark', 'visibility', isCartoDark ? 'visible' : 'none');
+    }
   }
 
   // Render Risk Zones & Markers
