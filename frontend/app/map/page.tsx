@@ -46,7 +46,18 @@ export default function MapPage() {
     group: RecordItem[];
     env?: EnvironmentItem;
   } | null>(null);
-  const [photoView, setPhotoView] = useState<'annotated' | 'original'>('annotated');
+  const [photoView, setPhotoView] = useState<'split' | 'annotated' | 'original'>('split');
+  const [drawerSliderPos, setDrawerSliderPos] = useState(50);
+  const drawerSliderRef = useRef<HTMLDivElement>(null);
+
+  function handleDrawerSliderMove(clientX: number) {
+    if (!drawerSliderRef.current) return;
+    const rect = drawerSliderRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setDrawerSliderPos(pct);
+  }
+
   const [flyToTarget, setFlyToTarget] = useState<{ lat: number; lng: number; zoom?: number } | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locatingUser, setLocatingUser] = useState(false);
@@ -189,7 +200,8 @@ export default function MapPage() {
 
   function handleSelectFromMap(record: RecordItem, group: RecordItem[], env?: EnvironmentItem) {
     setSelectedDrain({ record, group, env });
-    setPhotoView('annotated');
+    setPhotoView(record.annotated_image_url && record.original_image_url ? 'split' : 'annotated');
+    setDrawerSliderPos(50);
   }
 
   function handleSelectFromList(record: RecordItem) {
@@ -197,7 +209,8 @@ export default function MapPage() {
     const group = mapped.filter(x => x.latitude!.toFixed(5) + ',' + x.longitude!.toFixed(5) === key);
     const env = envMap.get(key);
     setSelectedDrain({ record, group, env });
-    setPhotoView('annotated');
+    setPhotoView(record.annotated_image_url && record.original_image_url ? 'split' : 'annotated');
+    setDrawerSliderPos(50);
     setFlyToTarget({ lat: record.latitude!, lng: record.longitude!, zoom: 17.5 });
   }
 
@@ -274,7 +287,9 @@ export default function MapPage() {
 
       {/* 3. Left Sliding Sidebar: Drain Directory & Filters */}
       <aside className={`gis-sidebar ${sidebarOpen ? 'is-open' : 'is-closed'}`} aria-label="Danh sách miệng cống">
-        <div className="gis-sidebar-inner">
+        <div className="gis-sidebar-inner" style={{ position: 'relative' }}>
+          <div className="hud-corner tl" style={{ borderColor: 'rgba(56, 189, 248, 0.4)' }} />
+          <div className="hud-corner tr" style={{ borderColor: 'rgba(56, 189, 248, 0.4)' }} />
           <div className="gis-sidebar-head">
             <div className="gis-sidebar-title-row">
               <h3>Miệng thu nước</h3>
@@ -581,7 +596,9 @@ export default function MapPage() {
       {/* 7. Selected Drain Inspector Drawer (Detailed Slide-out Panel) */}
       {selectedDrain && (
         <section className="gis-inspector-drawer" aria-label="Chi tiết miệng thu nước">
-          <div className="inspector-card">
+          <div className="inspector-card" style={{ position: 'relative' }}>
+            <div className="hud-corner tl" style={{ borderColor: 'rgba(56, 189, 248, 0.5)' }} />
+            <div className="hud-corner tr" style={{ borderColor: 'rgba(56, 189, 248, 0.5)' }} />
             {/* Inspector Header */}
             <div className="inspector-head">
               <div>
@@ -605,54 +622,141 @@ export default function MapPage() {
             </div>
 
             {/* Inspector Image & Toggle */}
-            <div className="inspector-photo-section">
-              <div className="inspector-photo-box">
-                {photoView === 'annotated' ? (
-                  selectedDrain.record.annotated_image_url ? (
-                    <img src={files(selectedDrain.record.annotated_image_url)} alt="Ảnh phân tích AI" />
-                  ) : (
-                    <div className="photo-placeholder">Không có ảnh AI</div>
-                  )
-                ) : selectedDrain.record.original_image_url ? (
-                  <img src={files(selectedDrain.record.original_image_url)} alt="Ảnh gốc chụp" />
-                ) : (
-                  <div className="photo-placeholder">Không có ảnh gốc</div>
-                )}
-              </div>
-              <div className="photo-toggle-bar">
-                <button
-                  type="button"
-                  className={`photo-toggle-btn ${photoView === 'annotated' ? 'active' : ''}`}
-                  onClick={() => setPhotoView('annotated')}
-                >
-                  <Sparkles size={14} /> Ảnh AI phân tích
-                </button>
-                <button
-                  type="button"
-                  className={`photo-toggle-btn ${photoView === 'original' ? 'active' : ''}`}
-                  onClick={() => setPhotoView('original')}
-                >
-                  <Eye size={14} /> Ảnh chụp gốc
-                </button>
-              </div>
-            </div>
+            {(() => {
+              const hasBoth = Boolean(selectedDrain.record.annotated_image_url && selectedDrain.record.original_image_url);
+              const bVal = selectedDrain.record.blockage_percent != null ? Math.min(100, Math.max(0, selectedDrain.record.blockage_percent)) : 0;
+              const rRadius = 24;
+              const rCircum = 2 * Math.PI * rRadius;
+              const rOffset = rCircum - (rCircum * bVal) / 100;
+              const gColor = bVal > 70 ? '#ef4444' : bVal > 40 ? '#f97316' : bVal > 20 ? '#f59e0b' : '#10b981';
 
-            {/* Blockage Progress Meter */}
-            <div className="inspector-meter-section">
-              <div className="meter-label-row">
-                <span>Mức độ bít tắc rác</span>
-                <b>{selectedDrain.record.blockage_percent != null ? `${selectedDrain.record.blockage_percent}%` : 'Chưa có dữ liệu'}</b>
-              </div>
-              <div className="meter-track">
-                <div
-                  className="meter-fill"
-                  style={{
-                    width: `${Math.min(100, Math.max(0, selectedDrain.record.blockage_percent || 0))}%`,
-                    backgroundColor: statusColor[selectedDrain.record.status] || '#0879c9',
-                  }}
-                />
-              </div>
-            </div>
+              return (
+                <>
+                  <div className="inspector-photo-section">
+                    {photoView === 'split' && hasBoth ? (
+                      <div
+                        ref={drawerSliderRef}
+                        className="inspector-photo-box"
+                        style={{ cursor: 'ew-resize', position: 'relative', overflow: 'hidden', userSelect: 'none' }}
+                        onMouseMove={e => handleDrawerSliderMove(e.clientX)}
+                        onTouchMove={e => handleDrawerSliderMove(e.touches[0].clientX)}
+                        onClick={e => handleDrawerSliderMove(e.clientX)}
+                      >
+                        <img
+                          src={files(selectedDrain.record.original_image_url!)}
+                          alt="Ảnh gốc"
+                          className="stage-img-raw"
+                        />
+                        <div
+                          className="stage-img-overlay-clip"
+                          style={{ clipPath: `polygon(${drawerSliderPos}% 0, 100% 0, 100% 100%, ${drawerSliderPos}% 100%)` }}
+                        >
+                          <img
+                            src={files(selectedDrain.record.annotated_image_url!)}
+                            alt="Ảnh AI"
+                            className="stage-img-annotated"
+                          />
+                        </div>
+                        <div className="stage-divider" style={{ left: `${drawerSliderPos}%` }}>
+                          <div className="stage-handle" style={{ width: '32px', height: '32px', fontSize: '13px' }}>
+                            <span>↔</span>
+                          </div>
+                        </div>
+                        <div className="stage-tag stage-tag-left" style={{ fontSize: '9px', padding: '3px 8px' }}>📷 Gốc</div>
+                        <div className="stage-tag stage-tag-right" style={{ fontSize: '9px', padding: '3px 8px' }}>✨ AI Phân tách</div>
+                      </div>
+                    ) : photoView === 'original' && selectedDrain.record.original_image_url ? (
+                      <div className="inspector-photo-box">
+                        <img src={files(selectedDrain.record.original_image_url)} alt="Ảnh gốc chụp" />
+                      </div>
+                    ) : selectedDrain.record.annotated_image_url ? (
+                      <div className="inspector-photo-box">
+                        <img src={files(selectedDrain.record.annotated_image_url)} alt="Ảnh phân tích AI" />
+                      </div>
+                    ) : (
+                      <div className="inspector-photo-box">
+                        <div className="photo-placeholder">Không có ảnh</div>
+                      </div>
+                    )}
+
+                    <div className="photo-toggle-bar">
+                      {hasBoth && (
+                        <button
+                          type="button"
+                          className={`photo-toggle-btn ${photoView === 'split' ? 'active' : ''}`}
+                          onClick={() => setPhotoView('split')}
+                        >
+                          <Sparkles size={13} /> So sánh ↔
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className={`photo-toggle-btn ${photoView === 'annotated' ? 'active' : ''}`}
+                        onClick={() => setPhotoView('annotated')}
+                      >
+                        <Layers size={13} /> Ảnh AI
+                      </button>
+                      {selectedDrain.record.original_image_url && (
+                        <button
+                          type="button"
+                          className={`photo-toggle-btn ${photoView === 'original' ? 'active' : ''}`}
+                          onClick={() => setPhotoView('original')}
+                        >
+                          <Eye size={13} /> Ảnh gốc
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Circular Holographic Blockage Meter */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    background: 'rgba(15, 23, 42, 0.75)',
+                    padding: '12px 16px',
+                    borderRadius: '14px',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    marginBottom: '14px',
+                  }}>
+                    <div style={{ position: 'relative', width: '56px', height: '56px', flex: 'none' }}>
+                      <svg width="56" height="56" viewBox="0 0 60 60" style={{ transform: 'rotate(-90deg)' }}>
+                        <circle cx="30" cy="30" r={rRadius} fill="transparent" stroke="rgba(255, 255, 255, 0.08)" strokeWidth="6" />
+                        <circle
+                          cx="30"
+                          cy="30"
+                          r={rRadius}
+                          fill="transparent"
+                          stroke={gColor}
+                          strokeWidth="6"
+                          strokeDasharray={rCircum}
+                          strokeDashoffset={rOffset}
+                          strokeLinecap="round"
+                          style={{ transition: 'stroke-dashoffset 0.6s ease', filter: `drop-shadow(0 0 5px ${gColor}80)` }}
+                        />
+                      </svg>
+                      <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center' }}>
+                        <b style={{ fontSize: '13px', fontWeight: 900, color: '#ffffff' }}>
+                          {selectedDrain.record.blockage_percent != null ? `${selectedDrain.record.blockage_percent}%` : '—'}
+                        </b>
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff' }}>Độ bít tắc rác bề mặt</div>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: gColor, marginTop: '2px' }}>
+                        {selectedDrain.record.blockage_percent != null && selectedDrain.record.blockage_percent > 70
+                          ? 'Báo động cấp 4 · Bít tắc nguy hiểm'
+                          : selectedDrain.record.blockage_percent != null && selectedDrain.record.blockage_percent > 40
+                          ? 'Cảnh báo cấp 3 · Tắc nhiều rác'
+                          : selectedDrain.record.blockage_percent != null && selectedDrain.record.blockage_percent > 20
+                          ? 'Cảnh báo cấp 2 · Có nguy cơ'
+                          : 'Trạng thái ổn định · Thông thoáng'}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
 
             {/* Metrics 3-Col Grid */}
             <div className="inspector-grid">
