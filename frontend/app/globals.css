@@ -1337,3 +1337,333 @@ body:has(.gis-viewport) .site-footer {
   margin: 0 auto 30px;
   line-height: 1.6;
 }
+
+/* ==========================================================================
+   ANALYZE PAGE: CYBERNETIC OPTICAL DIAGNOSTIC LAB
+   ========================================================================== */
+.analyze-page-wrap {
+  position: relative;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+
+.analyze-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.analyze-title {
+  font-size: clamp(28px, 4.2vw, 46px);
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  margin: 10px 0;
+}
+.analyze-sub {
+  color: #94a3b8;
+  font-size: 15px;
+  max-width: 580px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Diagnostic Viewport Frame */
+.diagnostic-viewport-frame {
+  position: relative;
+  background: rgba(11, 19, 38, 0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65), 0 0 40px rgba(2, 132, 199, 0.12);
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+/* Cybernetic HUD Corner Brackets */
+.hud-corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  z-index: 15;
+}
+.hud-corner.tl { top: 12px; left: 12px; border-top: 2px solid #38bdf8; border-left: 2px solid #38bdf8; }
+.hud-corner.tr { top: 12px; right: 12px; border-top: 2px solid #38bdf8; border-right: 2px solid #38bdf8; }
+.hud-corner.bl { bottom: 12px; left: 12px; border-bottom: 2px solid #38bdf8; border-left: 2px solid #38bdf8; }
+.hud-corner.br { bottom: 12px; right: 12px; border-bottom: 2px solid #38bdf8; border-right: 2px solid #38bdf8; }
+
+/* Dropzone & Initial State */
+.diagnostic-dropzone {
+  padding: 60px 24px 50px;
+  text-align: center;
+  border: 2px dashed rgba(56, 189, 248, 0.25);
+  border-radius: 20px;
+  margin: 16px;
+  background: radial-gradient(circle at center, rgba(14, 165, 233, 0.05) 0%, transparent 70%);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.diagnostic-dropzone.is-over {
+  border-color: #38bdf8;
+  background: rgba(14, 165, 233, 0.12);
+  box-shadow: inset 0 0 30px rgba(56, 189, 248, 0.2);
+}
+.diagnostic-reticle-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  display: grid;
+  place-items: center;
+  color: #38bdf8;
+  margin: 0 auto 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 189, 248, 0.2);
+  transition: all 0.2s ease;
+}
+.diagnostic-dropzone:hover .diagnostic-reticle-icon {
+  transform: scale(1.08);
+  border-color: #38bdf8;
+  box-shadow: 0 12px 30px rgba(56, 189, 248, 0.35);
+}
+
+/* Upload Action Buttons */
+.diagnostic-actions-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+/* Selected Preview Stage */
+.diagnostic-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: 540px;
+  background: #020617;
+  overflow: hidden;
+  user-select: none;
+}
+.diagnostic-stage-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #020617;
+  display: block;
+}
+
+/* Laser Scan Animation */
+.diagnostic-scan-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+.diagnostic-laser-beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #00f2fe;
+  box-shadow: 0 0 20px 4px #00f2fe, 0 0 40px rgba(0, 242, 254, 0.8);
+  animation: scanLaserTravel 2.4s ease-in-out infinite;
+  z-index: 12;
+}
+@keyframes scanLaserTravel {
+  0% { top: 5%; opacity: 0.9; }
+  50% { top: 95%; opacity: 1; }
+  100% { top: 5%; opacity: 0.9; }
+}
+.diagnostic-telemetry-hud {
+  background: rgba(10, 16, 30, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 14px;
+  padding: 16px 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  z-index: 14;
+}
+
+/* Diagnostic Bottom Bar */
+.diagnostic-stage-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: rgba(15, 23, 42, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.stage-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #e2e8f0;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+.gps-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.gps-status-pill.ok {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.gps-status-pill.loading {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+.gps-status-pill.off {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* Quick Real Sample Strip */
+.quick-samples-strip {
+  margin: 34px 0 0;
+}
+.quick-samples-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.quick-samples-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.quick-sample-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.quick-sample-card:hover {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: #38bdf8;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.2);
+}
+.quick-sample-card img {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.sample-info-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+}
+.sample-info-tag {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* Diagnostic Result Panel */
+.diagnostic-result-panel {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7);
+  margin-top: 28px;
+}
+.result-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 24px;
+}
+.result-status-title {
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin: 4px 0 0;
+}
+
+/* Telemetry Circular Gauge & Stats Grid */
+.diagnostic-metrics-grid {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  align-items: center;
+  margin-top: 24px;
+}
+@media(max-width: 768px) {
+  .diagnostic-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.gauge-box-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  border-radius: 20px;
+  background: rgba(10, 16, 30, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.telemetry-chips-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+.telemetry-chip {
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(10, 16, 30, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.telemetry-chip span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.telemetry-chip b {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 4px;
+}
