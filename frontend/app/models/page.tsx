@@ -1,20 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Archive, Download, FlaskConical, Loader2, Power, Upload } from 'lucide-react';
+import {
+  Archive,
+  Boxes,
+  CheckCircle2,
+  Cpu,
+  Download,
+  FlaskConical,
+  Loader2,
+  Plus,
+  Power,
+  Sparkles,
+  Upload,
+  X,
+} from 'lucide-react';
 import { api, files } from '@/services/api';
-import { EmptyState, ModelStatusBadge, StatusBadge, TableSkeleton, noticeClass } from '@/components/ui';
+import { StatusBadge } from '@/components/ui';
 import type { Model, ModelTestResponse } from '@/types';
+
+const TEST_SAMPLES = [
+  { title: 'Hùng Vương (78%)', url: '/demo/drain-sample-2.jpg', name: 'sample-hung-vuong.jpg' },
+  { title: 'Lê Duẩn (41%)', url: '/demo/drain-raw.jpg', name: 'sample-le-duan.jpg' },
+  { title: 'Chợ Cồn (64%)', url: '/demo/drain-sample-4.jpg', name: 'sample-cho-con.jpg' },
+  { title: 'Bạch Đằng (0%)', url: '/demo/drain-sample-5.jpg', name: 'sample-bach-dang.jpg' },
+];
 
 export default function Models() {
   const qc = useQueryClient();
-  const { data = [], error, isLoading } = useQuery({ queryKey: ['models'], queryFn: () => api<Model[]>('/models') });
+  const { data = [], error, isLoading } = useQuery({
+    queryKey: ['models'],
+    queryFn: () => api<Model[]>('/models'),
+  });
   const { data: datasets = [] } = useQuery({
     queryKey: ['datasets'],
     queryFn: () => api<{ id: number; name: string; version: string }[]>('/datasets'),
   });
 
+  const [showUpload, setShowUpload] = useState(false);
   const [file, setFile] = useState<File>();
   const [name, setName] = useState('');
   const [version, setVersion] = useState('');
@@ -23,11 +47,14 @@ export default function Models() {
   const [datasetId, setDatasetId] = useState('');
   const [metricsJson, setMetricsJson] = useState('');
   const [message, setMessage] = useState('');
-  const [uploading, setUploading] = useState(false); // UI: chặn bấm trùng khi đang upload
+  const [uploading, setUploading] = useState(false);
+
   const [testModel, setTestModel] = useState<Model>();
   const [testFile, setTestFile] = useState<File>();
   const [testResult, setTestResult] = useState<ModelTestResponse>();
   const [testing, setTesting] = useState(false);
+  const [sliderPos, setSliderPos] = useState(50);
+  const splitRef = useRef<HTMLDivElement>(null);
 
   async function upload() {
     if (!file || !name || !version) {
@@ -55,6 +82,7 @@ export default function Models() {
       setDescription('');
       setDatasetId('');
       setMetricsJson('');
+      setShowUpload(false);
       qc.invalidateQueries({ queryKey: ['models'] });
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Upload thất bại');
@@ -67,7 +95,7 @@ export default function Models() {
     try {
       await api('/models/' + id + '/activate', { method: 'POST' });
       qc.invalidateQueries({ queryKey: ['models'] });
-      setMessage('Đã kích hoạt model.');
+      setMessage('Đã kích hoạt model thành công.');
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Không thể kích hoạt');
     }
@@ -84,10 +112,11 @@ export default function Models() {
     }
   }
 
-  async function runTest() {
-    if (!testModel || !testFile) return;
+  async function runTest(overrideFile?: File) {
+    const targetFile = overrideFile || testFile;
+    if (!testModel || !targetFile) return;
     const f = new FormData();
-    f.append('image', testFile);
+    f.append('image', targetFile);
     setTesting(true);
     setTestResult(undefined);
     try {
@@ -96,6 +125,7 @@ export default function Models() {
         body: f,
       });
       setTestResult(result);
+      setSliderPos(50);
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Test model thất bại');
     } finally {
@@ -103,115 +133,436 @@ export default function Models() {
     }
   }
 
+  async function pickSampleAndTest(sample: typeof TEST_SAMPLES[0]) {
+    try {
+      const res = await fetch(sample.url);
+      const blob = await res.blob();
+      const sampled = new File([blob], sample.name, { type: 'image/jpeg' });
+      setTestFile(sampled);
+      await runTest(sampled);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function handleSplitMove(clientX: number) {
+    if (!splitRef.current) return;
+    const rect = splitRef.current.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    setSliderPos(pct);
+  }
+
   return (
-    <main id="main" className="main">
-      <h1 className="title">AI Models</h1>
-      <p className="lead">Registry quản lý version, validate, test, kích hoạt và rollback model YOLO.</p>
+    <div className="visual-space-home" style={{ minHeight: '100vh', paddingBottom: '80px' }}>
+      <div className="space-aurora-glow" />
+      <div className="gis-grid-backdrop" />
 
-      <section className="panel">
-        <h2>Upload model mới</h2>
-        <p className="label" style={{ marginBottom: 14 }}>Chọn file <b>.pt</b>, hệ thống sẽ load thử bằng Ultralytics và không tự kích hoạt.</p>
-        <div className="form-grid">
-          <div className="field"><label htmlFor="md-name">Tên model *</label><input id="md-name" placeholder="Tên model" value={name} onChange={e => setName(e.target.value)} /></div>
-          <div className="field"><label htmlFor="md-version">Version *</label><input id="md-version" placeholder="Version, ví dụ v1" value={version} onChange={e => setVersion(e.target.value)} /></div>
-          <div className="field"><label htmlFor="md-imgsz">imgsz</label><input id="md-imgsz" placeholder="imgsz, mặc định 1024" value={imgsz} onChange={e => setImgsz(e.target.value)} /></div>
-          <div className="field"><label htmlFor="md-dataset">Dataset training</label>
-            <select id="md-dataset" value={datasetId} onChange={e => setDatasetId(e.target.value)}>
-              <option value="">Dataset training (tùy chọn)</option>
-              {datasets.map(d => <option key={d.id} value={d.id}>{d.name} · {d.version}</option>)}
-            </select>
-          </div>
-          <div className="field"><label htmlFor="md-file">File model (.pt) *</label><input id="md-file" type="file" accept=".pt" onChange={e => setFile(e.target.files?.[0])} /></div>
-          <div className="field"><label htmlFor="md-metrics">Metrics JSON</label><input id="md-metrics" placeholder='Metrics JSON, ví dụ {"mAP50":0.8}' value={metricsJson} onChange={e => setMetricsJson(e.target.value)} /></div>
-          <div className="field full"><label htmlFor="md-desc">Mô tả</label><textarea id="md-desc" placeholder="Mô tả model (tùy chọn)" value={description} onChange={e => setDescription(e.target.value)} rows={3} /></div>
-        </div>
-        {file && <p className="label" style={{ marginTop: 10 }}>File: {file.name} · {(file.size / 1024 / 1024).toFixed(1)} MB</p>}
-        <div className="form-actions">
-          <button className="button" onClick={upload} disabled={uploading}>{uploading ? <><Loader2 size={17} className="spin" />Đang upload...</> : <><Upload size={17} />Upload & Validate</>}</button>
-        </div>
-        {message && <div className={noticeClass(message)} role="status">{message}</div>}
-      </section>
-
-      <section className="panel">
-        <div className="panel-head"><h2>Danh sách model</h2><span className="label">{isLoading ? 'Đang tải…' : data.length + ' model'}</span></div>
-        {error && <div className="notice error" role="alert">{error.message}</div>}
-        {isLoading ? <TableSkeleton /> : data.length ? (
-          <div className="table-wrap">
-            <table className="rtable">
-              <thead>
-                <tr><th>Tên</th><th>Version</th><th>Task</th><th>Classes</th><th>imgsz</th><th>Trạng thái</th><th>Thao tác</th></tr>
-              </thead>
-              <tbody>
-                {data.map(m => (
-                  <tr key={m.id} className={m.is_active ? 'is-selected' : ''}>
-                    <td data-label="Tên">
-                      <b>{m.name}</b>
-                      {m.description && <div className="cell-sub">{m.description}</div>}
-                    </td>
-                    <td data-label="Version">{m.version}</td>
-                    <td data-label="Task">{m.task || '—'}</td>
-                    <td data-label="Classes">{m.classes_json?.join(', ') || '—'}</td>
-                    <td data-label="imgsz">{m.imgsz ?? '—'}</td>
-                    <td data-label="Trạng thái"><ModelStatusBadge status={m.status} active={m.is_active} /></td>
-                    <td data-label="">
-                      <div className="cell-actions">
-                        {(m.status === 'READY' || m.status === 'ACTIVE') && (
-                          <button className="button outline sm" onClick={() => { setTestModel(m); setTestResult(undefined); }}><FlaskConical size={14} />Test</button>
-                        )}
-                        {!m.is_active && m.status === 'READY' && <button className="button sm" onClick={() => activate(m.id)}><Power size={14} />Activate</button>}
-                        {!m.is_active && m.status !== 'ARCHIVED' && <button className="button outline danger sm" onClick={() => archive(m.id)}><Archive size={14} />Archive</button>}
-                        <a className="button outline sm" href={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api'}/models/${m.id}/download`}><Download size={14} />Download</a>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : <EmptyState title="Chưa có model">Upload file .pt ở phía trên để bắt đầu.</EmptyState>}
-      </section>
-
-      {testModel && (
-        <section className="panel">
-          <div className="panel-head">
-            <div>
-              <h2>Test model: {testModel.name} {testModel.version}</h2>
-              <p className="label">{testModel.task || '—'} · {testModel.classes_json?.join(', ') || '—'}</p>
+      <main id="main" className="admin-cyber-wrap">
+        {/* Top Command Header */}
+        <div className="admin-command-header">
+          <div>
+            <div className="hero-pill-indicator" style={{ marginBottom: '10px' }}>
+              <span className="radar-ping-dot" />
+              <span>NEURAL ENGINE REGISTRY · ULTRALYTICS YOLO</span>
             </div>
-            <button className="button outline" onClick={() => { setTestModel(undefined); setTestResult(undefined); }}>Đóng</button>
+            <h1 className="admin-cyber-title">
+              Quản trị <span className="title-glow-cyan">AI Models (.pt)</span>
+            </h1>
           </div>
 
-          <div className="upload test-drop">
-            <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Chọn ảnh để test" onChange={e => setTestFile(e.target.files?.[0])} />
-            <button className="button" disabled={!testFile || testing} onClick={runTest}>
-              {testing ? <><Loader2 size={17} className="spin" />Đang test...</> : 'Chạy test'}
+          <div className="admin-header-actions">
+            <button
+              type="button"
+              className="btn-glow-primary"
+              style={{ padding: '10px 18px', fontSize: '13.5px' }}
+              onClick={() => setShowUpload(prev => !prev)}
+            >
+              {showUpload ? <X size={16} /> : <Plus size={16} />}
+              <span>{showUpload ? 'Đóng khung Upload' : 'Triển khai Model (.pt) mới'}</span>
             </button>
           </div>
+        </div>
 
-          {testResult && (
-            <div style={{ marginTop: 18 }}>
-              <div className="grid">
-                {[
-                  ['Drain', testResult.result.drain_count],
-                  ['Confidence', testResult.result.confidence == null ? '—' : `${(testResult.result.confidence * 100).toFixed(1)}%`],
-                  ['Blockage', testResult.result.blockage_percent == null ? '—' : `${testResult.result.blockage_percent}%`],
-                ].map(([k, v]) => <div className="card" key={String(k)}><div className="label">{k}</div><div className="metric">{v}</div></div>)}
-                <div className="card"><div className="label">Trạng thái</div><div style={{ marginTop: 12 }}><StatusBadge status={testResult.result.status} /></div></div>
+        {message && (
+          <div className="admin-cyber-alert info" role="status">
+            <Sparkles size={16} />
+            <span>{message}</span>
+          </div>
+        )}
+        {error && (
+          <div className="admin-cyber-alert error" role="alert">
+            <span>{error.message}</span>
+          </div>
+        )}
+
+        {/* Collapsible Deploy New Model Studio */}
+        {showUpload && (
+          <section className="admin-glass-panel" style={{ marginBottom: '26px', borderColor: 'rgba(0, 242, 254, 0.4)' }}>
+            <div className="admin-panel-head">
+              <div>
+                <span className="admin-eyebrow">DEPLOY NEURAL WEIGHTS</span>
+                <h2 className="admin-panel-title">Tải Lên &amp; Kiểm Định Trọng Số (.pt)</h2>
               </div>
-              <div className="detail-grid">
-                <div className="img-frame">
-                  <div className="label">Ảnh gốc</div>
-                  <img src={files(testResult.original_image_url)} alt="Ảnh gốc test" />
+            </div>
+
+            <div className="cyber-form-grid">
+              <div className="cyber-field">
+                <label htmlFor="md-name">Tên Model *</label>
+                <input
+                  id="md-name"
+                  className="cyber-input"
+                  placeholder="VD: YOLOv11x-Seg"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                />
+              </div>
+              <div className="cyber-field">
+                <label htmlFor="md-version">Version *</label>
+                <input
+                  id="md-version"
+                  className="cyber-input"
+                  placeholder="VD: v2.5"
+                  value={version}
+                  onChange={e => setVersion(e.target.value)}
+                />
+              </div>
+              <div className="cyber-field">
+                <label htmlFor="md-imgsz">Độ phân giải (imgsz)</label>
+                <input
+                  id="md-imgsz"
+                  className="cyber-input"
+                  placeholder="1024"
+                  value={imgsz}
+                  onChange={e => setImgsz(e.target.value)}
+                />
+              </div>
+              <div className="cyber-field">
+                <label htmlFor="md-dataset">Dataset Huấn luyện</label>
+                <select
+                  id="md-dataset"
+                  className="cyber-input"
+                  value={datasetId}
+                  onChange={e => setDatasetId(e.target.value)}
+                >
+                  <option value="">-- Chọn Dataset (Tùy chọn) --</option>
+                  {datasets.map(d => (
+                    <option key={d.id} value={d.id}>
+                      {d.name} · {d.version}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="cyber-field">
+                <label htmlFor="md-file">Tệp Trọng Số (.pt) *</label>
+                <input
+                  id="md-file"
+                  type="file"
+                  accept=".pt"
+                  className="cyber-file-input"
+                  onChange={e => setFile(e.target.files?.[0])}
+                />
+              </div>
+              <div className="cyber-field">
+                <label htmlFor="md-metrics">Metrics JSON</label>
+                <input
+                  id="md-metrics"
+                  className="cyber-input"
+                  placeholder='{"mAP50": 0.94}'
+                  value={metricsJson}
+                  onChange={e => setMetricsJson(e.target.value)}
+                />
+              </div>
+              <div className="cyber-field full">
+                <label htmlFor="md-desc">Ghi chú kỹ thuật</label>
+                <input
+                  id="md-desc"
+                  className="cyber-input"
+                  placeholder="Ghi chú kiến trúc / thông số huấn luyện"
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '18px' }}>
+              <button type="button" className="btn-glow-primary" onClick={upload} disabled={uploading}>
+                {uploading ? (
+                  <>
+                    <Loader2 size={16} className="spin" />
+                    <span>Đang nạp &amp; kiểm định...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} />
+                    <span>Upload &amp; Validate (.pt)</span>
+                  </>
+                )}
+              </button>
+              {file && (
+                <span style={{ fontSize: '12.5px', color: '#38bdf8', fontWeight: 700 }}>
+                  📦 {file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                </span>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Interactive Model Sandbox Test Lab */}
+        {testModel && (
+          <section className="admin-glass-panel" style={{ marginBottom: '26px', borderColor: '#00f2fe' }}>
+            <div className="admin-panel-head">
+              <div>
+                <span className="admin-eyebrow">OPTICAL SANDBOX LAB</span>
+                <h2 className="admin-panel-title">
+                  Thử Nghiệm Trực Tiếp: {testModel.name} ({testModel.version})
+                </h2>
+              </div>
+              <button
+                type="button"
+                className="admin-quick-chip"
+                onClick={() => {
+                  setTestModel(undefined);
+                  setTestResult(undefined);
+                }}
+              >
+                <X size={15} />
+                <span>Đóng Lab</span>
+              </button>
+            </div>
+
+            {/* 1-Click Quick Samples + Custom File Upload */}
+            <div className="sandbox-controls-bar">
+              <div className="sandbox-samples-row">
+                <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#38bdf8' }}>⚡ TEST NHANH 1 CHẠM:</span>
+                {TEST_SAMPLES.map(s => (
+                  <button
+                    key={s.name}
+                    type="button"
+                    className="sandbox-sample-btn"
+                    onClick={() => pickSampleAndTest(s)}
+                    disabled={testing}
+                  >
+                    <img src={s.url} alt={s.title} />
+                    <span>{s.title}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  aria-label="Chọn ảnh để test"
+                  className="cyber-file-input"
+                  style={{ maxWidth: '240px' }}
+                  onChange={e => setTestFile(e.target.files?.[0])}
+                />
+                <button
+                  type="button"
+                  className="btn-glow-primary"
+                  style={{ padding: '8px 16px', fontSize: '13px' }}
+                  disabled={!testFile || testing}
+                  onClick={() => runTest()}
+                >
+                  {testing ? (
+                    <>
+                      <Loader2 size={15} className="spin" />
+                      <span>Đang suy luận...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FlaskConical size={15} />
+                      <span>Chạy Suy Luận</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {testResult && (
+              <div style={{ marginTop: '20px' }}>
+                <div className="admin-kpi-grid" style={{ marginBottom: '18px' }}>
+                  <div className="admin-kpi-pod">
+                    <span className="kpi-pod-label">MIỆNG THU PHÁT HIỆN</span>
+                    <div className="kpi-pod-value">{testResult.result.drain_count}</div>
+                  </div>
+                  <div className="admin-kpi-pod">
+                    <span className="kpi-pod-label">ĐỘ TIN CẬY (CONFIDENCE)</span>
+                    <div className="kpi-pod-value" style={{ color: '#00f2fe' }}>
+                      {testResult.result.confidence == null
+                        ? '—'
+                        : `${(testResult.result.confidence * 100).toFixed(1)}%`}
+                    </div>
+                  </div>
+                  <div className="admin-kpi-pod">
+                    <span className="kpi-pod-label">TỶ LỆ BÍT TẮC</span>
+                    <div className="kpi-pod-value" style={{ color: '#f97316' }}>
+                      {testResult.result.blockage_percent == null ? '—' : `${testResult.result.blockage_percent}%`}
+                    </div>
+                  </div>
+                  <div className="admin-kpi-pod">
+                    <span className="kpi-pod-label">TRẠNG THÁI CẢNH BÁO</span>
+                    <div style={{ marginTop: '10px' }}>
+                      <StatusBadge status={testResult.result.status} />
+                    </div>
+                  </div>
                 </div>
-                <div className="img-frame">
-                  <div className="label">Ảnh AI annotate</div>
-                  <img src={files(testResult.annotated_image_url)} alt="Ảnh AI annotate" />
+
+                {/* Interactive Split-Screen Slider for Model Test Result */}
+                <div
+                  ref={splitRef}
+                  className="stage-slider-viewport"
+                  style={{ maxHeight: '440px', borderRadius: '18px', border: '1px solid rgba(0, 242, 254, 0.35)' }}
+                  onMouseMove={e => handleSplitMove(e.clientX)}
+                  onTouchMove={e => handleSplitMove(e.touches[0].clientX)}
+                >
+                  <img src={files(testResult.original_image_url)} alt="Ảnh gốc" className="stage-img-raw" />
+                  <div
+                    className="stage-img-overlay-clip"
+                    style={{ clipPath: `polygon(${sliderPos}% 0, 100% 0, 100% 100%, ${sliderPos}% 100%)` }}
+                  >
+                    <img
+                      src={files(testResult.annotated_image_url)}
+                      alt="Ảnh AI Annotate"
+                      className="stage-img-annotated"
+                    />
+                    <div className="ai-zone-scanline" />
+                  </div>
+                  <div className="stage-divider" style={{ left: `${sliderPos}%` }}>
+                    <div className="stage-handle">
+                      <span>↔</span>
+                    </div>
+                  </div>
+                  <div className="stage-tag stage-tag-left">📷 Ảnh Gốc</div>
+                  <div className="stage-tag stage-tag-right">✨ AI {testModel.version}</div>
                 </div>
               </div>
+            )}
+          </section>
+        )}
+
+        {/* Neural Engine Cards Grid */}
+        <section>
+          <div className="admin-panel-head" style={{ marginBottom: '16px' }}>
+            <div>
+              <span className="admin-eyebrow">MODEL FLEET</span>
+              <h2 className="admin-panel-title">
+                Danh Sách Neural Engines ({isLoading ? '...' : data.length})
+              </h2>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div style={{ textAlign: 'center', padding: '60px', color: '#38bdf8' }}>
+              <Loader2 size={34} className="spin" style={{ margin: '0 auto 10px' }} />
+              <div>Đang tải danh sách AI Models...</div>
+            </div>
+          ) : data.length ? (
+            <div className="neural-models-grid">
+              {data.map(m => (
+                <div
+                  key={m.id}
+                  className={`neural-model-card ${m.is_active ? 'is-active-engine' : ''}`}
+                >
+                  <div className="neural-card-top">
+                    <div className="neural-core-badge">
+                      <Cpu size={22} className={m.is_active ? 'spin-slow' : ''} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <h3 className="neural-model-name">{m.name}</h3>
+                        <span className="version-neon-chip">{m.version}</span>
+                      </div>
+                      {m.description && <div className="neural-model-desc">{m.description}</div>}
+                    </div>
+                    {m.is_active ? (
+                      <span className="engine-status-pill active">
+                        <CheckCircle2 size={13} />
+                        <span>ACTIVE</span>
+                      </span>
+                    ) : (
+                      <span className="engine-status-pill">{m.status}</span>
+                    )}
+                  </div>
+
+                  {/* Specs Pills */}
+                  <div className="neural-specs-row">
+                    <span className="neural-spec-chip">Task: <b>{m.task || 'segment'}</b></span>
+                    <span className="neural-spec-chip">imgsz: <b>{m.imgsz ?? 1024}</b></span>
+                    <span className="neural-spec-chip">
+                      Classes: <b>{m.classes_json?.join(', ') || 'drain, debris'}</b>
+                    </span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="neural-card-actions">
+                    {(m.status === 'READY' || m.status === 'ACTIVE') && (
+                      <button
+                        type="button"
+                        className="admin-quick-chip"
+                        onClick={() => {
+                          setTestModel(m);
+                          setTestResult(undefined);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                      >
+                        <FlaskConical size={14} className="text-sky-400" />
+                        <span>Test Lab</span>
+                      </button>
+                    )}
+
+                    {!m.is_active && m.status === 'READY' && (
+                      <button
+                        type="button"
+                        className="btn-glow-primary"
+                        style={{ padding: '7px 14px', fontSize: '12.5px' }}
+                        onClick={() => activate(m.id)}
+                      >
+                        <Power size={14} />
+                        <span>Activate</span>
+                      </button>
+                    )}
+
+                    <a
+                      className="admin-quick-chip"
+                      href={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api'}/models/${m.id}/download`}
+                    >
+                      <Download size={14} />
+                      <span>.pt</span>
+                    </a>
+
+                    {!m.is_active && m.status !== 'ARCHIVED' && (
+                      <button
+                        type="button"
+                        className="admin-quick-chip danger-hover"
+                        onClick={() => archive(m.id)}
+                      >
+                        <Archive size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="admin-glass-panel" style={{ textAlign: 'center', padding: '54px 20px' }}>
+              <Boxes size={38} style={{ color: '#38bdf8', margin: '0 auto 12px' }} />
+              <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: 800, margin: '0 0 8px' }}>
+                Chưa có AI Model nào trong Registry
+              </h3>
+              <button
+                type="button"
+                className="btn-glow-primary"
+                style={{ marginTop: '10px' }}
+                onClick={() => setShowUpload(true)}
+              >
+                <Plus size={16} />
+                <span>Triển khai Model (.pt) đầu tiên</span>
+              </button>
             </div>
           )}
         </section>
-      )}
-    </main>
+      </main>
+    </div>
   );
 }

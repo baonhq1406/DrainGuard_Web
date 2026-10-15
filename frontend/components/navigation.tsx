@@ -123,29 +123,6 @@ export function Navigation() {
         </div>
       </div>
 
-      {/* Admin Secondary Context Bar */}
-      {isAdmin && (
-        <div className="admin-subbar">
-          <div className="admin-subbar-container">
-            <span className="admin-subbar-tag">
-              <ShieldCheck size={14} /> KHÔNG GIAN QUẢN TRỊ
-            </span>
-            <div className="admin-subbar-links">
-              {adminLinks.map(([href, label, Icon]) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={'admin-sublink' + (active(href) ? ' active' : '')}
-                >
-                  <Icon size={14} />
-                  <span>{label}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Mobile Drawer Dropdown */}
       {mobileMenuOpen && (
         <div className="mobile-drawer" role="dialog" aria-modal="true">
