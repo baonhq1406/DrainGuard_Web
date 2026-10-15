@@ -395,6 +395,28 @@ tr.is-selected,tr.is-selected:hover{background:#eaf5fd}
 .test-drop input[type=file]{max-width:100%;font-size:13px}
 
 /* ---------- J. Nền tảng Bản đồ Giám sát GIS Chuyên Nghiệp ---------- */
+html:has(.gis-viewport), body:has(.gis-viewport) {
+  overflow: hidden !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+body:has(.gis-viewport) .app-shell {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+}
+body:has(.gis-viewport) .app-main-content {
+  height: calc(100vh - 68px) !important;
+  max-height: calc(100vh - 68px) !important;
+  overflow: hidden !important;
+  flex: 1 1 auto;
+}
+body:has(.gis-viewport) .site-footer {
+  display: none !important;
+}
+
 .gis-viewport{position:relative;width:100%;height:calc(100vh - 68px);overflow:hidden;background:#0c1b2a;display:flex}
 .gis-map-canvas-container{position:absolute;inset:0;z-index:1}
 .analysis-map-canvas{width:100%;height:100%}
@@ -457,11 +479,39 @@ tr.is-selected,tr.is-selected:hover{background:#eaf5fd}
 
 /* Floating FABs on Right */
 .gis-fab-group{position:absolute;right:18px;top:72px;z-index:22;display:flex;flex-direction:column;gap:8px}
-.gis-fab{position:relative;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.95);backdrop-filter:blur(14px);border:1px solid rgba(215,230,242,.9);box-shadow:0 6px 18px rgba(10,35,60,.1);color:#1e3f5d;display:grid;place-items:center;cursor:pointer;transition:all .15s}
+.gis-fab{position:relative;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.95);backdrop-filter:blur(14px);border:1px solid rgba(215,230,242,.9);box-shadow:0 6px 18px rgba(10,35,60,.1);color:#1e3f5d;display:grid;place-items:center;cursor:pointer;transition:all .15s}
 .gis-fab:hover{background:#fff;color:#0879c9;transform:scale(1.05)}
 .gis-fab.is-active{background:#0879c9;color:#fff;border-color:#0879c9}
+.gis-fab .fab-badge{position:absolute;top:3px;right:3px;font-size:8px;font-weight:800;background:#0879c9;color:#fff;padding:1px 4px;border-radius:4px;line-height:1}
 .fab-tooltip{position:absolute;right:calc(100% + 10px);top:50%;transform:translateY(-50%);background:#0c2338;color:#fff;font-size:11px;font-weight:700;padding:5px 9px;border-radius:7px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
 .gis-fab:hover .fab-tooltip{opacity:1}
+
+/* Layer Switcher Popover */
+.gis-layer-picker{position:absolute;right:72px;top:72px;width:300px;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(215,230,242,.95);border-radius:18px;box-shadow:0 16px 42px rgba(10,35,65,.16);padding:16px;z-index:26;animation:fadeInPop .18s ease-out}
+@keyframes fadeInPop{from{opacity:0;transform:scale(.96) translateX(8px)}to{opacity:1;transform:scale(1) translateX(0)}}
+.gis-layer-picker-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.gis-layer-picker-head h4{margin:0;font-size:14px;font-weight:800;color:#0d2c48}
+.gis-layer-close-btn{background:transparent;border:0;color:#70899d;cursor:pointer;display:grid;place-items:center;padding:3px;border-radius:6px}
+.gis-layer-close-btn:hover{color:#0d2c48;background:#ebf2f7}
+
+.gis-layer-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.gis-layer-tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px;border-radius:12px;border:1.5px solid #d8e6f1;background:#f7fafc;cursor:pointer;transition:all .15s;text-align:center}
+.gis-layer-tile:hover{background:#eef6fd;border-color:#0879c9}
+.gis-layer-tile.active{background:#edf6fd;border-color:#0879c9;box-shadow:0 0 0 2px rgba(8,121,201,.2)}
+.gis-layer-tile-icon{font-size:22px;line-height:1}
+.gis-layer-tile-name{font-size:11.5px;font-weight:750;color:#12324f}
+.gis-layer-tile-sub{font-size:9.5px;color:#6b8499;line-height:1.2}
+
+.gis-layer-divider{height:1px;background:#e5eff5;margin:12px 0 10px}
+.gis-layer-toggle-row{display:flex;justify-content:space-between;align-items:center;padding:7px 4px;font-size:12px;font-weight:650;color:#20405c;cursor:pointer;border-radius:8px}
+.gis-layer-toggle-row:hover{background:#f1f7fc}
+.gis-toggle-switch{width:36px;height:20px;border-radius:999px;background:#c8d9e6;position:relative;transition:background .2s;flex:none}
+.gis-toggle-switch.on{background:#0879c9}
+.gis-toggle-switch-handle{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.gis-toggle-switch.on .gis-toggle-switch-handle{transform:translateX(16px)}
+
+/* Compass needle */
+.compass-needle{transition:transform .2s ease-out;display:inline-block}
 
 /* Floating Bottom-Left Legend */
 .gis-legend-card{position:absolute;left:18px;bottom:20px;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border:1px solid rgba(215,230,242,.9);border-radius:14px;padding:11px 15px;box-shadow:0 6px 20px rgba(10,35,60,.08);font-size:11.5px;color:#28455e}

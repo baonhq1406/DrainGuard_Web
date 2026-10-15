@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import {
   AlertTriangle,
-  ArrowRight,
+  Box,
   Camera,
   ChevronLeft,
   ChevronRight,
@@ -18,27 +18,26 @@ import {
   ListFilter,
   Loader2,
   MapPin,
+  Maximize2,
   Navigation as NavigationIcon,
   RefreshCw,
   Search,
-  ShieldAlert,
-  ShieldCheck,
-  Siren,
-  SlidersHorizontal,
   Sparkles,
-  TrendingUp,
   X,
 } from 'lucide-react';
 import { api, files } from '@/services/api';
 import type { RecordItem, Status, EnvironmentItem } from '@/types';
-import { AnalysisMap, statusColor, statusLabel } from '@/components/analysis-map';
+import { AnalysisMap, statusColor, statusLabel, type MapStyleKey } from '@/components/analysis-map';
 import { StatusBadge } from '@/components/ui';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default function MapPage() {
   const [statusFilter, setStatusFilter] = useState<'ALL' | Status>('ALL');
   const [search, setSearch] = useState('');
-  const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
+  const [mapStyle, setMapStyle] = useState<MapStyleKey>('voyager');
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [is3D, setIs3D] = useState(false);
+  const [bearing, setBearing] = useState(0);
   const [showRiskZones, setShowRiskZones] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedDrain, setSelectedDrain] = useState<{
@@ -53,6 +52,8 @@ export default function MapPage() {
   const [fitBoundsSignal, setFitBoundsSignal] = useState(1);
   const [addressCache, setAddressCache] = useState<Record<string, string>>({});
   const [fetchingAddress, setFetchingAddress] = useState(false);
+
+  const mapInstanceRef = useRef<any>(null);
 
   // Fetch all records
   const { data = [], error, isFetching, isLoading, refetch } = useQuery({
@@ -166,7 +167,7 @@ export default function MapPage() {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         setUserLocation({ lat, lng });
-        setFlyToTarget({ lat, lng, zoom: 17 });
+        setFlyToTarget({ lat, lng, zoom: 17.5 });
         setLocatingUser(false);
       },
       err => {
@@ -175,6 +176,14 @@ export default function MapPage() {
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
+  }
+
+  function handleResetNorth() {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.resetNorthPitch({ duration: 600 });
+      setBearing(0);
+      setIs3D(false);
+    }
   }
 
   function handleSelectFromMap(record: RecordItem, group: RecordItem[], env?: EnvironmentItem) {
@@ -188,7 +197,7 @@ export default function MapPage() {
     const env = envMap.get(key);
     setSelectedDrain({ record, group, env });
     setPhotoView('annotated');
-    setFlyToTarget({ lat: record.latitude!, lng: record.longitude!, zoom: 17 });
+    setFlyToTarget({ lat: record.latitude!, lng: record.longitude!, zoom: 17.5 });
   }
 
   const selectedKey = selectedDrain?.record
@@ -206,9 +215,14 @@ export default function MapPage() {
           onSelectRecord={handleSelectFromMap}
           mapStyle={mapStyle}
           showRiskZones={showRiskZones}
+          is3D={is3D}
           flyToLocation={flyToTarget}
           userLocation={userLocation}
           fitBoundsSignal={fitBoundsSignal}
+          onBearingChange={setBearing}
+          onMapReady={m => {
+            mapInstanceRef.current = m;
+          }}
         />
       </div>
 
@@ -389,26 +403,42 @@ export default function MapPage() {
 
       {/* 4. Floating GIS Tools (FABs on Right Canvas) */}
       <div className="gis-fab-group" role="toolbar" aria-label="Công cụ bản đồ">
-        {/* Layer Switcher (Street vs Satellite) */}
+        {/* Layer Switcher Popover Button */}
         <button
           type="button"
-          className={`gis-fab ${mapStyle === 'satellite' ? 'is-active' : ''}`}
-          onClick={() => setMapStyle(prev => (prev === 'street' ? 'satellite' : 'street'))}
-          title={mapStyle === 'satellite' ? 'Chuyển sang bản đồ giao thông' : 'Chuyển sang ảnh vệ tinh'}
+          className={`gis-fab ${layersOpen ? 'is-active' : ''}`}
+          onClick={() => setLayersOpen(prev => !prev)}
+          title="Lớp bản đồ & Chế độ xem (Layers)"
         >
           <Layers size={19} />
-          <span className="fab-tooltip">{mapStyle === 'satellite' ? 'Bản đồ Vệ tinh' : 'Bản đồ Đường phố'}</span>
+          <span className="fab-tooltip">Lớp bản đồ ({mapStyle === 'voyager' ? 'Đô thị' : mapStyle === 'satellite' ? 'Vệ tinh' : mapStyle === 'dark' ? 'Đêm' : 'Tối giản'})</span>
         </button>
 
-        {/* Toggle Risk Circles */}
+        {/* 3D Perspective Tilt Button */}
         <button
           type="button"
-          className={`gis-fab ${showRiskZones ? 'is-active' : ''}`}
-          onClick={() => setShowRiskZones(prev => !prev)}
-          title={showRiskZones ? 'Ẩn vùng rủi ro ngập' : 'Hiện vùng rủi ro ngập'}
+          className={`gis-fab ${is3D ? 'is-active' : ''}`}
+          onClick={() => setIs3D(prev => !prev)}
+          title={is3D ? 'Góc nhìn phẳng 2D' : 'Góc nhìn nghiêng 3D'}
         >
-          <AlertTriangle size={19} />
-          <span className="fab-tooltip">Vùng ảnh hưởng ngập</span>
+          <Box size={19} />
+          <span className="fab-badge">{is3D ? '3D' : '2D'}</span>
+          <span className="fab-tooltip">{is3D ? 'Chuyển sang 2D' : 'Góc nhìn 3D'}</span>
+        </button>
+
+        {/* Compass / Reset North */}
+        <button
+          type="button"
+          className="gis-fab"
+          onClick={handleResetNorth}
+          title="Đặt lại hướng Bắc & Góc phẳng"
+        >
+          <Compass
+            size={19}
+            className="compass-needle"
+            style={{ transform: `rotate(${-bearing}deg)` }}
+          />
+          <span className="fab-tooltip">Đặt lại hướng Bắc</span>
         </button>
 
         {/* Fit Bounds */}
@@ -418,7 +448,7 @@ export default function MapPage() {
           onClick={() => setFitBoundsSignal(s => s + 1)}
           title="Thu phóng toàn cảnh các miệng cống"
         >
-          <Compass size={19} />
+          <Maximize2 size={19} />
           <span className="fab-tooltip">Xem toàn cảnh</span>
         </button>
 
@@ -435,7 +465,94 @@ export default function MapPage() {
         </button>
       </div>
 
-      {/* 5. Floating Bottom-Left Legend */}
+      {/* 5. Layer Picker Popover Card (Google Maps Style) */}
+      {layersOpen && (
+        <div className="gis-layer-picker" role="dialog" aria-label="Bộ chọn lớp bản đồ">
+          <div className="gis-layer-picker-head">
+            <h4>Lớp bản đồ</h4>
+            <button
+              type="button"
+              className="gis-layer-close-btn"
+              onClick={() => setLayersOpen(false)}
+              aria-label="Đóng"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="gis-layer-grid">
+            <button
+              type="button"
+              className={`gis-layer-tile ${mapStyle === 'voyager' ? 'active' : ''}`}
+              onClick={() => setMapStyle('voyager')}
+            >
+              <span className="gis-layer-tile-icon">🏙️</span>
+              <span className="gis-layer-tile-name">Đô thị CARTO</span>
+              <span className="gis-layer-tile-sub">Sắc nét, chuẩn Web</span>
+            </button>
+
+            <button
+              type="button"
+              className={`gis-layer-tile ${mapStyle === 'satellite' ? 'active' : ''}`}
+              onClick={() => setMapStyle('satellite')}
+            >
+              <span className="gis-layer-tile-icon">🛰️</span>
+              <span className="gis-layer-tile-name">Vệ tinh ESRI HD</span>
+              <span className="gis-layer-tile-sub">Ảnh vệ tinh + Tên đường</span>
+            </button>
+
+            <button
+              type="button"
+              className={`gis-layer-tile ${mapStyle === 'dark' ? 'active' : ''}`}
+              onClick={() => setMapStyle('dark')}
+            >
+              <span className="gis-layer-tile-icon">🌙</span>
+              <span className="gis-layer-tile-name">Chế độ đêm</span>
+              <span className="gis-layer-tile-sub">Phong cách Dark GIS</span>
+            </button>
+
+            <button
+              type="button"
+              className={`gis-layer-tile ${mapStyle === 'positron' ? 'active' : ''}`}
+              onClick={() => setMapStyle('positron')}
+            >
+              <span className="gis-layer-tile-icon">⚪</span>
+              <span className="gis-layer-tile-name">Tối giản Trắng</span>
+              <span className="gis-layer-tile-sub">Nổi bật điểm ngập</span>
+            </button>
+          </div>
+
+          <div className="gis-layer-divider" />
+
+          {/* Toggle Risk Circles */}
+          <div
+            className="gis-layer-toggle-row"
+            onClick={() => setShowRiskZones(prev => !prev)}
+            role="checkbox"
+            aria-checked={showRiskZones}
+          >
+            <span>Vùng cảnh báo ngập</span>
+            <div className={`gis-toggle-switch ${showRiskZones ? 'on' : ''}`}>
+              <div className="gis-toggle-switch-handle" />
+            </div>
+          </div>
+
+          {/* Toggle 3D Tilt */}
+          <div
+            className="gis-layer-toggle-row"
+            onClick={() => setIs3D(prev => !prev)}
+            role="checkbox"
+            aria-checked={is3D}
+          >
+            <span>Góc nhìn nghiêng 3D</span>
+            <div className={`gis-toggle-switch ${is3D ? 'on' : ''}`}>
+              <div className="gis-toggle-switch-handle" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 6. Floating Bottom-Left Legend */}
       <div className="gis-legend-card" aria-label="Chú giải bản đồ">
         <div className="gis-legend-title">Mức độ rủi ro</div>
         <div className="gis-legend-items">
@@ -458,7 +575,7 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* 6. Selected Drain Inspector Drawer (Detailed Slide-out Panel) */}
+      {/* 7. Selected Drain Inspector Drawer (Detailed Slide-out Panel) */}
       {selectedDrain && (
         <section className="gis-inspector-drawer" aria-label="Chi tiết miệng thu nước">
           <div className="inspector-card">

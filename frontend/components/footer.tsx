@@ -1,9 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Droplets, ShieldCheck, MapPin, Camera, History, ExternalLink, Heart } from 'lucide-react';
 
 export function Footer() {
+  const pathname = usePathname();
+
+  // Trang bản đồ hiển thị full màn hình GIS, không có footer để tránh cuộn trang
+  if (pathname === '/map' || pathname?.startsWith('/map/')) {
+    return null;
+  }
+
   return (
     <footer className="site-footer" role="contentinfo">
       <div className="footer-container">
