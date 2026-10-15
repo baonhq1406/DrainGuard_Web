@@ -90,8 +90,29 @@ export default function Analyze() {
         <p className="lead">Chụp ảnh tại chỗ hoặc chọn ảnh có sẵn. Kết quả sẽ được lưu cùng vị trí GPS nếu bạn cho phép.</p>
       </div>
       <section className="user-upload-card" aria-busy={loading}>
-        <input ref={pickerRef} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={e => chooseFile(e.target.files?.[0])} />
-        <input ref={cameraRef} hidden type="file" accept="image/*" capture="environment" onChange={e => chooseFile(e.target.files?.[0])} />
+        <input
+          id="image-picker"
+          ref={pickerRef}
+          className="visually-hidden-file"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={e => {
+            chooseFile(e.target.files?.[0]);
+            e.currentTarget.value = '';
+          }}
+        />
+        <input
+          id="camera-picker"
+          ref={cameraRef}
+          className="visually-hidden-file"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={e => {
+            chooseFile(e.target.files?.[0]);
+            e.currentTarget.value = '';
+          }}
+        />
         {!file ? (
           <div
             className={'upload-empty dropzone' + (dragOver ? ' is-over' : '')}
@@ -103,8 +124,14 @@ export default function Analyze() {
             <h2>Gửi ảnh miệng thu nước</h2>
             <p>Chọn một ảnh có sẵn hoặc chụp ảnh mới bằng camera.</p>
             <div className="upload-actions">
-              <button className="button" onClick={() => pickerRef.current?.click()}><ImagePlus size={18} />Chọn ảnh</button>
-              <button className="button outline" onClick={() => cameraRef.current?.click()}><Camera size={18} />Chụp ảnh</button>
+              <label htmlFor="image-picker" className="button">
+                <ImagePlus size={18} />
+                Chọn ảnh
+              </label>
+              <label htmlFor="camera-picker" className="button outline">
+                <Camera size={18} />
+                Chụp ảnh
+              </label>
             </div>
             <div className="upload-hint">Có thể kéo thả ảnh vào đây · JPG, PNG hoặc WebP</div>
           </div>
@@ -120,7 +147,9 @@ export default function Analyze() {
               <p className="label">{(file.size / 1024 / 1024).toFixed(1)} MB</p>
               <div className="upload-actions">
                 <button className="button" disabled={loading} onClick={run}>{loading ? <><Loader2 size={18} className="spin" />Đang phân tích...</> : <><ScanSearch size={18} />Phân tích ảnh</>}</button>
-                <button className="button outline" disabled={loading} onClick={() => pickerRef.current?.click()}>Đổi ảnh</button>
+                <label htmlFor="image-picker" className="button outline" aria-disabled={loading}>
+                  Đổi ảnh
+                </label>
               </div>
             </div>
           </div>
