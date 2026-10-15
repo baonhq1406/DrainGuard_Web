@@ -130,67 +130,330 @@
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
 /* ---------- B. Khung & Điều hướng Trên (Top Navigation Header) ---------- */
-.site-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #e1ecf4;box-shadow:0 2px 14px rgba(10,36,64,.04);transition:background .2s,border-color .2s}
-.site-header.is-admin{background:#091f35;border-bottom:1px solid #143553;color:#fff}
-.header-container{max-width:1360px;margin:0 auto;height:68px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.header-brand-wrap{display:flex;align-items:center}
-.brand{display:inline-flex;align-items:center;gap:11px;text-decoration:none;color:inherit}
-.brand-mark{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#097bc7,#10b8d5);box-shadow:0 4px 12px rgba(9,123,199,.25)}
-.brand-info{display:flex;flex-direction:column;line-height:1.2}
-.brand-name{font-size:18px;font-weight:850;color:#0b2e4d;letter-spacing:-.02em}
-.site-header.is-admin .brand-name{color:#fff}
-.brand-tag{font-size:10px;font-weight:800;letter-spacing:.08em;color:#0879c9;text-transform:uppercase;margin-top:1px}
-.site-header.is-admin .brand-tag{color:#4fd3f0}
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(3, 7, 18, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  transition: background 0.2s, border-color 0.2s;
+}
+.site-header.is-admin {
+  background: rgba(3, 7, 18, 0.92);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+  color: #fff;
+}
+.header-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  height: 68px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.header-brand-wrap {
+  display: flex;
+  align-items: center;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+.brand-mark {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #0284c7, #00f2fe);
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.brand-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.brand-name {
+  font-size: 18px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+.brand-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
 
-.desktop-nav{display:flex;align-items:center;gap:6px}
-.desktop-nav-link{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:10px;font-size:14px;font-weight:650;color:#435b71;text-decoration:none;transition:all .15s ease}
-.desktop-nav-link:hover{color:#0879c9;background:#f0f7fd}
-.desktop-nav-link.active{color:#076ab2;background:#e3f2fd;font-weight:750}
-.site-header.is-admin .desktop-nav-link{color:#c4ddf2}
-.site-header.is-admin .desktop-nav-link:hover{color:#fff;background:#13395b}
-.site-header.is-admin .desktop-nav-link.active{color:#fff;background:#184770;font-weight:750}
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.desktop-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+}
+.desktop-nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.desktop-nav-link.active {
+  color: #38bdf8;
+  background: rgba(2, 132, 199, 0.18);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+  font-weight: 750;
+}
+.site-header.is-admin .desktop-nav-link {
+  color: #94a3b8;
+}
+.site-header.is-admin .desktop-nav-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+.site-header.is-admin .desktop-nav-link.active {
+  color: #38bdf8;
+  background: rgba(2, 132, 199, 0.2);
+  border-color: rgba(56, 189, 248, 0.4);
+}
 
-.header-actions{display:flex;align-items:center;gap:10px}
-.header-cta-btn{min-height:38px;padding:8px 16px;font-size:13.5px;border-radius:10px;background:linear-gradient(135deg,#097bc7,#0662a3);box-shadow:0 3px 10px rgba(8,121,201,.25)}
-.header-cta-btn:hover{background:#0662a3}
-.admin-badge-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:9px;font-size:12.5px;font-weight:700;color:#526f89;background:#edf5fb;border:1px solid #d5e4ef;text-decoration:none;transition:all .15s}
-.admin-badge-btn:hover{background:#e2eef7;color:#0f3557;border-color:#bad3e7}
-.user-switch-btn{min-height:36px;font-size:13px}
-.mobile-menu-btn{display:none;background:#f0f6fa;border:1px solid #d0e0ec;border-radius:9px;padding:7px;cursor:pointer;color:#1e3f5d}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-cta-btn {
+  min-height: 38px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 750;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff !important;
+  box-shadow: 0 0 18px rgba(2, 132, 199, 0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.header-cta-btn:hover {
+  box-shadow: 0 0 25px rgba(2, 132, 199, 0.6);
+  transform: translateY(-1px);
+}
+.admin-badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+.admin-badge-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  color: #ffffff;
+  border-color: rgba(56, 189, 248, 0.4);
+}
+.user-switch-btn {
+  min-height: 36px;
+  font-size: 13px;
+}
+.mobile-menu-btn {
+  display: none;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 10px;
+  padding: 8px;
+  cursor: pointer;
+  color: #38bdf8;
+}
 
 /* Admin sub-bar */
-.admin-subbar{background:#0e2944;border-bottom:1px solid #1a4269;padding:8px 24px}
-.admin-subbar-container{max-width:1360px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.admin-subbar-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#79cff5;letter-spacing:.08em}
-.admin-subbar-links{display:flex;gap:6px;flex-wrap:wrap}
-.admin-sublink{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#c4dcf0;text-decoration:none;padding:5px 12px;border-radius:7px;transition:background .15s}
-.admin-sublink:hover{background:#18456d;color:#fff}
-.admin-sublink.active{background:#1e4f7a;color:#fff;font-weight:700}
+.admin-subbar {
+  background: rgba(10, 16, 30, 0.96);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  padding: 8px 24px;
+}
+.admin-subbar-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.admin-subbar-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 0.08em;
+}
+.admin-subbar-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.admin-sublink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-decoration: none;
+  padding: 5px 12px;
+  border-radius: 7px;
+  transition: background 0.15s;
+}
+.admin-sublink:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.admin-sublink.active {
+  background: rgba(2, 132, 199, 0.2);
+  color: #38bdf8;
+  font-weight: 700;
+}
 
 /* Mobile Drawer Dropdown */
-.mobile-drawer{position:fixed;top:68px;left:0;right:0;bottom:0;background:rgba(7,26,47,.45);z-index:49;backdrop-filter:blur(4px);animation:fadeIn .18s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.mobile-drawer-content{background:#fff;padding:20px;border-bottom:1px solid #e1ecf4;box-shadow:0 14px 34px rgba(10,35,60,.14)}
-.mobile-drawer-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #edf3f8}
-.mobile-drawer-nav{display:flex;flex-direction:column;gap:6px}
-.mobile-nav-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;font-size:15px;font-weight:650;color:#20405c;text-decoration:none;transition:background .15s}
-.mobile-nav-link:hover,.mobile-nav-link.active{background:#edf6fd;color:#0879c9}
-.mobile-drawer-footer{margin-top:16px;padding-top:16px;border-top:1px solid #edf3f8}
-.full-w{width:100%}.mt-2{margin-top:8px}
+.mobile-drawer {
+  position: fixed;
+  top: 68px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(2, 6, 23, 0.7);
+  z-index: 49;
+  backdrop-filter: blur(12px);
+  animation: fadeIn 0.18s ease;
+}
+.mobile-drawer-content {
+  background: rgba(10, 16, 30, 0.96);
+  padding: 20px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+}
+.mobile-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.mobile-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 650;
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.mobile-nav-link:hover, .mobile-nav-link.active {
+  background: rgba(2, 132, 199, 0.2);
+  color: #38bdf8;
+}
+.mobile-drawer-footer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
 
 /* Mobile Sticky Bottom Tab Bar */
-.bottom-bar{display:none}
-@media(max-width:900px){
-  .desktop-nav{display:none}
-  .mobile-menu-btn{display:inline-flex}
-  .admin-badge-btn .admin-btn-label{display:none}
-  .admin-badge-btn{padding:8px}
+.bottom-bar {
+  display: none;
 }
-@media(max-width:800px){
-  .main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
-  .bottom-bar{display:flex;position:fixed;bottom:0;left:0;right:0;height:calc(62px + env(safe-area-inset-bottom));padding:4px 6px env(safe-area-inset-bottom);background:rgba(255,255,255,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid #dce8f2;z-index:40;justify-content:space-around;align-items:center;box-shadow:0 -4px 18px rgba(10,30,60,.06)}
-  .bottom-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:50px;padding:4px 2px;border-radius:10px;font-size:10.5px;font-weight:650;color:#627b91;text-decoration:none;transition:all .15s}
-  .bottom-tab.active{color:#0879c9;font-weight:750;background:#edf6fd}
+@media(max-width: 900px) {
+  .desktop-nav { display: none; }
+  .mobile-menu-btn { display: inline-flex; }
+  .admin-badge-btn .admin-btn-label { display: none; }
+  .admin-badge-btn { padding: 8px; }
+}
+@media(max-width: 800px) {
+  .main { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
+  .bottom-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(62px + env(safe-area-inset-bottom));
+    padding: 4px 6px env(safe-area-inset-bottom);
+    background: rgba(10, 16, 30, 0.94);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-top: 1px solid rgba(56, 189, 248, 0.2);
+    z-index: 40;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.6);
+  }
+  .bottom-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 50px;
+    padding: 4px 2px;
+    border-radius: 10px;
+    font-size: 10.5px;
+    font-weight: 650;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .bottom-tab.active {
+    color: #38bdf8;
+    font-weight: 750;
+    background: rgba(2, 132, 199, 0.18);
+  }
 }
 
 /* ---------- B2. Chân Trang (Site Footer) ---------- */
