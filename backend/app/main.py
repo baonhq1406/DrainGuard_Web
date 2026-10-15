@@ -65,11 +65,12 @@ allowed_origins = [
 
 # Preserve a usable local-development default if CORS_ORIGINS is empty.
 if not allowed_origins:
-    allowed_origins = ["http://localhost:3000"]
+    allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 app = CORSMiddleware(
     app=api,
     allow_origins=allowed_origins,
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

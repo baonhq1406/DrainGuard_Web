@@ -534,7 +534,7 @@ export default function Models() {
 
                     <a
                       className="admin-quick-chip"
-                      href={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api'}/models/${m.id}/download`}
+                      href={`/api/models/${m.id}/download`}
                     >
                       <Download size={14} />
                       <span>.pt</span>

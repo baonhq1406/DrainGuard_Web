@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from ultralytics import YOLO
 from sqlalchemy.orm import Session
 from ..models import AIModel
-from ..config import settings
+from ..config import BASE_DIR, settings
 from .blockage_service import calculate, status_for
 from .image_service import annotate
 
@@ -23,7 +23,7 @@ class ModelService:
         storage_p = Path(settings.model_storage_dir) / p.name
         if storage_p.is_file():
             return storage_p
-        base_p = Path(settings.BASE_DIR) / file_path
+        base_p = Path(BASE_DIR) / file_path
         if base_p.is_file():
             return base_p
         # Fallback: check if yolo26l-seg.pt was placed directly in model_storage_dir
