@@ -402,7 +402,7 @@ export default function History() {
                       }}
                     >
                       <span style={{ fontSize: '11.5px', color: '#64748b' }}>
-                        {item.model?.name || 'YOLOv11'}
+                        {item.model?.name || 'YOLO26l-Seg'}
                       </span>
 
                       <div style={{ display: 'flex', gap: '8px' }}>
@@ -490,7 +490,7 @@ export default function History() {
                         {new Date(item.created_at).toLocaleString('vi-VN')}
                       </td>
                       <td style={{ color: '#cbd5e1' }}>
-                        {item.model?.name || 'YOLOv11'} · {item.model?.version || 'v1'}
+                        {item.model?.name || 'YOLO26l-Seg'} · {item.model?.version || 'v1'}
                       </td>
                       <td>
                         <b>{item.drain_count} điểm</b>
@@ -721,7 +721,7 @@ export default function History() {
                 </div>
                 <div className="inspector-metric-box">
                   <span className="box-label">Model AI</span>
-                  <b className="box-val" title={selected.model?.name || 'YOLOv11'}>
+                  <b className="box-val" title={selected.model?.name || 'YOLO26l-Seg'}>
                     {selected.model?.version || 'v1'}
                   </b>
                 </div>

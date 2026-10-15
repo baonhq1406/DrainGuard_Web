@@ -113,7 +113,7 @@ export function Footer() {
 
             <div className="footer-telemetry-wave">
               <Activity size={14} className="wave-icon-pulse" />
-              <span>38ms · YOLOv11-Seg · ĐÀ NẴNG GIS</span>
+              <span>38ms · YOLO26l-Seg · ĐÀ NẴNG GIS</span>
               <span className="online-ping-dot" />
             </div>
           </div>

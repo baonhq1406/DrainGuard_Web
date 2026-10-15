@@ -243,7 +243,7 @@ export default function Analyze() {
         <div className="analyze-header">
           <div className="hero-pill-indicator" style={{ marginBottom: '14px' }}>
             <span className="radar-ping-dot" />
-            <span>THỊ GIÁC MÁY TÍNH HIỆN TRƯỜNG · YOLOv11x-Seg</span>
+            <span>THỊ GIÁC MÁY TÍNH HIỆN TRƯỜNG · YOLO26l-Seg</span>
           </div>
 
           <h1 className="analyze-title">
@@ -284,7 +284,7 @@ export default function Analyze() {
                 <div className="hero-telemetry-chips" style={{ marginBottom: '22px' }}>
                   <span className="hero-telemetry-pill">📷 JPG / PNG / WEBP</span>
                   <span className="hero-telemetry-pill">📍 Tự động gắn GPS</span>
-                  <span className="hero-telemetry-pill">⚡ YOLOv11 38ms</span>
+                  <span className="hero-telemetry-pill">⚡ YOLO26l-Seg 38ms</span>
                 </div>
 
                 <div className="diagnostic-actions-row" onClick={e => e.stopPropagation()}>
@@ -343,7 +343,7 @@ export default function Analyze() {
                       <div style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff' }}>
                         {locationState === 'loading'
                           ? 'ĐANG GHI NHẬN TỌA ĐỘ GPS THỰC ĐỊA...'
-                          : 'YOLOv11 ĐANG PHÂN TÁCH VẬT CẢN...'}
+                          : 'YOLO26L-SEG ĐANG PHÂN TÁCH VẬT CẢN...'}
                       </div>
                       <div style={{ fontSize: '11.5px', color: '#38bdf8', marginTop: '4px' }}>
                         Độ trễ xử lý ~38ms · Trích xuất vùng bít tắc
@@ -461,7 +461,7 @@ export default function Analyze() {
 
                 {/* Badges */}
                 <div className="stage-tag stage-tag-left">📷 Ảnh thực địa gốc</div>
-                <div className="stage-tag stage-tag-right">✨ AI YOLOv11 phát hiện vật cản</div>
+                <div className="stage-tag stage-tag-right">✨ AI YOLO26l-Seg phát hiện vật cản</div>
               </div>
             </div>
           )}
@@ -632,7 +632,7 @@ export default function Analyze() {
                 <div className="telemetry-chip">
                   <span>Mô hình suy luận</span>
                   <b style={{ fontSize: '15px', color: '#a78bfa', marginTop: '8px' }}>
-                    YOLOv11x-Seg
+                    YOLO26l-Seg
                   </b>
                 </div>
               </div>

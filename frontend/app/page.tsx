@@ -149,7 +149,7 @@ const VISUAL_PORTALS = [
   },
   {
     step: '02',
-    badge: 'YOLOv11-SEG VISION',
+    badge: 'YOLO26L-SEG VISION',
     title: 'Bóc Tách Vật Cản',
     metric: '38ms · Chính xác 99.2%',
     img: '/demo/drain-annotated-2.jpg',
@@ -233,7 +233,7 @@ export default function Home() {
         <div className="hero-telemetry-chips">
           <div className="hero-telemetry-pill">
             <Zap size={14} className="text-sky-400" />
-            <span><b>38ms</b> YOLOv11-Seg</span>
+            <span><b>38ms</b> YOLO26l-Seg</span>
           </div>
           <div className="hero-telemetry-pill">
             <Radar size={14} className="text-emerald-400" />
@@ -262,7 +262,7 @@ export default function Home() {
           <div className="stage-slider-bar">
             <div className="slider-bar-left">
               <Cpu size={15} className="text-sky-400 spin-slow" />
-              <span>YOLOv11x-Seg · {current.title}</span>
+              <span>YOLO26l-Seg · {current.title}</span>
             </div>
             <div className="slider-bar-hint">
               <span className="pulse-text-cyan">

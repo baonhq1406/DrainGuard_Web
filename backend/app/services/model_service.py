@@ -13,6 +13,7 @@ class ModelService:
     def __init__(self):
         self.model = None
         self.model_id = None
+        self.model_mtime = None
         self.lock = RLock()
 
     def _resolve_model_path(self, file_path: str) -> Path:
@@ -25,6 +26,10 @@ class ModelService:
         base_p = Path(settings.BASE_DIR) / file_path
         if base_p.is_file():
             return base_p
+        # Fallback: check if yolo26l-seg.pt was placed directly in model_storage_dir
+        seg_p = Path(settings.model_storage_dir) / 'yolo26l-seg.pt'
+        if seg_p.is_file():
+            return seg_p
         return p
 
     @staticmethod
@@ -49,33 +54,55 @@ class ModelService:
         active = db.query(AIModel).filter_by(is_active=True).first()
         with self.lock:
             if not active:
-                self.model = self.model_id = None
+                self.model = self.model_id = self.model_mtime = None
                 return None
-            if self.model_id != active.id:
-                model_path = self._resolve_model_path(active.file_path)
-                if not model_path.is_file():
-                    self.model = self.model_id = None
-                    return None
+            model_path = self._resolve_model_path(active.file_path)
+            if not model_path.is_file():
+                self.model = self.model_id = self.model_mtime = None
+                return None
+            mtime = model_path.stat().st_mtime
+            if self.model_id != active.id or self.model_mtime != mtime or self.model is None:
                 self.model = YOLO(str(model_path))
                 self.model_id = active.id
+                self.model_mtime = mtime
+                # Auto-sync task & classes if the .pt file was swapped to yolo26l-seg.pt
+                actual_task = getattr(self.model, 'task', None)
+                if actual_task in {'detect', 'segment'} and active.task != actual_task:
+                    active.task = actual_task
+                    active.classes_json = self.classes(self.model)
+                    db.commit()
+                    db.refresh(active)
         return active
 
     def infer(self, db: Session, record: AIModel, source: Path, destination: Path):
         model_path = self._resolve_model_path(record.file_path)
         if not model_path.is_file():
             raise HTTPException(404, f'Không tìm thấy file mô hình tại {record.file_path}')
+        mtime = model_path.stat().st_mtime
         with self.lock:
-            if record.id == self.model_id and self.model is not None:
+            if record.id == self.model_id and self.model_mtime == mtime and self.model is not None:
                 model = self.model
             else:
                 model = YOLO(str(model_path))
                 self.model = model
                 self.model_id = record.id
-            outputs = model.predict(str(source), conf=settings.default_conf, imgsz=record.imgsz or settings.default_imgsz, device=0 if torch.cuda.is_available() else 'cpu', verbose=False)
+                self.model_mtime = mtime
+            outputs = model.predict(
+                str(source),
+                conf=settings.default_conf,
+                imgsz=record.imgsz or settings.default_imgsz,
+                device=0 if torch.cuda.is_available() else 'cpu',
+                verbose=False,
+            )
         output = outputs[0]
+        actual_task = getattr(model, 'task', record.task)
+        if actual_task in {'detect', 'segment'} and record.task != actual_task:
+            record.task = actual_task
+            db.commit()
+
         classes = record.classes_json or self.classes(model)
-        drain_indices = [i for i,c in enumerate(classes) if c.lower() == 'drain']
-        debris_indices = [i for i,c in enumerate(classes) if c.lower() == 'debris']
+        drain_indices = [i for i, c in enumerate(classes) if c.lower() == 'drain']
+        debris_indices = [i for i, c in enumerate(classes) if c.lower() == 'debris']
         drain_masks = []
         debris_masks = []
         drains = []
@@ -86,7 +113,7 @@ class ModelService:
                 conf = float(box.conf[0])
                 mask = None
                 if output.masks is not None and index < len(output.masks.data):
-                    mask = output.masks.data[index].cpu().numpy() > .5
+                    mask = output.masks.data[index].cpu().numpy() > 0.5
                 if cls in drain_indices:
                     confidence = max(confidence or 0, conf)
                     drains.append({'confidence': round(conf, 4)})
@@ -97,7 +124,7 @@ class ModelService:
         detected = bool(drains)
         blockage = None
         per = []
-        if detected and debris_indices and record.task == 'segment' and drain_masks:
+        if detected and debris_indices and (actual_task == 'segment' or output.masks is not None) and drain_masks:
             per, blockage = calculate(drain_masks, debris_masks)
         for i, value in enumerate(per):
             if i < len(drains):
@@ -110,7 +137,7 @@ class ModelService:
             'blockage_percent': blockage,
             'status': status_for(blockage, detected),
             'drains': drains,
-            'classes': classes
+            'classes': classes,
         }
 
 model_service = ModelService()

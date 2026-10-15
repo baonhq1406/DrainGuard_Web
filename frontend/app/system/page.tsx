@@ -217,7 +217,7 @@ export default function System() {
               ) : (
                 <div className="admin-cyber-alert info">
                   <Activity size={18} />
-                  <span>Hệ thống đang chạy kernel mặc định YOLOv11x-Seg. Vào mục AI Models để nạp thêm trọng số (.pt).</span>
+                  <span>Hệ thống chuẩn bị kernel YOLO26l-Seg (yolo26l-seg.pt). Vào mục AI Models để nạp và kích hoạt trọng số (.pt).</span>
                 </div>
               )}
             </div>

@@ -211,7 +211,7 @@ export default function Models() {
                 <input
                   id="md-name"
                   className="cyber-input"
-                  placeholder="VD: YOLOv11x-Seg"
+                  placeholder="VD: yolo26l-seg"
                   value={name}
                   onChange={e => setName(e.target.value)}
                 />
@@ -221,7 +221,7 @@ export default function Models() {
                 <input
                   id="md-version"
                   className="cyber-input"
-                  placeholder="VD: v2.5"
+                  placeholder="VD: v1-seg"
                   value={version}
                   onChange={e => setVersion(e.target.value)}
                 />
@@ -259,7 +259,16 @@ export default function Models() {
                   type="file"
                   accept=".pt"
                   className="cyber-file-input"
-                  onChange={e => setFile(e.target.files?.[0])}
+                  onChange={e => {
+                    const selected = e.target.files?.[0];
+                    setFile(selected);
+                    if (selected && !name.trim()) {
+                      setName(selected.name.replace(/\.pt$/i, ''));
+                    }
+                    if (selected && !version.trim()) {
+                      setVersion('v1-seg');
+                    }
+                  }}
                 />
               </div>
               <div className="cyber-field">

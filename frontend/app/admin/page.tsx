@@ -65,7 +65,7 @@ const DEMO_FEED = [
     pct: 78,
     color: '#ef4444',
     img: '/demo/drain-annotated-2.jpg',
-    model: 'YOLOv11x-Seg v2.4',
+    model: 'YOLO26l-Seg',
     time: 'Vừa xong',
   },
   {
@@ -75,7 +75,7 @@ const DEMO_FEED = [
     pct: 64,
     color: '#f97316',
     img: '/demo/drain-annotated-4.jpg',
-    model: 'YOLOv11x-Seg v2.4',
+    model: 'YOLO26l-Seg',
     time: '5 phút trước',
   },
   {
@@ -85,7 +85,7 @@ const DEMO_FEED = [
     pct: 41,
     color: '#f59e0b',
     img: '/demo/drain-annotated.jpg',
-    model: 'YOLOv11x-Seg v2.4',
+    model: 'YOLO26l-Seg',
     time: '12 phút trước',
   },
   {
@@ -95,7 +95,7 @@ const DEMO_FEED = [
     pct: 0,
     color: '#10b981',
     img: '/demo/drain-annotated-5.jpg',
-    model: 'YOLOv11x-Seg v2.4',
+    model: 'YOLO26l-Seg',
     time: '18 phút trước',
   },
 ];
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="kpi-pod-value" style={{ fontSize: '20px' }}>
-              {data?.active_model ? `${data.active_model.name} ${data.active_model.version}` : 'YOLOv11x-Seg'}
+              {data?.active_model ? `${data.active_model.name} ${data.active_model.version}` : 'YOLO26l-Seg'}
             </div>
             <div className="kpi-pod-sub">
               <span className="online-ping-dot" />
