@@ -32,6 +32,7 @@ const userLinks: NavItem[] = [
 
 const adminLinks: NavItem[] = [
   ['/admin', 'Tổng quan', LayoutDashboard],
+  ['/admin/analyze', 'Kiểm tra miệng thu', ScanSearch],
   ['/admin/models', 'AI Models', Boxes],
   ['/admin/datasets', 'Datasets', Database],
   ['/admin/system', 'Hệ thống', Server],

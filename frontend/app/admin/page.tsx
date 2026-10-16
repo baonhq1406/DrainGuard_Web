@@ -17,6 +17,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { api, files } from '@/services/api';
+import { AdminInspectStudio } from '@/components/admin-inspect-studio';
 import type { RecordItem } from '@/types';
 
 type Stats = {
@@ -135,6 +136,14 @@ export default function AdminDashboard() {
           </div>
 
           <div className="admin-header-actions">
+            <Link
+              href="/admin/analyze"
+              className="btn-glow-primary"
+              style={{ padding: '9px 16px', fontSize: '13px' }}
+            >
+              <Camera size={15} />
+              <span>Kiểm tra &amp; Định vị Cống</span>
+            </Link>
             <Link href="/admin/models" className="admin-quick-chip">
               <Boxes size={15} className="text-sky-400" />
               <span>AI Models</span>
@@ -149,8 +158,7 @@ export default function AdminDashboard() {
             </Link>
             <button
               type="button"
-              className="btn-glow-primary"
-              style={{ padding: '9px 16px', fontSize: '13px' }}
+              className="admin-quick-chip"
               onClick={() => refetch()}
               disabled={isFetching}
             >
@@ -230,6 +238,11 @@ export default function AdminDashboard() {
           </div>
         </section>
 
+        {/* Admin Drain Inspection & GIS Coordinate Picker Studio */}
+        <section style={{ marginBottom: '26px' }}>
+          <AdminInspectStudio />
+        </section>
+
         {/* 2-Column Command Matrix: Visual Severity Distribution + Live Satellite Radar */}
         <section className="admin-matrix-grid">
           {/* Left: Visual Severity Distribution with Real Drain Thumbnails */}
@@ -239,9 +252,9 @@ export default function AdminDashboard() {
                 <span className="admin-eyebrow">TELEMETRY MATRIX</span>
                 <h2 className="admin-panel-title">Phân Bố Mức Độ Bít Tắc</h2>
               </div>
-              <Link href="/analyze" className="footer-quick-try">
+              <Link href="/admin/analyze" className="footer-quick-try">
                 <Camera size={13} />
-                <span>Quét mới</span>
+                <span>Kiểm tra &amp; Định vị cống</span>
               </Link>
             </div>
 
@@ -359,7 +372,7 @@ export default function AdminDashboard() {
                   );
                 })
               : DEMO_FEED.map(demo => (
-                  <Link key={demo.id} href="/analyze" className="admin-feed-card">
+                  <Link key={demo.id} href="/admin/analyze" className="admin-feed-card">
                     <div className="admin-feed-thumb">
                       <img src={demo.img} alt={demo.title} loading="lazy" />
                       <div className="marquee-hover-scan" />
